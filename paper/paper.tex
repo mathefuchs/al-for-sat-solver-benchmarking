@@ -1,5 +1,6 @@
 \documentclass[runningheads]{llncs}
 
+\usepackage[T1]{fontenc} % recommended by LNCS template
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb}
 \usepackage[labelfont=bf]{caption}
@@ -18,19 +19,13 @@
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
 
-\renewcommand{\arraystretch}{1.5}
-%\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
-\setlength{\textfloatsep}{12pt}
-
 \usepackage[ruled,vlined,linesnumbered,norelsize]{algorithm2e}
 \DontPrintSemicolon
 \def\NlSty#1{\textnormal{\fontsize{8}{10}\selectfont{}#1}}
 \SetKwSty{texttt}
 \SetCommentSty{emph}
-\def\listalgorithmcfname{List of Algorithms}
-\def\algorithmautorefname{Algorithm}
-\let\chapter=\section % repariert ein Problem mit algorithm2e
 
+\renewcommand\UrlFont{\color{blue}\rmfamily} % link coloring according to LNCS template
 
 \begin{document}
 
@@ -62,6 +57,8 @@
   We achieve this while still maintaining a prediction accuracy of about \SI{92}{\%} regarding the PAR-2 ranking of this solver if it were evaluated on the complete dataset.
   Instance-selection decisions made by our approach also allow for discussing instance-family importance in the selection process. 
   Our tool provides the engineer of propositional-satisfiability solvers with a faster way of determining a new SAT-solver's performance in comparison to sampling the benchmark set by hand.
+
+  \keywords{Propositional satisfiability \and Benchmarking \and Active learning}
 \end{abstract}
 
 
@@ -76,7 +73,10 @@ Their goal is to select a representative and robust benchmark set for discrimina
 Within our work, we show that we can arrive at the same conclusions with high accuracy in only a fraction of the time that would be needed to evaluate the full benchmark set.
 To be more specific, we address the following problem.
 
-\textbf{New solver problem.} Given a pool of instances $\mathcal{I}$ and solvers $\mathcal{A}$ with already known runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$ (timeout $\tau$ usually \SI{5000}{s}~\cite{FroleyksHIJS21}), the problem is to decide with as little resources (CPU time) as possible how a new solver $\hat{a} \notin \mathcal{A}$ performs in comparison to the existing ones by incrementally selecting a benchmark set $\tilde{\mathcal{I}}$ on which to evaluate $\hat{a}$.
+\begin{definition}[New solver problem]
+	Given a pool of instances $\mathcal{I}$ and solvers $\mathcal{A}$ with already known runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$ (timeout $\tau$ usually \SI{5000}{s}~\cite{FroleyksHIJS21}), the problem is to decide with as little resources (CPU time) as possible how a new solver $\hat{a} \notin \mathcal{A}$ performs in comparison to the existing ones by incrementally selecting a benchmark set $\tilde{\mathcal{I}}$ on which to evaluate $\hat{a}$.
+\end{definition}
+
 We want to find a scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ assigning each solver a score.
 Having a set of solvers with their respective scores induces a ranking.
 This allows for both comparing the solvers as well as identifying solvers with similar behavior.
@@ -146,7 +146,7 @@ However, they do not optimize for benchmark \textit{runtime} and select instance
   \label{tab:requirements}
   \vspace{0.2cm}
   \begin{tabular}{
-    m{0.2\textwidth}
+    m{0.3\textwidth}
     >{\centering\arraybackslash}m{0.15\textwidth}
     >{\centering\arraybackslash}m{0.15\textwidth}
     >{\centering\arraybackslash}m{0.15\textwidth}
@@ -156,9 +156,9 @@ However, they do not optimize for benchmark \textit{runtime} and select instance
     Feature & Hoos \mbox{et. al.~\cite{HoosKSS13}} & SMAC~\cite{HutterHL11} & Matricon \mbox{et. al.~\cite{MatriconAFSH21}} & Our approach \\
     \hline
     Ranking & \cmark & \xmark & \cmark & \cmark \\
-    Runtime \mbox{optimization} & \xmark & \cmark & \cmark & \cmark \\
+    Runtime optimization & \xmark & \cmark & \cmark & \cmark \\
     %Feature-based & \cmark & \cmark & \cmark & \cmark \\
-    Incremental \mbox{non-random} \mbox{sampling} & \xmark & \xmark & \cmark & \cmark \\
+    Incremental non-random sampling & \xmark & \xmark & \cmark & \cmark \\
     % \tablefootnote{While using a model-based selection strategy to select the next configuration to evaluate, the instance sampling is done randomly.}
     Interpretability & \cmark & \xmark & \xmark & \cmark \\
     % \tablefootnote{While they provide a confidence measure, the strategy's output is still only binary, i.e., whether a solver A is better or worse than solver B.}
@@ -237,7 +237,7 @@ The classic exploration-exploitation dilemma arises since, on the one hand, we w
   \node at (-2.8,0.25) {$f$};
   \end{tikzpicture}
   }
-  \caption{Passive.}
+  \caption{Passive}
   \label{fig:passive}
   \end{subfigure}
   &
@@ -277,7 +277,7 @@ The classic exploration-exploitation dilemma arises since, on the one hand, we w
   \draw[fill=black]  (-1.425,2.4) ellipse (0.07 and 0.07);
   \end{tikzpicture}
   }
-  \caption{Active Pool-based.}
+  \caption{Active Pool-based}
   \label{fig:activepool}
   \end{subfigure}
   &
@@ -312,12 +312,13 @@ The classic exploration-exploitation dilemma arises since, on the one hand, we w
   \draw[->, densely dashed] (-2.4,1.2) arc (-90:90:1.2);
   \end{tikzpicture}
   }
-  \caption{Active Synthesis-based.}
+  \caption{Active Synthesis-based}
   \label{fig:activesynth}
   \end{subfigure}
   \end{tabular}
   
-  \caption{Types of Learning (depiction inspired by Rubens~et.al.~\cite{RubensESK15}).}
+  \caption{Types of Learning (depiction inspired by Rubens~et.al.~\cite{RubensESK15})}
+  %JB: slightly larger font size in figure (at least having the size of the caption) would be nice
   \label{fig:learning}
 \end{figure}  
 
@@ -351,7 +352,7 @@ Note that the prediction target values $\mathcal{V}$ are unspecified to allow fo
 Refer to the next sections for more details.
 
 \begin{algorithm}
-  \caption{Simple incremental benchmark-set-selection schema.}
+  \caption{Simple incremental benchmark-set-selection schema}
   \label{algALBenchmark}
 
   \KwIn{A pool of instances $\mathcal{I}$, a set of known solvers $\mathcal{A}$ with known runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and a new solver $\hat{a} \notin \mathcal{A}$.}
@@ -411,7 +412,7 @@ The Spearman correlation~\cite{de2016comparing} of cluster-label and PAR-2 ranki
 
 \begin{table}[tbp]
   \centering
-  \caption{PAR-2 ranking vs. ranking based on discretized runtimes for the SAT Competition~2022 Anniversary Track instances~\cite{sat2022} ($k = 3$; hierarchical clustering).}
+  \caption{PAR-2 ranking vs. ranking based on discretized runtimes for the SAT Competition~2022 Anniversary Track instances~\cite{sat2022} ($k = 3$; hierarchical clustering)}
   \label{tab:discreteranking}
   \vspace{0.2cm}
   \begin{tabular}{
@@ -576,7 +577,7 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
 
 \vspace{-0.2cm}
 \begin{algorithm}[htbp]
-  \caption{Evaluation framework.}
+  \caption{Evaluation framework}
   \label{alg:eval}
 
   \KwIn{A pool of instances $\mathcal{I}$ and a set of solvers $\mathcal{S}$ with known runtimes $r\!: \mathcal{S} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$.}
@@ -785,6 +786,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   \end{subfigure}
 
   \caption{$O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams showing the performance of different hyper-parameter instantiations. The x-axis shows the fraction of runtime in comparison to the time needed to evaluate a solver on all instances. The y-axis shows the accuracy of the predicted rank in comparison to the true PAR-2 rank. Each line entails the front of Pareto-optimal configurations with the respective instantiation.}
+  %JB: not sure if the color palette in the plots is grayscale-/color-blind-friendly; consider changing the palette (see https://colorbrewer2.org/#type=qualitative&scheme=Set3&n=3 ) and using different line types
   \label{fig:e2eallsolvers}
 \end{figure}
 
@@ -854,12 +856,12 @@ However, we sample on average \SI{1.59}{} of them.
 
 \begin{table}[tb!]
   \centering
-  \caption{Top-10 most \textit{important} families regarding the average occurrences and the fraction of selected occurrences regarding our AL approach.}
+  \caption{Top-10 most \textit{important} families regarding the average occurrences and the fraction of selected occurrences regarding our AL approach}
   \label{tab:families}
   \hspace{-0.58cm}
   \begin{subtable}{0.45\textwidth}
     \centering
-    \caption{Sorted by the average number of occurrences.}
+    \caption{Sorted by the average number of occurrences}
     \label{tab:familiesa}
 
     \begin{tabular}{
@@ -901,7 +903,7 @@ However, we sample on average \SI{1.59}{} of them.
   \hspace{0.55cm}
   \begin{subtable}{0.45\textwidth}
     \centering
-    \caption{Sorted by the fraction of sampled occurrences.}
+    \caption{Sorted by the fraction of sampled occurrences}
     \label{tab:familiesb}
 
     \begin{tabular}{
