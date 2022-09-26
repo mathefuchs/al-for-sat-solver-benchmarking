@@ -52,18 +52,18 @@ def run_e2e_experiment(
     """
 
     # Features
-    with open("./pickled-data/base_features_df.pkl", "rb") as file:
+    with open("../al-for-sat-solver-benchmarking-data/pickled-data/base_features_df.pkl", "rb") as file:
         base_features_df: pd.DataFrame = pickle.load(file).copy()
 
     if experiment.only_hashes:
         # Load full runtimes of 16 solvers and filter to competition instances
-        with open("./pickled-data/runtimes_df.pkl", "rb") as file:
+        with open("../al-for-sat-solver-benchmarking-data/pickled-data/runtimes_df.pkl", "rb") as file:
             runtimes_df: pd.DataFrame = pickle.load(file).copy()
         with open(experiment.instance_filter, "rb") as file:
             instance_filter: pd.Series = pickle.load(file).copy()
     else:
         # Load dedicated competition dataset with more solvers
-        with open(f"./pickled-data/{experiment.instance_filter_prefix}_df.pkl", "rb") as file:
+        with open(f"../al-for-sat-solver-benchmarking-data/pickled-data/{experiment.instance_filter_prefix}_df.pkl", "rb") as file:
             runtimes_df = pickle.load(file).copy()
         instance_filter = runtimes_df.index.copy()
 
@@ -396,22 +396,23 @@ def run_e2e_experiment(
 if __name__ == "__main__":
     # Notify experiment start
     push_notification("Starting experiments.")
+    rand_int = random.randint(1, 100)
 
     for i_exp, experiment in enumerate(all_experiments):
         # Skip if present
         time.sleep(random.random() * 5)
-        if os.path.exists(experiment.results_location):
+        if os.path.exists(f"{experiment.results_location}_{rand_int:03}.csv"):
             continue
         else:
-            with open(experiment.results_location, "w") as lock_file:
+            with open(f"{experiment.results_location}_{rand_int:03}.csv", "w") as lock_file:
                 lock_file.write("lock")
 
         # Retrieve column list
         if experiment.only_hashes:
-            with open("./pickled-data/runtimes_df.pkl", "rb") as file:
+            with open("../al-for-sat-solver-benchmarking-data/pickled-data/runtimes_df.pkl", "rb") as file:
                 runtimes_df = pickle.load(file).copy()
         else:
-            with open(f"./pickled-data/{experiment.instance_filter_prefix}_df.pkl", "rb") as file:
+            with open(f"../al-for-sat-solver-benchmarking-data/pickled-data/{experiment.instance_filter_prefix}_df.pkl", "rb") as file:
                 runtimes_df = pickle.load(file).copy()
         column_list = list(runtimes_df.columns)
         del runtimes_df
@@ -441,11 +442,11 @@ if __name__ == "__main__":
             ],
             index="solver",
         )
-        res_df.to_csv(experiment.results_location)
+        res_df.to_csv(f"{experiment.results_location}_{rand_int:03}.csv")
 
         # Store sampled instances
         for i, (_, y_sampled) in enumerate(solver_results):
-            with open(f"./pickled-data/end_to_end/{experiment.key}_y_sampled_{i:02d}.pkl", "wb") as wfile:
+            with open(f"../al-for-sat-solver-benchmarking-data/pickled-data/end_to_end/{experiment.key}_y_sampled_{i:02d}.pkl", "wb") as wfile:
                 pickle.dump(y_sampled.copy(), wfile)
 
         if len(all_experiments) <= 50 or i_exp % 100 == 0:

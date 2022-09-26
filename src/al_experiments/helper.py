@@ -1,5 +1,4 @@
 import logging
-import requests
 
 from al_experiments.config import DEBUG
 
@@ -17,13 +16,13 @@ def push_notification(text: str = "Execution finished.", is_error: bool = False)
     else:
         logging.error(text)
 
-    if not DEBUG:
-        with open("./secret", "r") as file:
-            api_secret = str(file.read()).strip()
-        headers = {"x-api-key": api_secret}
-        message = {"title": "Jupyter Notebook", "body": text}
-        requests.post(
-            "https://push.techulus.com/api/v1/notify",
-            data=message, headers=headers
-        )
-        del api_secret
+    # if not DEBUG:
+    #     with open("./secret", "r") as file:
+    #         api_secret = str(file.read()).strip()
+    #     headers = {"x-api-key": api_secret}
+    #     message = {"title": "Jupyter Notebook", "body": text}
+    #     requests.post(
+    #         "https://push.techulus.com/api/v1/notify",
+    #         data=message, headers=headers
+    #     )
+    #     del api_secret

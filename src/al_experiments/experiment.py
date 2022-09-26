@@ -45,11 +45,11 @@ class Experiment:
         self.selection = selection
         self.stopping = stopping
         self.ranking = ranking
-        self.results_location = f"./pickled-data/end_to_end/{key}.csv"
+        self.results_location = f"../al-for-sat-solver-benchmarking-data/pickled-data/end_to_end/{key}"
         self.repetitions = repetitions
         self.par = par
         self.instance_filter_prefix = instance_filter
-        self.instance_filter = f"./pickled-data/instance_filters/{instance_filter}.pkl"
+        self.instance_filter = f"../al-for-sat-solver-benchmarking-data/pickled-data/instance_filters/{instance_filter}.pkl"
         self.label_ranking_timeout_weight = 2.0
         self.only_hashes = only_hashes
 
