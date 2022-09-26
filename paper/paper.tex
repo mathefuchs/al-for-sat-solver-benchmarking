@@ -206,9 +206,9 @@ The classic exploration-exploitation dilemma arises since, on the one hand, we w
 \begin{figure}[tbp!]
   \centering
   \begin{tabular}[c]{ccc}
-  \begin{subfigure}[b]{0.26\textwidth}
+  \begin{subfigure}[b]{0.25\textwidth}
   \centering
-  \resizebox{!}{2.85cm}{
+  \resizebox{!}{2.75cm}{
   \begin{tikzpicture}
   \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
   \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
@@ -238,9 +238,9 @@ The classic exploration-exploitation dilemma arises since, on the one hand, we w
   \label{fig:passive}
   \end{subfigure}
   &
-  \begin{subfigure}[b]{0.36\textwidth}
+  \begin{subfigure}[b]{0.35\textwidth}
   \centering
-  \resizebox{!}{2.85cm}{
+  \resizebox{!}{2.75cm}{
   \begin{tikzpicture}
   \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
   \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
@@ -278,9 +278,9 @@ The classic exploration-exploitation dilemma arises since, on the one hand, we w
   \label{fig:activepool}
   \end{subfigure}
   &
-  \begin{subfigure}[b]{0.36\textwidth}
+  \begin{subfigure}[b]{0.35\textwidth}
   \centering
-  \resizebox{!}{2.85cm}{
+  \resizebox{!}{2.75cm}{
   \begin{tikzpicture}
   \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
   \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
@@ -411,11 +411,10 @@ The Spearman correlation~\cite{de2016comparing} of cluster-label and PAR-2 ranki
   \centering
   \caption{PAR-2 ranking vs. ranking based on discretized runtimes for the SAT Competition~2022 Anniversary Track instances~\cite{sat2022} ($k = 3$; hierarchical clustering)}
   \label{tab:discreteranking}
-  \vspace{0.2cm}
   \begin{tabular}{
     c
-    >{\centering\arraybackslash}p{2.2cm}p{3.6cm}
-    >{\centering\arraybackslash}p{1.8cm}p{3.3cm}
+    >{\centering\arraybackslash}p{1.8cm}p{3.6cm}
+    >{\centering\arraybackslash}p{1.8cm}p{3.6cm}
   }
     \hline
     Rank & \multicolumn{2}{c}{PAR-2 Ranking} & \multicolumn{2}{c}{Cluster-Label Ranking} \\
@@ -799,7 +798,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   \label{tab:paretotable}
   \vspace{0.2cm}
   \begin{tabular}{
-    >{\centering\arraybackslash}m{0.4cm}
+    >{\centering\arraybackslash}m{0.6cm}
     >{\centering\arraybackslash}m{1.6cm}
     >{\centering\arraybackslash}m{1.6cm}
     >{\centering\arraybackslash}m{1.6cm}
@@ -855,17 +854,16 @@ However, we sample on average \SI{1.59}{} of them.
   \centering
   \caption{Top-10 most \textit{important} families regarding the average occurrences and the fraction of selected occurrences regarding our AL approach}
   \label{tab:families}
-  \hspace{-0.58cm}
-  \begin{subtable}{0.45\textwidth}
+  \begin{subtable}[t]{0.48\textwidth}
     \centering
     \caption{Sorted by the average number of occurrences}
     \label{tab:familiesa}
 
     \begin{tabular}{
-      >{\centering\arraybackslash}m{1.6cm}
-      >{\centering\arraybackslash}m{1.3cm}
-      >{\centering\arraybackslash}m{1.3cm}
-      >{\centering\arraybackslash}m{1.3cm}
+      >{\centering\arraybackslash}m{1.8cm}
+      >{\centering\arraybackslash}m{1.2cm}
+      >{\centering\arraybackslash}m{1.2cm}
+      >{\centering\arraybackslash}m{1.2cm}
     }
       \hline
       Family & Avg. Occ. & In Dataset & Fraction (\%) \\
@@ -897,17 +895,17 @@ However, we sample on average \SI{1.59}{} of them.
       \hline
     \end{tabular}
   \end{subtable}
-  \hspace{0.55cm}
-  \begin{subtable}{0.45\textwidth}
+  \hfill
+  \begin{subtable}[t]{0.48\textwidth}
     \centering
     \caption{Sorted by the fraction of sampled occurrences}
     \label{tab:familiesb}
 
     \begin{tabular}{
-      >{\centering\arraybackslash}m{1.6cm}
-      >{\centering\arraybackslash}m{1.3cm}
-      >{\centering\arraybackslash}m{1.3cm}
-      >{\centering\arraybackslash}m{1.3cm}
+      >{\centering\arraybackslash}m{1.8cm}
+      >{\centering\arraybackslash}m{1.2cm}
+      >{\centering\arraybackslash}m{1.2cm}
+      >{\centering\arraybackslash}m{1.2cm}
     }
       \hline
       Family & Avg. Occ. & In Dataset & Fraction (\%) \\
