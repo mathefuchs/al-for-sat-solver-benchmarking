@@ -1,26 +1,23 @@
 \documentclass[runningheads]{llncs}
 
-\usepackage[T1]{fontenc} % recommended by LNCS template
-\usepackage{graphicx}
+\usepackage[ruled,vlined,linesnumbered,norelsize]{algorithm2e}
 \usepackage{amsmath,amssymb}
-\usepackage[labelfont=bf]{caption}
-\usepackage{subcaption}
-\captionsetup{compatibility=false}
-\usepackage[table]{xcolor}
-\usepackage{tikz}
-\usepackage{siunitx}
+\usepackage[T1]{fontenc} % font encoding; recommended by LNCS template
+\usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{tabularx}
-\usepackage{pifont}
-\usepackage{tablefootnote}
-\usepackage{array}
 \usepackage[misc]{ifsym} % letter symbol to mark corresponding author
+\usepackage{pifont}
+\usepackage{siunitx}
+\usepackage{subcaption}
+\usepackage{tablefootnote}
+\usepackage{tabularx}
+\usepackage[table]{xcolor}
+\usepackage{tikz} % has to be loaded after "xcolor" here, else "option clash"
 
-\newcommand{\cmark}{\ding{51}}
+\newcommand{\cmark}{\ding{51}} % symbols for table comparing benchmarking approaches
 \newcommand{\xmark}{\ding{55}}
 
-\usepackage[ruled,vlined,linesnumbered,norelsize]{algorithm2e}
-\DontPrintSemicolon
+\DontPrintSemicolon % configuration for algorithm2e
 \def\NlSty#1{\textnormal{\fontsize{8}{10}\selectfont{}#1}}
 \SetKwSty{texttt}
 \SetCommentSty{emph}
