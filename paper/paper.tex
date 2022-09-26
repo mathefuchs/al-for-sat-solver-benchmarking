@@ -13,6 +13,7 @@
 \usepackage{pifont}
 \usepackage{tablefootnote}
 \usepackage{array}
+\usepackage[misc]{ifsym} % letter symbol to mark corresponding author
 
 \newcommand{\cmark}{\ding{51}}
 \newcommand{\xmark}{\ding{55}}
@@ -33,10 +34,20 @@
 
 \begin{document}
 
-\title{Active-Learning for SAT-Solver Benchmarking}
-\author{Tobias Fuchs}
-\institute{Institute of Theoretical Informatics, \\ Karlsruhe Institute of Technology, Germany \\
-\email{info@tobiasfuchs.de}}
+\title{Active Learning for SAT-Solver Benchmarking}
+
+\author{
+	Tobias Fuchs (\Letter) \and
+	Jakob Bach\orcidID{0000-0003-0301-2798} \and
+	Markus Iser\orcidID{0000-0003-2904-232X}
+}
+
+\institute{
+	Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany \\
+	\email{info@tobiasfuchs.de, jakob.bach@kit.edu, markus.iser@kit.edu}
+}
+
+\authorrunning{T. Fuchs et al.} % according to sample paper of template: first names are abbreviated; if there are more than two authors, 'et al.' is used.
 
 \maketitle
 
@@ -330,7 +341,7 @@ Finally, ensembles are a meta-strategy that combines the predictions of several 
 \subsubsection{Summary.}
 To sum up this section, we have shown both traditional and recent benchmark-set-selection approaches. Moreover, we have briefly outlined how active-learning techniques can help to incrementally select benchmark sets. In the following sections, we present an active-learning-based benchmark-set-selection approach that solves the \textit{new solver problem} while optimizing for runtime and being both interpretable and scalable.
 
-\section{Active-Learning for SAT-Solver Benchmarking}
+\section{Active Learning for SAT-Solver Benchmarking}
 \label{sec:main}
 Our algorithm follows a simple three-step schema (Alg.~\ref{algALBenchmark}). After initializing the model $\mathcal{M}$, we incrementally \textit{select} a problem instance from the pool of instances, one at a time, evaluate the new solver $\hat{a}$ on it, and \textit{update} the model with the acquired result. We \textit{stop} when meeting some stopping condition.
 Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark set by one instance at a time rather than using batches.

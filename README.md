@@ -1,6 +1,6 @@
-# Active-Learning for SAT-Solver Benchmarking
+# Active Learning for SAT-Solver Benchmarking
 
-This repository contains the paper and code of *Active-Learning for SAT-Solver Benchmarking*.
+This repository contains the paper and code of *Active Learning for SAT-Solver Benchmarking*.
 All data and immediate results are available in a separate repository.
 
 * The folder `paper` contains the LaTeX source of the paper.
