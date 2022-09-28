@@ -78,7 +78,7 @@ We want to find a scoring function $\operatorname{score}\!: \mathcal{A} \cup \le
 SAT~Competitions~\cite{FroleyksHIJS21} typically rely on the PAR-2 score, i.e, the average runtime with a penalty term of $2\tau$ for timeouts.
 We predict the solver ranking induced by this scoring, without predicting exact solver runtimes.
 This allows for both comparing the solvers as well as identifying solvers with similar behavior.
-%JB: is there any further behavior we can deduce about a solver scoring than a performance ranking? similar behavior could be something like two solvers being fast/slow on the same instances, but that cannot be deduced from overall score
+%JB: is there any further behavior we can deduce about a solver scoring apart from a performance ranking? "similar behavior" could IMHO be something like two solvers being fast/slow on the same instances, but that cannot be deduced from overall score
 
 This current article is proposing a novel active-learning-based benchmark-set-selection approach.
 Our algorithm is unique in that it is the only one, to the best of our knowledge, that has all of the following features (also refer to Tab.~\ref{tab:requirements}).
@@ -90,7 +90,7 @@ Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
 By doing so, we have a greater impact on the properties of the benchmarking approach such as its required runtime.
 Sampling instances incrementally means taking runtime information from already done experiments into account when choosing the next.
 Rather than solely outputting a binary classification, i.e, the new solver is worse than solver A, we provide a \emph{scoring function} that shows by which margin a solver is worse and how similar it is to existing approaches (\emph{interpretability}).
-%JB: we should rename "interpretability" criterion, term can have lots of different meanings and our specific meaning is not very intuitive
+%JB: we should rename "interpretability" criterion (make it more specific), term "interpretability" can have lots of different meanings and our specific meaning is not very intuitive
 Finally, our strategy's cost \emph{scales linearly} with the cardinality of the set of existing solvers $\mathcal{A}$ to compare against and the instances $\mathcal{I}$ within our pool of possible benchmark instances.
 We avoid comparing pairs of solvers.
 This would scale quadratically.
@@ -110,7 +110,7 @@ Third, we discuss an existing benchmark-set-selection approach that optimizes fo
 Finally, we show how active-learning techniques can help to tackle the aforementioned \emph{New-Solver Problem}.
 
 Tab.~\ref{tab:requirements} shows a concise overview of existing approaches with a related goal.
-%JB: we can probably cut this part a bit, as we discuss weakness of individual approaches later anyway
+%JB: we can probably cut this part a bit, as we discuss weaknesses of individual approaches later anyway
 While traditional benchmark-set-selection~\cite{HoosKSS13} lacks the aspect of runtime optimization, related work within algorithm configuration~\cite{HutterHL11} is concerned with finding better configurations fast.
 However, algorithm configuration is not suited for ranking.
 There is already existing work employing active learning for SAT-solver discrimination~\cite{MatriconAFSH21}.
@@ -121,6 +121,8 @@ Note that all approaches already make use of problem-instance features as it sho
 
 \subsubsection{Traditional benchmark-set-selection.}
 %JB: I think we should do some further research on static benchmark-set selection approaches (maybe in SMT, CP, etc.)
+%JB: can shortly describe benchmark selection in SAT Competition 2022 \cite{sat2022}, previous competitions (if difference procedure used; Related-Work section of Matricon et al. (2021) states that) and other competitions (e.g., those in https://www.floc2022.org/floc-olympic-games)
+%JB: redundancy removal in benchmarks: Manthey and Möhle: "Better Evaluations by Analyzing Benchmark Structure"
 Recent studies~\cite{abs-2107-07002,NiesslHWCB22} show that selecting a benchmark set in general is a difficult endeavor for multiple reasons.
 Dehghani~et.~al.~\cite{abs-2107-07002} describe how a biased benchmarking set can easily lead to fallacious interpretations.
 Moreover, Nießl~et.~al.~\cite{NiesslHWCB22} state that benchmark-set design has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
@@ -131,7 +133,7 @@ The selection strategy presented is static, i.e., it does not depend on the solv
 Desirable properties are a variety of instances (avoids over-fitting of solver approaches), adapted instance hardness (not too easy but also not too hard; solvers cannot be distinguished if too many time-out or finish immediately), and no duplicates (having duplicates gives those instances more weight).
 To avoid having too similar instances, they make use of a distance-based approach using the SATzilla features~\cite{XuHHL08,features}.
 Those features comprise general instance-size features and graph-representation features among others.
-%JB: we should probably cut the discussion of each approach's criteria to save space, maybe only mention the unsatisifed ones
+%JB: we should probably cut the discussion of each approach's criteria to save space, maybe only mention the unsatisifed criteria
 Their approach \emph{ranks} solvers by providing its PAR-2 score, is \emph{feature-based}, and is \emph{scalable} in the sense that the evaluation time scales linearly with more instances and solvers.
 Also, their approach is \emph{interpretable} in the sense that the obtained PAR-2 score induces a distance between solvers.
 However, they do not optimize for benchmark \emph{runtime} and select instances \emph{randomly}, apart from constraints on the instance hardness and feature distance.
@@ -182,6 +184,7 @@ The goal is to tune SAT-solvers for a given sub-domain of problem instances.
 
 SMAC~\cite{HutterHL11} tries to find a close-to-optimal configuration for a given SAT-solver on a given set of instances.
 %JB: discussion of SMAC is too long, we should cut it a bit
+%JB: following paper might be relevant in that context, too (haven't read it): Eggensperger et al. "Efficient benchmarking of algorithm configurators via model-based surrogates"
 Although this task is different from our goal, e.g., we do not need to navigate configuration space, they use a similar framework.
 There are mainly two similarities.
 First, both approaches are model-based.
@@ -197,11 +200,12 @@ If the new solver does not belong to this category (new ideas are seldomly the b
 %JB: "this category" = category of most promising solvers? not 100% clear
 Second, while using a model-based selection strategy to sample configurations, instance sampling is done \emph{randomly}, i.e., without building a model over instances.
 And third, their approach is not \emph{interpretable} regarding the new solver performance since we are already missing the feature to \emph{rank} the new solver among existing ones.
-%JB: well, the internal meta-model of the configurator allows to estimate the solver performance for particular configurations (instead of comparing solvers), which allows a specific performance assessment, so the approach is interpretable in that direction (though for comparison to other solvers, only top performance should be interesting)
+%JB: well, the internal meta-model of the configurator allows to estimate the solver performance for particular configurations (rather than solvers), so the approach is kind of interpretable, though regarding configurations (while for comparison to other solvers, only top-configuration performance should be interesting, so the approach is indeed not interpretable regarding solvers)
 
 \subsubsection{Incremental benchmark-set-selection.}
 Matricon et. al.~\cite{MatriconAFSH21} present an incremental benchmark-set-selection approach.
 %JB: again, I think there are too many details for describing this single approach
+%JB: should either add further incremental approaches or if there are none, should say so ("to the best of our knowledge")
 Given a pair of SAT solvers, they want to iteratively select a subset of instances to decide with high confidence which of the two solvers is better.
 The selection of instances is dependent on the choice of the solvers to distinguish.
 They calculate a scoring metric for all instances (that have not been selected yet), run the experiment with the highest score, and update the confidence.
@@ -218,16 +222,16 @@ Regarding our desired features of adaptive benchmark-set-selection (Tab.~\ref{ta
 Although they provide a confidence metric for their prediction, which makes this approach partially \emph{interpretable}, it is not clear how similar two given solvers are or on which instances they behave similarly, as the prediction is solely binary.
 Moreover, the major shortcoming lies within it being not \emph{scalable} with the number solvers.
 As they compare only pairs of solvers, scaling with more and more solvers and ideas becomes an issue as there is a quadratic amount of pairs to distinguish.
-%JB: maybe rather log-linear than quadratic, see a prior comment
+%JB: maybe rather log-linear than quadratic, see a prior comment in intro
 Since a new solver idea is seldomly best at first try but requires more or less tweaking, it is desired to rank a new solver in a way that scales linearly with the number of existing approaches.
-%JB: this general motivation should go there where linearity is introduced as criterion, not here
+%JB: this general motivation should go there where linearity is introduced as criterion (-> intro), not here
 In this way, a new solver idea can be discarded if it performs poorly across the board or may be further tweaked if it shows promising results at least in some cases.
 
 \subsubsection{Active learning (AL).}
-%JB: section does not make clear which of the following approaches we will use (reads more like fundamentals than related work)
+%JB: section does not make clear which of the following approaches we will use, i.e., relationship to our work not clear (reads more like fundamentals than related work)
 The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning within recommender systems, especially the \emph{new-user problem}~\cite{RubensESK15}.
 The classic exploration-exploitation dilemma arises since, on the one hand, we want to maximize the utility an instance provides to our model and, on the other hand, minimize the cost (CPU time) that is associated with its acquisition.
-%JB: no sure it is arises here as well; dilemma is typical for searching one optimal solution in continuous space; however, if we find an interesting/useful instance here, I'm not sure if we would continue picking similar instances ("exploting" instead of "exploring") just because we expect them to be useful as well
+%JB: no sure if this dilemma arises here as well; dilemma is typical for searching one optimal solution in continuous space, where there is an incentive to exploit neighborhood in promising regions; however, if we find an interesting/useful (= good for assessing solver performance) instance in our approach, I'm not sure if we would continue picking similar instances ("exploting" instead of "exploring") just because we expect them to be useful as well
 
 \begin{figure}[tbp!]
   \centering
@@ -355,7 +359,7 @@ AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,
 While synthesis-based methods (Fig. \ref{fig:activesynth}) generate instances that might be interesting to label, pool-based methods (Fig. \ref{fig:activepool}) rely on a pool of unlabeled instances from which to draw items.
 
 Recent synthesis-based methods within the field of satisfiability solving~\cite{0001AEMN22,GarzonMG22} show how to generate problem instances with desired properties.
-%JB: we should conduct some further research if there are other approaches using AL for SAT (or SMT, CP, etc.) benchmarking
+%JB: we should conduct some further research if there are other approaches using AL for SAT (or SMT, CP, etc.) benchmarking or some other task
 This goal is, however, orthogonal to ours.
 While those approaches want to generate problem instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark set.
 
@@ -373,7 +377,7 @@ In the following sections, we present an active-learning-based benchmark-set-sel
 \section{Active Learning for SAT-Solver Benchmarking}
 \label{sec:main}
 Our algorithm follows a simple three-step schema (Alg.~\ref{algALBenchmark}).
-%JB: as it is rather simple and has different parts to be plugged in, I think we should rebrand it as "framework" rater than algorithm
+%JB: as the algorithm is rather simple and has different parts to be plugged in, I think we should rebrand it as "framework" rather than algorithm (and change the term consistently in text)
 After initializing the model $\mathcal{M}$, we incrementally \emph{select} a problem instance from the pool of instances, one at a time, evaluate the new solver $\hat{a}$ on it, and \emph{update} the model with the acquired result.
 We \emph{stop} when meeting some stopping condition.
 Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark set by one instance at a time rather than using batches.
@@ -399,10 +403,10 @@ Refer to the next sections for more details.
   }
 
   $\operatorname{score} \leftarrow \operatorname{predictScores}\!\left(\mathcal{M}\right)$
-  %JB: bit confusing that this is not a numerical score, but a function (see next line); maybe call it "score()"? or return a tuple with all estimated scores (one per solver)?; also, one could expect to get a benchmark set (see title of algorithm), but as instance selection is solver-specific, this is not case
+  %JB: bit confusing that this is not a numerical score, but a function (see next line); maybe call it "score()"? or return a tuple with all estimated scores (one per solver?); also, one could expect to get a benchmark set as result (see title of algorithm), but since instance selection is solver-specific, this is not case (it's rather a benchmarking schema)
 
   \KwOut{Return scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ and the fraction of sampled instances and runtime needed to provide it.}
-  %JB: we should formally specify the tuple rather than only describing it
+  %JB: we should formally specify the tuple rather than only describing it in words
 \end{algorithm}
 
 The following section (Sec.~\ref{sec:main1}) discusses how we may derive a solver ranking from our model (line~6).
@@ -422,7 +426,7 @@ Preliminary experiments, as well as research in portfolio solvers~\cite{NgokoCT1
 In our experiments, the mean squared error was within the same magnitude as the values to be predicted.
 In contrast to that, discretizing runtimes and using those labels in the model's training and prediction yields good results (cf.~Sec.~\ref{sec:eval}).
 The following paragraphs motivate why it makes sense to discretize runtimes.
-%JB: we probably should cut this a bit
+%JB: we should probably cut this a bit
 
 We use a function $\gamma\!: {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ to transform runtime observations.
 In our experiments, this function is a clustering algorithm.
@@ -436,7 +440,7 @@ To determine a ranking based on those labels, we define
 \end{equation}
 with $w_{a,i} := 2$ (PAR-\emph{2} penalty factor) if $\gamma\!\left(a, i\right) = k$ else $w_{a,i} := 1$.
 To be applicable to $\hat{a}$, we extend $\operatorname{score}$ by replacing $\gamma\!\left(a, i\right)$ by the model's predictions $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
-%JB: as "$\operatorname{score}$" is not visible, we should use some other way of highlighting
+%JB: as "$\operatorname{score}$" is not visibly different to rest of text, we should use some other way of highlighting
 
 Turning a regression into a classification problem, discretization is a useful tool.
 However, it does not provide much value if the resulting cluster labels are not predictive of the PAR-2 ranking we seek to predict.
@@ -503,7 +507,7 @@ While only time-out labels (solver times out or not on a particular instance) ar
 %\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
 This means that we do not lose much discriminatory power using discrete runtime labels.
 The number of significant comparisons between solvers \emph{alone}, though, does only offer limited insights as we might achieve significant differences in all pairs by assigning some randomly skewed values as labels.
-%JB: thus, we should reorder section to mention significant difference (this paragraph) first and deciding solver pairs (previous paragraph, stronger argument) second (rather than giving the stronger argument first, making the second argument superfluous)
+%JB: thus, we should reorder this section to mention argument "significant differenc"e (this paragraph) first and "deciding solver pairs" (previous paragraph, stronger argument) second (rather than giving the stronger argument first, making the second argument superfluous)
 However, the predictiveness of the PAR-2 score, the labels' discriminatory power, as well as that it enables us to use classification at the same time, show the clear advantage of runtime discretization.
 %JB: at the same time with what? with the other benefits?
 
@@ -512,7 +516,7 @@ However, the predictiveness of the PAR-2 score, the labels' discriminatory power
 \label{sec:main2}
 Our instance-sampling strategies (also refer to Alg.~\ref{algALBenchmark}; line 3) can be divided into two categories.
 First, we present possible baseline approaches including existing work on how to pick \emph{interesting} instances~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
-%JB: approaches under "Second" are also at least "inspired by existing work" and probably also pick "interesting" instances, distinction between the two categories not entirely clear
+%JB: approaches under "Second" are also at least "inspired by existing work" and probably also pick "interesting" instances, so distinction between the two categories of approaches not entirely clear
 Second, we show promising machine-learning-based sampling strategies that make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 
 \subsubsection{Baselines and existing approaches.}
@@ -643,7 +647,7 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
     $O_{\operatorname{acc}} \leftarrow \operatorname{computeRankingAccuracy}\!\left( ranking,\, \mathcal{I},\, \mathcal{S},\, r \right)$ \tcp*{Refer to Sec.~\ref{sec:goal}}
 
     $O_{\operatorname{rt}} \leftarrow \operatorname{computeRuntimeFractionUsed}\!\left( runtime,\, \mathcal{I},\, \mathcal{S},\, r \right)$
-    %JB: do we need to call a function here or can't we directly write how this is computed (define a variable starting at 0 to which the runtime fraction is added each iteration)
+    %JB: do we need to call a function here or can't we directly write how this is computed (define a variable starting at 0 to which the runtime fraction is added each iteration)?
 
     $res \leftarrow res \cup \left\lbrace \left( O_{\operatorname{acc}},\, O_{\operatorname{rt}} \right) \right\rbrace$
   }
@@ -679,7 +683,7 @@ The end-to-end experiment configurations are given below.
 
 \subsubsection{Ranking.}
 Regarding \emph{ranking} (cf. Sec.~\ref{sec:main1}), we experiment with the following approaches, including our used hyper-parameter values:
-%JB: as these approaches are mostly new (Section 3.1 only explains prediction-based ranking in general, neither observed ranking nor history nor fallback), I'm not sure if we should provide further motivation/explanation here); also applies to other components of experimental design
+%JB: as parts of these approaches are mostly new to readers (Section 3.1 only explains prediction-based ranking in general, neither observed ranking nor history nor fallback), I'm not sure if we should provide further motivation/explanation here); also applies to other components of experimental design
 \begin{itemize}
   \item Observed PAR-2 ranking of already sampled instances
   \item Predicted ranking induced by runtime-label predictions
@@ -692,7 +696,7 @@ Regarding \emph{ranking} (cf. Sec.~\ref{sec:main1}), we experiment with the foll
 
 \subsubsection{Selection.}
 For \emph{selection} (cf. Sec.~\ref{sec:sampling1}), we experiment with the following methods, including our used hyper-parameter values:
-%JB: sampling section describes more methods than the ones listed below, I guess some got dropped after preliminary experiments
+%JB: the referenced sampling section describes more methods than the ones listed below, so I guess some methods got dropped after preliminary experiments
 \begin{itemize}
   \item Random sampling 
   \item Model-based uncertainty sampling
@@ -800,19 +804,19 @@ As already mentioned in Sec.~\ref{sec:main1}, this approach has good properties 
 Also, preliminary experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
 Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
 Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
-%: JB: " similar experiment as above" - reference unclear; what do you want to say?
+%JB: "similar experiment as above" - reference unclear; what do you want to say?
 
 \subsection{Experimental Results}
 \subsubsection{Tuning our algorithm.}
 Our main end-to-end experiments follow the evaluation framework that has been introduced in Sec.~\ref{sec:evalframe}.
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches listed in Sec.~\ref{sec:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
 The plotted lines represent the Pareto front for each possible choice of ranking approaches (Fig.~\ref{fig:annitraincolorranking}), selection approaches (Fig.~\ref{fig:annitraincolorselection}), and stopping criteria (Fig.~\ref{fig:annitraincolorstopping}).
-%JB: as far as I understand it, the lines only fully compare some top-level hyperparameters, but for each of these hyperparemeters, take the best out of some more fine-grained settings (the hyperparameters of the hyperparameters, so to speak), so it's no really "each possible choice"
+%JB: as far as I understand it, the lines only compare some top-level hyperparameters, but for each of these hyperparemeters, take the best (= Pareto front) out of some more fine-grained settings (the hyperparameters of the hyperparameters, so to speak), so it's no really "each possible choice" in the sense of actual, individual configurations, but rather a combination of configurations
 Colors indicate the different hyper-parameter instantiations.
 To be more specific, they represent the Pareto front of all configurations with the respective instantiations.
 
 Regarding the ranking approach (Fig.~\ref{fig:annitraincolorranking}), using the ranking that is induced by our runtime-label predictions consistently performs better than the partially observed PAR-2 ranking for each possible value of $\delta$.
-%JB: consistent outperformance not guaranteed in case the lines are not individual approaches, but Pareto fronts within the compared categories (which means that different parts of the line might be related to different hyperparameter settings)
+%JB: as in previous comment: consistent outperformance not guaranteed in case the lines are not individual approaches, but Pareto fronts within the compared categories (which means that different parts of the line might be related to different hyperparameter settings)
 %This was expected since a possible bias in the selection decisions of the model is accounted for when using the model's predictions for ranking.
 This is expected since selection decisions are not random.
 For example, we might sample more instances of one family if it benefits discrimination of solvers.
@@ -820,7 +824,7 @@ While the partially observed PAR-2 score is skewed, the prediction model can acc
 
 Regarding the selection approaches (Fig.~\ref{fig:annitraincolorselection}), the model-based uncertainty strategy performs best in most cases.
 However, the model-based information-gain sampling is beneficial if runtime is strongly favored (very small $\delta$; runtime fraction less than \SI{5}{\%}).
-%JB: we should also describe performance of random sampling
+%JB: we should also describe performance of random sampling, which is visible in plot as well
 
 Regarding the stopping criterion (Fig.~\ref{fig:annitraincolorstopping}), the ranking convergence criterion performs the most consistently well.
 If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
@@ -871,7 +875,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   	The y-axis shows the accuracy of the predicted rank in comparison to the true PAR-2 rank.
   	Each line entails the front of Pareto-optimal configurations with the respective instantiation.
   }
-  %JB: not sure if the color palette in the plots is grayscale-/color-blind-friendly; consider changing the palette (see https://colorbrewer2.org/#type=qualitative&scheme=Set3&n=3 ) and using different line types
+  %JB: not sure if the color palette in the plots is grayscale-/color-blind-friendly; consider changing the palette (see https://colorbrewer2.org/#type=qualitative&scheme=Set3&n=3 ) and using different line types for each color
   \label{fig:e2eallsolvers}
 \end{figure}
 
@@ -882,7 +886,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
 % A good trade-off is achieved for $\delta = 0.85$ with an average PAR-2 ranking performance of \SI{91.83}{\%} and a runtime requirement of on average \SI{23.05}{\%} of the time it would take to evaluate the complete dataset.
 
 \begin{table}[tb!]
-  %JB: really hard to extract take-aways by looking at this table (several settings and several metrics)
+  %JB: really hard to extract take-aways by looking at this table (several hyperprameter settings and several metrics, the hyperparameter settings of our approach change from row to row)
   \centering
   \caption{
   	Pareto-optimal approaches for different choices of $\delta$ regarding our smaller hyper-parameter tuning dataset.
@@ -891,7 +895,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   	Ranking approaches are either predicted cluster-label ranking (Pred.) or partially observed PAR-2 ranking (PAR-2).
   	Selection approaches are either uncertainty-based selection (Uncert.) or information-gain-based selection (IG).
   	Stopping criteria are either ranking convergence (Conv.) or Wilcoxon-based (Wilcoxon).
-  	%JB: How are tthe values for ranking/selection/stopping determined? whatever is best for a particular delta?
+  	%JB: How are the values for ranking/selection/stopping determined -- whatever is best for a particular delta?
   }
   \label{tab:paretotable}
   \vspace{0.2cm}
@@ -932,10 +936,10 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
 Tab.~\ref{tab:paretotable} also shows the performance of particular hyper-parameter choices for different values of $\delta$.
 %JB: some plot for comparison would be better than a truncated table showing a variety hyperparameter configs
 Thereby, we observe that for small $\delta$ (runtime more important) our approaches preferably use easy instances to get a good sense of the PAR-2 ranking fast, e.g., row with $\delta = 0.15$.
-%JB: the "e.g." part needs more explanation
+%JB: the "e.g." part needs more explanation (how can we see that easy instances used? -> fraction runtime vs. fraction instances)
 In contrast to that, harder instances are preferred for higher values of $\delta$, i.e., the sampled fraction of runtime is greater than the fraction of instances.
 In our opinion, the row with $\delta = 0.85$ represents the best trade-off between runtime and PAR-2 accuracy.
-%JB: this is a scientific article, not an opinion piece :-); all deltas represent different trade-offs, so I would not claim to have found a best trade-off (probably depends on user what is most desired)
+%JB: this is a scientific article, not an opinion piece :-); all deltas represent different trade-offs, so I would not claim to have found a best trade-off (probably depends on user which kind of trade-off is most desired)
 
 \subsubsection{Full dataset evaluation.}
 Having selected the most promising hyper-parameters, we run our end-to-end active-learning experiments on the complete Anniversary Track dataset (5355 instances).
@@ -952,13 +956,13 @@ For example, \emph{planning} instances account for on average \SI{19.14}{} of th
 In contrast to that, Tab.~\ref{tab:familiesb} shows the families that are sampled the most often relative to their occurrences in the underlying dataset.
 There are, for example, only nine \emph{circuit-multiplier} instances in the complete dataset.
 However, we sample on average \SI{1.59}{} of them.
-%JB: there should be some (qualitative) interpretation (based on our results, is the sample interesting family-wise or not?) rather than just dropping a table and explaining its structure
+%JB: there should be some (qualitative) interpretation (based on our results, is the sample interesting/special family-wise or not?) rather than just dropping a table into the paper and mainly explaining its structure
 
 \begin{table}[tb!]
-  %JB: might be interesting to have scatterplot with fraction in sample / fraction in dataset (does not allow to show all family labels, but allows to show all families)
+  %JB: "fraction" here only draws family-specific comparison of sample vs. full dataset, but does not compare overall distribution of families in sample/dataset; might be interesting to have scatterplot with "(relative) frequency of family in sample" vs. "(relative) frequency of family in dataset" (does not allow to show all family labels (though we probably could manually label some families), but allows to show all families)
+  %JB: could also correlate "(relative) frequency of family in sample" with "(relative) frequency of family in dataset"
   \centering
   \caption{Top-10 most \emph{important} families regarding the average occurrences and the fraction of selected occurrences regarding our AL approach}
-  %JB: also interesting: distribution of families in sample vs. full dataset (can even correlate these two vectors); "fraction" here only draws family-specific comparison of sample to full dataset
   \label{tab:families}
   \begin{subtable}[t]{0.48\textwidth}
     \centering
@@ -1068,7 +1072,7 @@ Running benchmarks on a computing cluster with $n$ cores benefits from having a 
 This is, however, not trivial since, on the one hand, a higher $n$ leads to less \emph{active learning} (because of bigger batch sizes) and, on the other hand, it is not clear how to synchronize the model update and instance selection without a barrier lock, which wastes a lot of runtime resources.
 
 On a more general note, it would make sense to generalize this evaluation framework for arbitrary $\mathcal{NP}$-complete problems.
-%JB: is there methodological generalization needed or can't we just apply the same framework (instantiating the instance-feature part differently) to these use cases?
+%JB: is there some methodological generalization needed or can't we just apply the same framework (instantiating the instance-feature part differently) to these use cases?
 Those problems share most of the relevant properties of SAT solving, i.e., there are established problem-instance features, a full benchmark run takes days, and creating new problem solvers traditionally requires expert knowledge to hand-select instances of interest.
 
 
