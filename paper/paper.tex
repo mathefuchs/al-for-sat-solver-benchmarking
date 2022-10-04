@@ -74,6 +74,8 @@ To be more specific, we address the following problem:
 	\label{def:new-solver-problem}
 \end{definition}
 
+Note that we know the runtimes of all solvers, except the new one, on all instances.
+There also is work on collaborative filtering, where runtimes are only partially known, for algorithm selection~\cite{misir2017alors,misir2017data}.
 We want to find a scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ assigning each solver a score.
 SAT~Competitions~\cite{FroleyksHIJS21} typically rely on the PAR-2 score, i.e, the average runtime with a penalty term of $2\tau$ for timeouts.
 We predict the solver ranking induced by this scoring, without predicting exact solver runtimes.
@@ -92,9 +94,13 @@ Sampling instances incrementally means taking runtime information from already d
 Rather than solely outputting a binary classification, i.e, the new solver is worse than solver A, we provide a \emph{scoring function} that shows by which margin a solver is worse and how similar it is to existing approaches (\emph{interpretability}).
 %JB: we should rename "interpretability" criterion (make it more specific), term "interpretability" can have lots of different meanings and our specific meaning is not very intuitive
 Finally, our strategy's cost \emph{scales linearly} with the cardinality of the set of existing solvers $\mathcal{A}$ to compare against and the instances $\mathcal{I}$ within our pool of possible benchmark instances.
-We avoid comparing pairs of solvers.
-This would scale quadratically.
-%JB: need to discuss this; log-linear effort might be sufficient if binary-search-/recursive-sorting-like procedure used
+%JB: for what do we measure cost here?
+% (1) solving new-solver-problem once? -> apart from more runtimes to be acquired beforehand, is running our framework affected by increasing the set of existing solvers, and how does this depend on the configuration of our framework, i.e., sampling/selection/stopping? (e.g., Wilcoxon stopping criterion iterates over set of existing solvers, showing linear complexity, while fixed-subset stopping is independent from number of existing solvers)
+% (2) solving new-solver-problem for each solver out of a set of solvers? -> is a rather theoretical scenario, because our algorithm itself assumes we know runtimes of all but one solver, so in practice we cannot throw in a bunch of new solvers and get a ranking over all of them
+We avoid comparing pairs of solvers, which would scale quadratically.
+%JB: need to discuss this; logarithmic (compare one-vs rest) / log-linear (compare each pair) effort might be sufficient if binary-search-/recursive-sorting-like procedure used
+Since a new solver idea is rarely best at first try but requires more or less tweaking, it is desired to obtain a solver ranking fast.
+In this way, a new solver idea can be discarded if it performs poorly across the board or may be further tweaked if it shows promising results at least in some cases.
 
 To sum up our contribution, we take an existing benchmark set, i.e., the SAT Competition~2022 Anniversary Track~\cite{sat2022}, and predict a new solver's PAR-2 score on this dataset with only a fraction of the runtime that would be needed to evaluate this solver on the complete set of instances.
 %JB: I think we should expand a bit more on experimental design (how many instances/solvers, what do we compare), and the key results; I think it's okay if the intro becomes a bit longer (and in turn, the overview of the approach's features can be cut a bit)
@@ -120,16 +126,20 @@ Note that all approaches already make use of problem-instance features as it sho
 %JB: as commented above, we should either remove this criterion or show it in the table
 
 \subsubsection{Traditional benchmark-set-selection.}
-%JB: I think we should do some further research on static benchmark-set selection approaches (maybe in SMT, CP, etc.)
-%JB: can shortly describe benchmark selection in SAT Competition 2022 \cite{sat2022}, previous competitions (if difference procedure used; Related-Work section of Matricon et al. (2021) states that) and other competitions (e.g., those in https://www.floc2022.org/floc-olympic-games)
-%JB: redundancy removal in benchmarks: Manthey and Möhle: "Better Evaluations by Analyzing Benchmark Structure"
 Recent studies~\cite{abs-2107-07002,NiesslHWCB22} show that selecting a benchmark set in general is a difficult endeavor for multiple reasons.
 Dehghani~et.~al.~\cite{abs-2107-07002} describe how a biased benchmarking set can easily lead to fallacious interpretations.
 Moreover, Nießl~et.~al.~\cite{NiesslHWCB22} state that benchmark-set design has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
 Questionable research practices might modify those design elements a-posteriori to fit expectations, leading to biased results.
 
-Hoos et. al.~\cite{HoosKSS13} discuss which properties are most desirable when selecting a set of SAT benchmark instances, for instance for a competition.
-The selection strategy presented is static, i.e., it does not depend on the solvers to distinguish.
+Benchmark-set selection is an important issue for solver competitions, e.g., the SAT Competition.
+In such competitions, the organizers define the rules for composing the corresponding benchmarks.
+Balint et al.~\cite{balint2015overview} provide an overview of benchmark-selection criteria in different solver competitions.
+%JB: not sure if we should provide some details regarding SAT Competition 2022 \cite{sat2022}, previous competitions (if different procedure used; Related-Work section of Matricon et al. (2021) states that) or other competitions (e.g., those in https://www.floc2022.org/floc-olympic-games)
+Manthey and Möhle~\cite{manthey2016better} find that competition benchmarks might contain redundant instances, and propose a feature-based approach to remove redundancy.
+M{\i}s{\i}r~\cite{misir2021benchmark} presents a feature-based approach to reduce benchmark sets by matrix factorization and clustering.
+
+Hoos et. al.~\cite{HoosKSS13} discuss which properties are most desirable when selecting a set of SAT benchmark instances.
+The selection strategy presented is static, i.e., it does not depend on particular solvers to distinguish.
 Desirable properties are a variety of instances (avoids over-fitting of solver approaches), adapted instance hardness (not too easy but also not too hard; solvers cannot be distinguished if too many time-out or finish immediately), and no duplicates (having duplicates gives those instances more weight).
 To avoid having too similar instances, they make use of a distance-based approach using the SATzilla features~\cite{XuHHL08,features}.
 Those features comprise general instance-size features and graph-representation features among others.
@@ -169,7 +179,7 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
     Ranking & \cmark & \xmark & \cmark & \cmark \\
     Runtime optimization & \xmark & \cmark & \cmark & \cmark \\
     %Feature-based & \cmark & \cmark & \cmark & \cmark \\
-    Incremental non-random sampling & \xmark & \xmark & \cmark & \cmark \\
+    Incremental non-random\\ sampling & \xmark & \xmark & \cmark & \cmark \\
     % \tablefootnote{While using a model-based selection strategy to select the next configuration to evaluate, the instance sampling is done randomly.}
     Interpretability & \cmark & \xmark & \xmark & \cmark \\
     % \tablefootnote{While they provide a confidence measure, the strategy's output is still only binary, i.e., whether a solver A is better or worse than solver B.}
@@ -184,7 +194,6 @@ The goal is to tune SAT-solvers for a given sub-domain of problem instances.
 
 SMAC~\cite{HutterHL11} tries to find a close-to-optimal configuration for a given SAT-solver on a given set of instances.
 %JB: discussion of SMAC is too long, we should cut it a bit
-%JB: following paper might be relevant in that context, too (haven't read it): Eggensperger et al. "Efficient benchmarking of algorithm configurators via model-based surrogates"
 Although this task is different from our goal, e.g., we do not need to navigate configuration space, they use a similar framework.
 There are mainly two similarities.
 First, both approaches are model-based.
@@ -196,17 +205,21 @@ SMAC's configuration sampling has also proven to be better than random sampling 
 
 While this approach considers the configuration's \emph{runtime}, is \emph{feature-based}, and \emph{scales linearly} by having a fixed time budget, it is not capable of the other three features listed in Tab.~\ref{tab:requirements}.
 First, an algorithm configurator cannot be used to \emph{rank} a new solver since it only looks at promising solvers/configurations rather than the overall average performance.
-If the new solver does not belong to this category (new ideas are seldomly the best approach right from the start, i.e., they need some tweaking), we do not have any information on how this solver performed.
+If the new solver does not belong to this category (new ideas are rarely the best approach right from the start, i.e., they need some tweaking), we do not have any information on how this solver performed.
 %JB: "this category" = category of most promising solvers? not 100% clear
 Second, while using a model-based selection strategy to sample configurations, instance sampling is done \emph{randomly}, i.e., without building a model over instances.
+In fact, tuning algorithms to a small or non-homogeneous set of instances might lead to over-tuning, i.e., lack of generalization~\cite{eggensperger2019pitfalls}.
 And third, their approach is not \emph{interpretable} regarding the new solver performance since we are already missing the feature to \emph{rank} the new solver among existing ones.
 %JB: well, the internal meta-model of the configurator allows to estimate the solver performance for particular configurations (rather than solvers), so the approach is kind of interpretable, though regarding configurations (while for comparison to other solvers, only top-configuration performance should be interesting, so the approach is indeed not interpretable regarding solvers)
 
 \subsubsection{Incremental benchmark-set-selection.}
 Matricon et. al.~\cite{MatriconAFSH21} present an incremental benchmark-set-selection approach.
+Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
+The main difference is that Matricon et. al. compare a solver to another one, while we compare to a set of existing solvers.
+To the best of our knowledge, we are the first to tackle the latter problem.
 %JB: again, I think there are too many details for describing this single approach
-%JB: should either add further incremental approaches or if there are none, should say so ("to the best of our knowledge")
-Given a pair of SAT solvers, they want to iteratively select a subset of instances to decide with high confidence which of the two solvers is better.
+
+Given a pair of SAT solvers, Matricon et. al. want to iteratively select a subset of instances to decide with high confidence which of the two solvers is better.
 The selection of instances is dependent on the choice of the solvers to distinguish.
 They calculate a scoring metric for all instances (that have not been selected yet), run the experiment with the highest score, and update the confidence.
 If the confidence exceeds a threshold (e.g., 95\%), they stop iterating.
@@ -223,15 +236,12 @@ Although they provide a confidence metric for their prediction, which makes this
 Moreover, the major shortcoming lies within it being not \emph{scalable} with the number solvers.
 As they compare only pairs of solvers, scaling with more and more solvers and ideas becomes an issue as there is a quadratic amount of pairs to distinguish.
 %JB: maybe rather log-linear than quadratic, see a prior comment in intro
-Since a new solver idea is seldomly best at first try but requires more or less tweaking, it is desired to rank a new solver in a way that scales linearly with the number of existing approaches.
-%JB: this general motivation should go there where linearity is introduced as criterion (-> intro), not here
-In this way, a new solver idea can be discarded if it performs poorly across the board or may be further tweaked if it shows promising results at least in some cases.
 
 \subsubsection{Active learning (AL).}
 %JB: section does not make clear which of the following approaches we will use, i.e., relationship to our work not clear (reads more like fundamentals than related work)
 The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning within recommender systems, especially the \emph{new-user problem}~\cite{RubensESK15}.
 The classic exploration-exploitation dilemma arises since, on the one hand, we want to maximize the utility an instance provides to our model and, on the other hand, minimize the cost (CPU time) that is associated with its acquisition.
-%JB: no sure if this dilemma arises here as well; dilemma is typical for searching one optimal solution in continuous space, where there is an incentive to exploit neighborhood in promising regions; however, if we find an interesting/useful (= good for assessing solver performance) instance in our approach, I'm not sure if we would continue picking similar instances ("exploting" instead of "exploring") just because we expect them to be useful as well
+%JB: no sure if this dilemma arises here as well; dilemma is typical for searching one optimal solution in continuous space, where there is an incentive to exploit neighborhood in promising regions; however, if we find an interesting/useful (= good for assessing solver performance) instance in our approach, I'm not sure if we would continue picking similar instances ("exploiting" instead of "exploring") just because we expect them to be useful as well
 
 \begin{figure}[tbp!]
   \centering
@@ -359,7 +369,6 @@ AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,
 While synthesis-based methods (Fig. \ref{fig:activesynth}) generate instances that might be interesting to label, pool-based methods (Fig. \ref{fig:activepool}) rely on a pool of unlabeled instances from which to draw items.
 
 Recent synthesis-based methods within the field of satisfiability solving~\cite{0001AEMN22,GarzonMG22} show how to generate problem instances with desired properties.
-%JB: we should conduct some further research if there are other approaches using AL for SAT (or SMT, CP, etc.) benchmarking or some other task
 This goal is, however, orthogonal to ours.
 While those approaches want to generate problem instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark set.
 
@@ -368,6 +377,9 @@ Error-based strategies pick instances that have the most influence on the model 
 Uncertainty-based methods sample instances close to their perceived decision boundary.
 Distribution-based approaches sample instances whose features are unaccounted for amongst the already sampled instances.
 Finally, ensembles are a meta-strategy that combines the predictions of several different active-learning models into a selection choice.
+
+In the field of SAT-solving, Volpato and Guangyan~\cite{volpato2019active} use uncertainty-sampling-based AL to learn an instance-specific algorithm selector.
+Rather than benchmarking a solver's overall performance, the goal is to recommend the best solver out of a set of solvers for each SAT instance.
 
 \subsubsection{Summary.}
 To sum up this section, we have shown both traditional and recent benchmark-set-selection approaches.
