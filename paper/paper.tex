@@ -87,7 +87,8 @@ The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 %TF: made it clearer
 %MI: makes no sense in the context
 
-Our algorithm is unique in that it is the only one, to the best of our knowledge, that has all of the following features (also refer to Tab.~\ref{tab:requirements}).
+% The following belongs to Related Work discussion... already references the table there... will fuse / rework tomorrow
+Our algorithm is unique in that it is the only one, to the best of our knowledge, that has all of the following features (also refer to Table~\ref{tab:requirements}).
 Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers as described above.
 We optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
 We use problem-instance and runtime \emph{features} $\varphi\!: \mathcal{A} \times \mathcal{I} \rightarrow \mathbb{R}^n$ since such features already have proven to be helpful in classic benchmark-set-selection approaches~\cite{HoosKSS13} as well as in portfolio selection~\cite{CollauttiMMO13,NgokoCT19}.
@@ -123,7 +124,7 @@ Second, we explore how SAT solver configuration systems deal with navigating pos
 Third, we discuss an existing benchmark-set-selection approach that optimizes for benchmark runtime.
 Finally, we show how active-learning techniques can help to tackle the aforementioned \emph{New-Solver Problem}.
 
-Tab.~\ref{tab:requirements} shows a concise overview of existing approaches with a related goal.
+Table~\ref{tab:requirements} shows a concise overview of existing approaches with a related goal.
 %JB: we can probably cut this part a bit, as we discuss weaknesses of individual approaches later anyway
 %TF: it's supposed to be a short overview of what is to come
 While traditional benchmark-set-selection~\cite{HoosKSS13} lacks the aspect of runtime optimization, related work within algorithm configuration~\cite{HutterHL11} is concerned with finding better configurations fast.
@@ -165,7 +166,7 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
 %It is expected that dynamic selection strategies outperform static ones regarding the runtime of experiments. 
 %Dynamic strategies chose instances incrementally, one at a time, by integrating runtime data (of the instances that the solver has been already evaluated on) to make subsequent selection decisions rather than completely choosing the benchmark set upfront.
 
-% In terms of our desired features (also refer to Tab.~\ref{tab:requirements}), 
+% In terms of our desired features (also refer to Table~\ref{tab:requirements}), 
 
 %The aforementioned SATzilla features~\cite{XuHHL08,features} are provided within the GBD meta-data database~\cite{IserS18}.
 %Finding a good representation of instances is quintessential for our work since any feature-based benchmark-set-selection approach is only as good as the quality of the employed features.
@@ -216,7 +217,7 @@ Theirs selects configurations rather than instances though.
 Furthermore, Hutter et. al.~\cite{HutterHL11} use an approach that makes use of exploitation (what configuration parameters are already good) and exploration (parameter space with few data points) to select the next configuration for which to acquire runtime information.
 SMAC's configuration sampling has also proven to be better than random sampling in all tested scenarios and has even proven to be significantly better in most cases~\cite{HutterHL11}.
 
-While this approach considers the configuration's \emph{runtime}, is \emph{feature-based}, and \emph{scales linearly} by having a fixed time budget, it is not capable of the other three features listed in Tab.~\ref{tab:requirements}.
+While this approach considers the configuration's \emph{runtime}, is \emph{feature-based}, and \emph{scales linearly} by having a fixed time budget, it is not capable of the other three features listed in Table~\ref{tab:requirements}.
 First, an algorithm configurator cannot be used to \emph{rank} a new solver since it only looks at promising solvers/configurations rather than the overall average performance.
 If the new solver does not belong to the best-performing solvers (new ideas are rarely the best approach right from the start, i.e., they need some tweaking), we do not have any information on how this solver performed.
 %JB: "this category" = category of most promising solvers? not 100% clear
@@ -248,7 +249,7 @@ Their experiments show that random instance selection with a Wilcoxon test as th
 %JB: in our evaluation, we should state whether our results are consistent with this or not
 %TF: will do
 
-Regarding our desired features of adaptive benchmark-set-selection (Tab.~\ref{tab:requirements}), the aforementioned approach already ticks off the first four features, i.e., it \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
+Regarding our desired features of adaptive benchmark-set-selection (Table~\ref{tab:requirements}), the aforementioned approach already ticks off the first four features, i.e., it \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
 Although they provide a confidence metric for their prediction, which makes solvers partially \emph{comparable}, it is not clear how similar two given solvers are or on which instances they behave similarly, as the prediction is solely binary.
 Moreover, the major shortcoming lies within it being not \emph{scalable} with the number solvers.
 As they compare only pairs of solvers, evaluating a new solver requires a non-constant number of benchmark sets, which in turn requires more runtime.
@@ -492,7 +493,7 @@ However, it does not provide much value if the resulting cluster labels are not 
 In our work, we use a hierarchical-clustering approach with a single-link criterion for $k = 3$.
 For the SAT Competition~2022 Anniversary Track instances~\cite{sat2022}, this ranking approach is capable of correctly deciding for almost all pairs of solvers which one is faster (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$).
 Moreover, it decides all solvers correctly if the difference in the cluster-label-ranking scores between two solvers is at least \SI{0.11}{}.
-%Refer to Tab.~\ref{tab:discreteranking} for a comparison with the PAR-2 ranking.
+%Refer to Table~\ref{tab:discreteranking} for a comparison with the PAR-2 ranking.
 The Spearman correlation~\cite{de2016comparing} of cluster-label and PAR-2 ranking is about \SI{0.988} (in comparison to a perfect value of \SI{1}).
 This shows that monotonicity and score distances between ranks align quite well between both ranking methods.
 
@@ -858,7 +859,7 @@ MCC scores are great in dealing with class imbalances in contrast to conventiona
 % 0.888221577313471
 % 0.04753979056930393
 
-To obtain the results in Tab.~\ref{tab:mcc}, we perform cross-validation among all solvers: we assume that all other solver runtimes are known and provide \SI{64}{\%} of ground-truth runtime labels of the target solver for training, use \SI{16}{\%} as a validation set for hyper-parameter tuning, and \SI{20}{\%} as a test set (5-fold cross-validation).
+To obtain the results in Table~\ref{tab:mcc}, we perform cross-validation among all solvers: we assume that all other solver runtimes are known and provide \SI{64}{\%} of ground-truth runtime labels of the target solver for training, use \SI{16}{\%} as a validation set for hyper-parameter tuning, and \SI{20}{\%} as a test set (5-fold cross-validation).
 This is repeated for each solver once.
 Note that we perform cross-validation on two levels, i.e., among the solvers and the target solver runtimes.
 We report the average performances on the test sets.
@@ -1016,7 +1017,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   \label{fig:annitrainoptgoal}
 \end{figure}
 
-Tab.~\ref{tab:paretotable} also shows the performance of particular hyper-parameter choices for different values of $\delta$.
+Table~\ref{tab:paretotable} also shows the performance of particular hyper-parameter choices for different values of $\delta$.
 %JB: some plot for comparison would be better than a truncated table showing a variety hyperparameter configs
 Thereby, we observe that for small $\delta$ (runtime more important) our approaches preferably use easy instances to get a good sense of the PAR-2 ranking fast, e.g., row with $\delta = 0.15$.
 %JB: the "e.g." part needs more explanation (how can we see that easy instances used? -> fraction runtime vs. fraction instances)
@@ -1034,9 +1035,9 @@ Moreover, the PAR-2 accuracy is about \SI{92.33}{\%}, the average Spearman corre
 \subsubsection{Instance-family importance.}
 For all configurations of our approach that sample on average less than \SI{10}{\%} of all 5355 instances, we look at the particular instances and families that are selected by our active-learning approach.
 Thereby, the average benchmark set contains about \SI{192.34}{} instances.
-Tab.~\ref{tab:familiesa} lists the ten most frequent families that are chosen.
+Table~\ref{tab:familiesa} lists the ten most frequent families that are chosen.
 For example, \emph{planning} instances account for on average \SI{19.14}{} of the \SI{192.34}{} benchmark instances.
-In contrast to that, Tab.~\ref{tab:familiesb} shows the families that are sampled the most often relative to their occurrences in the underlying dataset.
+In contrast to that, Table~\ref{tab:familiesb} shows the families that are sampled the most often relative to their occurrences in the underlying dataset.
 There are, for example, only nine \emph{circuit-multiplier} instances in the complete dataset.
 However, we sample on average \SI{1.59}{} of them.
 %JB: there should be some (qualitative) interpretation (based on our results, is the sample interesting/special family-wise or not?) rather than just dropping a table into the paper and mainly explaining its structure
