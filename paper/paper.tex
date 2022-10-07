@@ -44,15 +44,15 @@
 \maketitle
 
 \begin{abstract}
-  Experimentation is one of the main phases in algorithm engineering, including the propositional-sat\-is\-fia\-bi\-li\-ty problem (SAT).
-  While the field of SAT-solver benchmarking is well established, traditional bench\-mark-set-selection approaches do not optimize for benchmark runtime.
-  Benchmark-set selection is the process of choosing a subset of instances out of a pool to be representative and reliable in discriminating SAT solvers.
-  This paper presents an active-learning-based benchmark-set-selec\-tion approach that solves the \emph{New-Solver Problem}:
-  Given a new solver, we want to find its ranking amidst its competitors with as little runtime as possible while still giving accurate ranking predictions.
-  We can determine a new solver's rank regarding the SAT Competition 2022 Anniversary Track instances in about \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset.
-  We achieve this while still maintaining a prediction accuracy of about \SI{92}{\%} regarding the PAR-2 ranking of this solver if it were evaluated on the complete dataset.
-  Additionally, we discuss the importance of instance families in the selection process. 
-  Our tool provides the engineer of propositional-satisfiability solvers with a faster way of determining a new SAT-solver's performance in comparison to sampling the benchmark set by hand.
+  Experimentation, in particular the evaluation of the runtime of a concrete implementation, is one of the most important phases in the development of algorithms.
+  This also applies to solutions of the SAT problem (propositional sat\-is\-fia\-bi\-li\-ty).
+  While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
+  Benchmark compilation selects representative instances from a pool of instances such that they reliably discriminate SAT solvers based on their runtime.
+  In this paper, we present an active learning based dynamic benchmark selection approach that predicts the rank of a new solver among its competitors with minimum running time and maximum rank prediction accuracy.
+  We evaluated this approach using the Anniversary track dataset from the 2022 SAT Competition. 
+  Our dynamic instance selection approach can predict the rank of a new solver after about \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of about \SI{92}{\%}. 
+  In this paper, we also discuss the importance of instance families in the selection process. 
+  Our tool provides a reliable way for SAT solver engineers to efficiently determine the performance of a new SAT solver.
 
   \keywords{Propositional satisfiability \and Benchmarking \and Active learning}
 \end{abstract}
