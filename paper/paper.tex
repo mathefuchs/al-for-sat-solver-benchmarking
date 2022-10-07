@@ -26,7 +26,7 @@
 
 \begin{document}
 
-\title{Active Learning for SAT-Solver Benchmarking}
+\title{Active Learning for SAT solver Benchmarking}
 
 \author{
 	Tobias Fuchs\orcidID{0000-0001-9727-2878} (\Letter) \and \\
@@ -60,30 +60,33 @@
 
 \section{Introduction}
 \label{sec:intro}
-One of the main phases of algorithm engineering is experimentation.
-This is also true for the pro\-po\-si\-tio\-nal-sat\-is\-fia\-bi\-li\-ty problem (SAT), the archetypal $\mathcal{NP}$-complete problem.
-While state-of-the-art solvers embark upon more and more problem instances, SAT-solver evaluation is steadily getting more costly.
-Usually, solvers submitted to competitions like the annual SAT~Competition~\cite{FroleyksHIJS21,sat2022} themselves precede heavy experimentation and are the remnant of a multitude of ideas and considerations.
-While the field of SAT-solver benchmarking is well established, traditional benchmark-set-selection approaches~\cite{Gelder11,HoosKSS13} do not optimize for benchmark runtime.
-Their goal is to select a representative and robust benchmark set for discriminating solvers reliably.
-Within our work, we show that we can arrive at the same conclusions with high accuracy in only a fraction of the time that would be needed to evaluate the full benchmark set.
-To be more specific, we address the following problem:
+One of the main phases of algorithm engineering is benchmarking.
+This is also true for the pro\-po\-si\-tio\-nal sat\-is\-fia\-bi\-li\-ty problem (SAT), the archetypal $\mathcal{NP}$-complete problem.
+While state-of-the-art solvers embark upon more and more problem instances, SAT solver evaluation is steadily getting more costly.
+Competitive SAT solvers are the result of extensive experimentation and a variety of ideas and considerations~\cite{FroleyksHIJS21,sat2022}.
+While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
+The goal of traditional approaches is to select a representative set of instances for ranking solvers based on a scoring scheme~\cite{Gelder11,HoosKSS13}.
+SAT~Competitions typically use the widely adopted PAR-2 score, i.e, the average runtime with a penalty term of $2 \tau$ for timeouts with time-limit $\tau$~\cite{FroleyksHIJS21}.
+
+In this paper, we present a novel active learning based benchmark selection approach which is able to predict the rank of a new solver with high accuracy in only a fraction of the time needed to evaluate the full benchmark.
+The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 
 \begin{definition}[New-Solver Problem]
-	Given a pool of instances $\mathcal{I}$ and solvers $\mathcal{A}$ with already known runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$ (timeout $\tau$ usually \SI{5000}{s}~\cite{FroleyksHIJS21}), the problem is to decide with as little resources (CPU time) as possible how a new solver $\hat{a} \notin \mathcal{A}$ performs in comparison to the existing ones by incrementally selecting a benchmark set $\tilde{\mathcal{I}}$ on which to evaluate $\hat{a}$.
+	Given a pool of instances~$\mathcal{I}$, solvers~$\mathcal{A}$, and runtimes~$r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ with time limit $\tau$, maximize the confidence in predicting the rank of a new solver $\hat{a} \notin \mathcal{A}$ while minimizing the total benchmark runtime by incrementally selecting instances in $\mathcal{I}$ to evaluate $\hat{a}$.
 	\label{def:new-solver-problem}
 \end{definition}
 
-Note that we know the runtimes of all solvers, except the new one, on all instances.
-There also is work on collaborative filtering, where runtimes are only partially known, for algorithm selection~\cite{misir2017alors,misir2017data}.
-We want to find a scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ assigning each solver a score.
-SAT~Competitions~\cite{FroleyksHIJS21} typically rely on the PAR-2 score, i.e, the average runtime with a penalty term of $2\tau$ for timeouts.
-We predict the solver ranking induced by this scoring, without predicting exact solver runtimes.
-This allows for both comparing the solvers as well as identifying solvers with similar behavior if looking at individual predictions per instance.
+%Note that we know the runtimes of all solvers, except the new one, on all instances.
+%There also is work on collaborative filtering, where runtimes are only partially known, for algorithm selection~\cite{misir2017alors,misir2017data}.
+%MI: this belongs to discussion of related work
+
+%We predict the solver ranking induced by this scoring, without predicting exact solver runtimes.
+
+%This allows for both comparing the solvers as well as identifying solvers with similar behavior if looking at individual predictions per instance.
 %JB: is there any further behavior we can deduce about a solver scoring apart from a performance ranking? "similar behavior" could IMHO be something like two solvers being fast/slow on the same instances, but that cannot be deduced from overall score
 %TF: made it clearer
+%MI: makes no sense in the context
 
-This current article is proposing a novel active-learning-based benchmark-set-selection approach.
 Our algorithm is unique in that it is the only one, to the best of our knowledge, that has all of the following features (also refer to Tab.~\ref{tab:requirements}).
 Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers as described above.
 We optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
@@ -115,8 +118,8 @@ For reproducibility, all our source code\footnote{temporary, anonymized version 
 
 \section{Related Work}
 This section discusses work in several related fields.
-First, we take a look at traditional SAT-solver benchmarking.
-Second, we explore how SAT-solver configuration systems deal with navigating possible configurations.
+First, we take a look at traditional SAT solver benchmarking.
+Second, we explore how SAT solver configuration systems deal with navigating possible configurations.
 Third, we discuss an existing benchmark-set-selection approach that optimizes for benchmark runtime.
 Finally, we show how active-learning techniques can help to tackle the aforementioned \emph{New-Solver Problem}.
 
@@ -125,7 +128,7 @@ Tab.~\ref{tab:requirements} shows a concise overview of existing approaches with
 %TF: it's supposed to be a short overview of what is to come
 While traditional benchmark-set-selection~\cite{HoosKSS13} lacks the aspect of runtime optimization, related work within algorithm configuration~\cite{HutterHL11} is concerned with finding better configurations fast.
 However, algorithm configuration is not suited for ranking.
-There is already existing work employing active learning for SAT-solver discrimination~\cite{MatriconAFSH21}.
+There is already existing work employing active learning for SAT solver discrimination~\cite{MatriconAFSH21}.
 This approach has some major shortcomings though.
 Finally, our approach seeks to provide all stated features.
 Note that all approaches already make use of problem-instance features as it showed to be beneficial in past work~\cite{HoosKSS13,CollauttiMMO13,NgokoCT19}.
@@ -197,11 +200,11 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
   \end{tabular}
 \end{table}
 
-\subsubsection{SAT-solver configuration.}
+\subsubsection{SAT solver configuration.}
 Another interesting approach can be found within algorithm-configuration systems~\cite{HutterHL11,HoosHL21,Stutzle0P22}.
 The goal is to tune SAT solvers for a given sub-domain of problem instances.
 
-SMAC~\cite{HutterHL11} tries to find a close-to-optimal configuration for a given SAT-solver on a given set of instances.
+SMAC~\cite{HutterHL11} tries to find a close-to-optimal configuration for a given SAT solver on a given set of instances.
 %JB: discussion of SMAC is too long, we should cut it a bit
 %TF: Agreed. Not sure however where. I find it useful to discuss the similarities and differences between algorithm configuration and our problem.
 Although this task is different from our goal, e.g., we do not need to navigate configuration space, they use a similar framework.
@@ -405,7 +408,7 @@ To sum up this section, we have shown both traditional and recent benchmark-set-
 Moreover, we have briefly outlined how active-learning techniques can help to incrementally select benchmark sets.
 In the following sections, we present an active-learning-based benchmark-set-selection approach that solves the \emph{New-Solver Problem} while optimizing for runtime and fulfilling both comparability and scalability.
 
-\section{Active Learning for SAT-Solver Benchmarking}
+\section{Active Learning for SAT solver Benchmarking}
 \label{sec:main}
 Our framework follows a simple three-step schema (Alg.~\ref{algALBenchmark}).
 %JB: as the algorithm is rather simple and has different parts to be plugged in, I think we should rebrand it as "framework" rather than algorithm (and change the term consistently in text)
@@ -807,7 +810,7 @@ If not stated explicitly, all other model parameters default to the presets of \
 %Possible values are 10, 20, 30, 40, and 50.
 
 \subsection{Implementation Details}
-For reproducibility, our source code, all experiments, and data are available on GitHub\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}}.
+For reproducibility, our source code, all experiments, and data are available on GitHub\footnote{\url{https://github.com/mathefuchs/al-for-SAT solver-benchmarking}}.
 Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions and \emph{gbd-tools}~\cite{IserS18} for SAT-instance retrieval.
 
 
