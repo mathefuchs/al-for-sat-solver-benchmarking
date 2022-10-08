@@ -357,49 +357,68 @@ Rather than benchmarking a solver's overall performance, the goal is to recommen
 
 \section{Active Learning for SAT Solver Benchmarking}
 \label{sec:main}
-Our framework follows a simple three-step schema (Alg.~\ref{algALBenchmark}).
-%JB: as the algorithm is rather simple and has different parts to be plugged in, I think we should rebrand it as "framework" rather than algorithm (and change the term consistently in text)
-%TF: changed
-After initializing the model $\mathcal{M}$, we incrementally \emph{select} a problem instance from the pool of instances, one at a time, evaluate the new solver $\hat{a}$ on it, and \emph{update} the model with the acquired result.
-We \emph{stop} when meeting some stopping condition.
-Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark set by one instance at a time rather than using batches.
-% For now, we also restrict ourselves to the aforementioned sequential one-instance-at-a-time process.
-At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
-%Note that the prediction target values may be also a subset of $\mathbb{R}$.
-%Refer to the next sections for more details.
+
+In this section, we present the details of our approach.
+Section~\ref{sec:main-framework} describes the general procedure.
+Section~\ref{sec:main-model} specifies the details of the underlying prediction model.
+Section~\ref{sec:main1} discusses how we may derive a solver ranking from that model.
+Possible criteria for sampling instances are discussed in Section~\ref{sec:main2}.
+Section~\ref{sec:main3} concludes with possible stopping conditions.
+
+
+\subsection{Incremental Benchmarking Framework}
+\label{sec:main-framework}
+
+Our framework follows a simple three-step schema.
+Algorithm~\ref{algALBenchmark} outlines the procedure. 
+While the stopping condition is not met (line~1), we select \emph{one} problem instance from the pool of instances (line~2) and evaluate the new solver $\hat{a}$ on it (line~3).
+We then use the acquired result to update the model (line~4).
+When the stopping criterion is met, we return the predicted score of the given solver $\hat{a}$.
 
 \begin{algorithm}
+% MI: comment in to rename to framework and remove numbering:
+%\SetAlgorithmName{Framework}{framework}{List of Frameworks}
+%\renewcommand{\thealgocf}{}
   \caption{Incremental Benchmarking Framework}
   \label{algALBenchmark}
 
-  \KwIn{Instances $\mathcal{I}$, Solvers $\mathcal{A}$, Runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$}
-  \KwIn{New Solver $\hat{a} \notin \mathcal{A}$}
+  %\KwIn{Instances $\mathcal{I}$, Solvers $\mathcal{A}$, Runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$}
+  \KwIn{Model $\mathcal{M}$,  Solver $\hat{a}$}
+  \KwOut{Score of $\hat{a}$}
 
-  $\mathcal{M} \leftarrow \textrm{init model with $\mathcal{A}$, $\mathcal{I}$, $r$, and $\hat{a}$}$
-  
-  $\tilde{\mathcal{I}} \leftarrow \emptyset$
+  \BlankLine
+
+  %$\mathcal{M} \leftarrow \textrm{init model with $\mathcal{A}$, $\mathcal{I}$, $r$, and $\hat{a}$}$
+  %$\tilde{\mathcal{I}} \leftarrow \emptyset$
 
   \While{$\operatorname{not} \, \operatorname{stop}\!\left(\mathcal{M}\right)$}{
     $s \leftarrow \operatorname{selectNextInstance}\!\left(\mathcal{M}\right)$
 
     $t \leftarrow \operatorname{runExperiment}\!\left(\hat{a},\,  s\right)$  \tcp*{Runs $\hat{a}$ on $s$ with time-out $\tau$}
 
-    $\tilde{\mathcal{I}} \leftarrow \tilde{\mathcal{I}} \cup \left\lbrace s \right\rbrace$
+    %$\tilde{\mathcal{I}} \leftarrow \tilde{\mathcal{I}} \cup \left\lbrace s \right\rbrace$
 
     $\operatorname{updateModel}\!\left(\mathcal{M},\, s,\, t\right)$
   }
+  
+  \Return $\operatorname{predictScore}\!\left(\mathcal{M}, \hat{a}\right)$
 
-  $\operatorname{score}\!\left(\right) \leftarrow \operatorname{predictScores}\!\left(\mathcal{M}\right)$
-  %JB: bit confusing that this is not a numerical score, but a function (see next line); maybe call it "score()"? or return a tuple with all estimated scores (one per solver?); also, one could expect to get a benchmark set as result (see title of algorithm), but since instance selection is solver-specific, this is not case (it's rather a benchmarking schema)
-  %TF: renamed it to benchmarking framework and score()
-
-  \KwOut{Return tuple of scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ and the selected instances $\tilde{\mathcal{I}}$.}
-  %JB: we should formally specify the tuple rather than only describing it in words
-  %TF: made it clearer
+  %$\operatorname{score}\!\left(\right) \leftarrow \operatorname{predictScores}\!\left(\mathcal{M}\right)$
+  %\KwOut{Return tuple of scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ and the selected instances $\tilde{\mathcal{I}}$.}
 \end{algorithm}
 
-The following section (Section~\ref{sec:main1}) discusses how we may derive a solver ranking from our model (line~8).
-Thereafter, we look at possible sampling criteria (line~4) in Section~\ref{sec:main2} and, finally, possible stopping conditions (line~3) in Section~\ref{sec:main3}.
+
+
+
+
+\subsection{Solver Model}
+\label{sec:main-model}
+
+% MI: describe initialization and update of model
+
+Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark set by one instance at a time rather than using batches.
+At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
+
 
 \subsection{Predicting Rankings}
 \label{sec:main1}
