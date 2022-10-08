@@ -87,20 +87,19 @@ The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 %TF: made it clearer
 %MI: makes no sense in the context
 
-% The following belongs to Related Work discussion... already references the table there... will fuse / rework tomorrow
-Our algorithm is unique in that it is the only one, to the best of our knowledge, that has all of the following features (also refer to Table~\ref{tab:requirements}).
-Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers as described above.
+
+%MI: In the following I stripped out stuff which belongs to related work section. Stick to advertising own approach here.
+Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers.
 We optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
-We use problem-instance and runtime \emph{features} $\varphi\!: \mathcal{A} \times \mathcal{I} \rightarrow \mathbb{R}^n$ since such features already have proven to be helpful in classic benchmark-set-selection approaches~\cite{HoosKSS13} as well as in portfolio selection~\cite{CollauttiMMO13,NgokoCT19}.
-%JB: I think we can remove this criterion, as it also is satisified by all competitors (and is commented out in table; if we keep criterion, we should also show it in table)
-%TF: I still find it worth mentioning. So, I added it back to the table.
+We use problem-instance and runtime \emph{features}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
 By doing so, we have a greater impact on the properties of the benchmarking approach such as its required runtime.
 Sampling instances incrementally means taking runtime information from already done experiments into account when choosing the next.
-Rather than solely outputting a binary classification, i.e, the new solver is worse than solver A, we provide a \emph{scoring function} that shows by which margin a solver is worse and how similar it is to existing approaches (\emph{comparability}).
+Rather than solely outputting a binary classification, i.e, the new solver is worse than solver A, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing approaches.
 %JB: we should rename the "interpretability" criterion (make it more specific), term "interpretability" can have lots of different meanings and our specific meaning is not very intuitive
 %TF: Renamed it to "comparability"
-Finally, our strategy incrementally selects only a single benchmark set to compare one new solver $\hat{a}$ with the set of existing solvers $\mathcal{A}$ whose cardinality can be any number (\emph{scalability}).
+%MI: Renamed it to "scoring"
+Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
 %JB: for what do we measure cost here?
 %TF: made it clearer
 We avoid comparing pairs of solvers, which requires a non-constant number of benchmark sets.
@@ -173,12 +172,6 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
 
 \begin{table}[tbp]
   \centering
-  \caption{
-  	Support for desired features that are introduced in Sec.~\ref{sec:intro}.
-  	The shown approaches include traditional benchmark-set-selection techniques~\cite{HoosKSS13}, an algorithm configuration system~\cite{HutterHL11}, an existing active-learning approach~\cite{MatriconAFSH21}, as well as our approach.
-  }
-  \label{tab:requirements}
-  \vspace{0.2cm}
   \begin{tabular}{
     m{0.3\textwidth}
     >{\centering\arraybackslash}m{0.15\textwidth}
@@ -187,18 +180,23 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
     >{\centering\arraybackslash}m{0.15\textwidth}
   }
     \hline
-    Feature & Hoos \mbox{et. al.~\cite{HoosKSS13}} & SMAC~\cite{HutterHL11} & Matricon \mbox{et. al.~\cite{MatriconAFSH21}} & Our approach \\
+    Feature & Hoos~\cite{HoosKSS13} & SMAC~\cite{HutterHL11} & Matricon~\cite{MatriconAFSH21} & Our approach \\
     \hline
     Ranking & \cmark & \xmark & \cmark & \cmark \\
-    Runtime optimization & \xmark & \cmark & \cmark & \cmark \\
-    Feature-based & \cmark & \cmark & \cmark & \cmark \\
-    Incremental non-random\\ sampling & \xmark & \xmark & \cmark & \cmark \\
+    Runtime Minimization & \xmark & \cmark & \cmark & \cmark \\
+    % Feature-based & \cmark & \cmark & \cmark & \cmark \\
+    Incremental Sampling & \xmark & \xmark & \cmark & \cmark \\
     % \tablefootnote{While using a model-based selection strategy to select the next configuration to evaluate, the instance sampling is done randomly.}
-    Comparability & \cmark & \xmark & \xmark & \cmark \\
+    Scoring & \cmark & \xmark & \xmark & \cmark \\
     % \tablefootnote{While they provide a confidence measure, the strategy's output is still only binary, i.e., whether a solver A is better or worse than solver B.}
     Scalability & \cmark & \cmark & \xmark & \cmark \\
     \hline
   \end{tabular}
+  ~\\[1em]
+  \caption{Support for desired features that are introduced in Section~\ref{sec:intro}.
+	The shown approaches include traditional benchmark-set-selection techniques~\cite{HoosKSS13}, an algorithm configuration system~\cite{HutterHL11}, an existing active-learning approach~\cite{MatriconAFSH21}, as well as our approach.
+  }
+  \label{tab:requirements}
 \end{table}
 
 \subsubsection{SAT solver configuration.}
@@ -452,8 +450,8 @@ At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mat
   %TF: made it clearer
 \end{algorithm}
 
-The following section (Sec.~\ref{sec:main1}) discusses how we may derive a solver ranking from our model (line~8).
-Thereafter, we look at possible sampling criteria (line~4) in Sec.~\ref{sec:main2} and, finally, possible stopping conditions (line~3) in Sec.~\ref{sec:main3}.
+The following section (Section~\ref{sec:main1}) discusses how we may derive a solver ranking from our model (line~8).
+Thereafter, we look at possible sampling criteria (line~4) in Section~\ref{sec:main2} and, finally, possible stopping conditions (line~3) in Section~\ref{sec:main3}.
 
 \subsection{Predicting Rankings}
 \label{sec:main1}
@@ -468,7 +466,7 @@ Preliminary experiments, as well as research in portfolio solvers~\cite{NgokoCT1
 %JB: Collauti at el. still predict actual (though normalized) runtimes rather than discrete labels, they only heavily discretize runtimes when using them as features
 %TF: added "without any transformation"
 %In our experiments, the mean squared error was within the same magnitude as the values to be predicted.
-In contrast to that, discretizing runtimes and using those labels in the model's training and prediction yields good results (cf.~Sec.~\ref{sec:eval}).
+In contrast to that, discretizing runtimes and using those labels in the model's training and prediction yields good results (cf.~Section~\ref{sec:eval}).
 The following paragraphs motivate why it makes sense to discretize runtimes.
 %JB: we should probably cut this a bit
 %TF: I've commented out a few sentences but we probably need to cut more.
@@ -687,7 +685,7 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
 
 \vspace{-0.2cm}
 \begin{algorithm}[htbp]
-  \caption{Evaluation framework}
+  \caption{Evaluation Framework}
   \label{alg:eval}
 
   \KwIn{A pool of instances $\mathcal{I}$, a set of solvers $\mathcal{S}$ with known runtimes $r\!: \mathcal{S} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and PAR-2 scores $par2\!: \mathcal{S} \rightarrow \mathbb{R}$ for each solver.}
@@ -735,13 +733,13 @@ This smaller dataset allows for a more extensive exploration of hyper-parameter 
 Given Alg.~\ref{algALBenchmark}, there are several possible instantiations for the three phases, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}.
 Also, there are different choices for the runtime-label prediction model.
 Note that we are not considering all previously listed approaches since a grid search of all combinations would be infeasible.
-Rather, we filter approaches based on preliminary experimental results (cf. Sec.~\ref{sec:evalprel}) and do the main end-to-end experiments only with a subset.
+Rather, we filter approaches based on preliminary experimental results (cf. Section~\ref{sec:evalprel}) and do the main end-to-end experiments only with a subset.
 The end-to-end experiment configurations are given below.
 %JB: still interesting to see which approaches were considered in preliminary experiments; could also list them here and indicate somehow which methods were only used preliminarily (e.g., by putting "(preliminary experiments only)" or some shorter label/sign behind them)
 %TF: Added some selection methods that are mentioned.
 
 \subsubsection{Ranking.}
-Regarding \emph{ranking} (cf. Sec.~\ref{sec:main1}), we experiment with the following approaches, including our used hyper-parameter values:
+Regarding \emph{ranking} (cf. Section~\ref{sec:main1}), we experiment with the following approaches, including our used hyper-parameter values:
 %JB: as parts of these approaches are mostly new to readers (Section 3.1 only explains prediction-based ranking in general, neither observed ranking nor history nor fallback), I'm not sure if we should provide further motivation/explanation here); also applies to other components of experimental design
 %TF: I've tried to add some more information. 
 \begin{itemize}
@@ -749,14 +747,14 @@ Regarding \emph{ranking} (cf. Sec.~\ref{sec:main1}), we experiment with the foll
   \item Predicted ranking induced by runtime-label predictions
   \begin{itemize}
     \item History size: consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability. Given a particular ranking decision, the latest $x$ predictions vote on the winner.
-    \item Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker. As discussed in Sec.~\ref{sec:main1}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
+    \item Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker. As discussed in Section~\ref{sec:main1}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
     %JB: "difference of ranking" between a pair of new solver and another solver? or has this phrase a different meaning?
     %TF: tried to clarify
   \end{itemize}
 \end{itemize}
 
 \subsubsection{Selection.}
-For \emph{selection} (cf. Sec.~\ref{sec:sampling1}), we experiment with the following methods, including our used hyper-parameter values:
+For \emph{selection} (cf. Section~\ref{sec:sampling1}), we experiment with the following methods, including our used hyper-parameter values:
 %JB: the referenced sampling section describes more methods than the ones listed below, so I guess some methods got dropped after preliminary experiments
 %TF: added them
 \begin{itemize}
@@ -782,7 +780,7 @@ For \emph{selection} (cf. Sec.~\ref{sec:sampling1}), we experiment with the foll
 \end{itemize}
 
 \subsubsection{Stopping.}
-For \emph{stopping} decisions (cf. Sec.~\ref{sec:main3}), we experiment with the following criteria, including our used hyper-parameter values:
+For \emph{stopping} decisions (cf. Section~\ref{sec:main3}), we experiment with the following criteria, including our used hyper-parameter values:
 \begin{itemize}
   \item Fixed subset size of \SI{10}{\%} or \SI{20}{\%} of instances
   \item Ranking convergence criterion
@@ -802,7 +800,7 @@ For \emph{stopping} decisions (cf. Sec.~\ref{sec:main3}), we experiment with the
 \end{itemize}
 
 \subsubsection{Runtime-label prediction model.}
-As a runtime-label prediction model, we only make use of one method that has proven to be successful in preliminary experiments (cf.~Sec.~\ref{sec:evalprel}).
+As a runtime-label prediction model, we only make use of one method that has proven to be successful in preliminary experiments (cf.~Section~\ref{sec:evalprel}).
 Our model of choice is an ensemble, stacking a quadratic-discriminant analysis\footnote{With a regularization parameter of zero and a singular value threshold of zero} onto a random forest model\footnote{With \emph{entropy} splitting criterion and \emph{balanced} class weights} using a decision tree\footnote{With \emph{Gini} impurity splitting criterion; choosing the best split for each branching decision and maximum tree depth of 5 levels} to weight its members.
 If not stated explicitly, all other model parameters default to the presets of \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/stable/index.html}; Version 1.0.2}~\cite{scikit-learn}.
 
@@ -825,7 +823,7 @@ Thereafter, we look at end-to-end results and instance-family importance.
 \subsection{Preliminary Results}
 \label{sec:evalprel}
 %JB: if we dedicate a whole section to these results, we should probably rename this section (not "preliminary" in the typical sense); for TACAS, I guess this can be cut a bit
-An exhaustive grid search of all approaches outlined in Sec.~\ref{sec:main} is infeasible.
+An exhaustive grid search of all approaches outlined in Section~\ref{sec:main} is infeasible.
 We are, therefore, narrowing down the search by filtering based on preliminary results.
 Since all relevant decisions, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}, revolve around the choice of prediction model, we are first looking at the \emph{Matthews Correlation Coefficient} (MCC) scores~\cite{gorodkin2004comparing,matthews1975comparison} that a particular prediction model achieves.
 MCC scores are great in dealing with class imbalances in contrast to conventional metrics like accuracy.
@@ -869,7 +867,7 @@ Since the differences in the MCC-performance distributions of the best and secon
 As a runtime discretization technique, we use hierarchical clustering with $k = 3$ using a log-single-link criterion for all further experiments.
 Each non-time-out runtime starts in a separate interval.
 We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
-As already mentioned in Sec.~\ref{sec:main1}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
+As already mentioned in Section~\ref{sec:main1}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
 Also, preliminary experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
 Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
 Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
@@ -877,8 +875,8 @@ Predicting runtime labels in a similar experiment as above produced an MCC score
 
 \subsection{Experimental Results}
 \subsubsection{Tuning our algorithm.}
-Our main end-to-end experiments follow the evaluation framework that has been introduced in Sec.~\ref{sec:evalframe}.
-Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches listed in Sec.~\ref{sec:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
+Our main end-to-end experiments follow the evaluation framework that has been introduced in Section~\ref{sec:evalframe}.
+Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches listed in Section~\ref{sec:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
 The plotted lines represent the Pareto front for each possible choice of ranking approaches (Fig.~\ref{fig:annitraincolorranking}), selection approaches (Fig.~\ref{fig:annitraincolorselection}), and stopping criteria (Fig.~\ref{fig:annitraincolorstopping}).
 %JB: as far as I understand it, the lines only compare some top-level hyperparameters, but for each of these hyperparemeters, take the best (= Pareto front) out of some more fine-grained settings (the hyperparameters of the hyperparameters, so to speak), so it's no really "each possible choice" in the sense of actual, individual configurations, but rather a combination of configurations
 Colors indicate the different hyper-parameter instantiations.
