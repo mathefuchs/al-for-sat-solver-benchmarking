@@ -409,8 +409,6 @@ At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mat
 % MI: skipping this elaboration, since we do not use regression
 
 Preliminary experiments, as well as research in portfolio solvers, have shown however that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
-%JB: Collauti at el. still predict actual (though normalized) runtimes rather than discrete labels, they only heavily discretize runtimes when using them as features
-%TF: added "without any transformation"
 In our experiments, the mean squared error was within the same magnitude as the values to be predicted.
 In contrast to that, discretizing runtimes and using those labels in the model's training and prediction yields good results (cf.~Section~\ref{sec:eval}).
 %The following paragraphs motivate why it makes sense to discretize runtimes.%MI: no further motivation found, commented out
@@ -433,8 +431,6 @@ To determine a ranking based on those labels, we define
 \end{equation}
 with $w_{a,i} := 2$ if $\gamma\!\left(a, i\right) = k$ else $w_{a,i} := 1$.
 To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma\!\left(a, i\right)$ by the model's predictions $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
-%JB: as "$\operatorname{score}$" is not visibly different to the rest of the text, we should use some other way of highlighting
-%TF: replaced it with emph{score} for now
 
 Discretization would not provide much value if the resulting cluster labels were not predictive of the PAR-2 ranking we seek to predict.
 In our work, we use a hierarchical-clustering approach with a single-link criterion for $k = 3$.
@@ -452,12 +448,7 @@ Within the SAT~Competition~2022 Anniversary Track, about \SI{89.95}{\%} of solve
 While only time-out labels (solver times out or not on a particular instance) are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs, discrete-runtime labels are sufficient to distinguish about \SI{87.83}{\%} of solver pairs.
 %\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
 This means that we do not lose much discriminatory power using discrete runtime labels.
-%The number of significant comparisons between solvers \emph{alone}, though, does only offer limited insights as we might achieve significant differences in all pairs by assigning some randomly skewed values as labels.
-%JB: thus, we should reorder this section to mention the argument "significant difference" (this paragraph) first and "deciding solver pairs" (previous paragraph, stronger argument) second (rather than giving the stronger argument first, making the second argument superfluous)
-%TF: Removed the previous sentence
 The predictiveness of the PAR-2 score, the labels' discriminatory power, as well as that it enables us to use classification, show the clear advantage of runtime discretization.
-%JB: at the same time with what? with the other benefits?
-%TF: removed redundant phrase
 
 %\begin{table}[tbp]
 %  \centering
@@ -511,8 +502,6 @@ The predictiveness of the PAR-2 score, the labels' discriminatory power, as well
 \label{sec:main2}
 Our instance-sampling strategies (also refer to Algorithm~\ref{algALBenchmark}; line 4) can be divided into two categories.
 First, we present possible baseline approaches including existing work on instance-based selection strategies~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
-%JB: approaches under "Second" are also at least "inspired by existing work" and probably also pick "interesting" instances, so distinction between the two categories of approaches not entirely clear
-%TF: made it clearer. First = instance-based methods, second = model-based methods
 Second, we show promising machine-learning-based sampling strategies that make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 
 \subsubsection{Baselines and existing approaches.}
@@ -554,9 +543,6 @@ The model-uncertainty-based approach simply selects the instance that is closest
 \end{equation}
 
 The model-based information-gain sampling strategy selects the instance with the highest expected entropy reduction.
-%This implicitly assumes that the model's runtime-label probabilities for an instance are close to being correct.
-%JB: not sure what "close to being correct" means excactly: does strategy assume correct predictions, but implicitly has a tolerance for wrong predictions, or does it explicitly account for errors somehow?
-%TF: removed the previous sentence as it probably confuses readers more and is not essential for the explanation
 To be more specific, we select the instance $i$ that maximizes
 \begin{equation}
   \operatorname{IG}\!\left(i\right) := \operatorname{H}\!\left(i\right) - \sum_{n = 1}^{k} f'\!\left(\hat{a}, i\right)_{n} \operatorname{H}\!\left(i, n\right) \enspace \textrm{,}
@@ -583,8 +569,6 @@ drops below a certain threshold.
 %JB: if this is info gain regarding runtimes, doesn't Eq. (4) mean that we would prefer instances with low entropy of runtime distribution after considering the new solver, i.e., instances that are not very discriminatory?
 %TF: I don't think so. We want to maximize the reduction in entropy of the runtime labels. Low entropy afterward -> we know that the solver behaves similarly to existing ones.
 Thereby, \emph{wilcoxon} denotes the $p$-value of a Wilcoxon signed-rank test of the runtime-label distributions and $\gamma\!\left(a, \mathcal{I}\right)$ and $f\!\left(\hat{a}, \mathcal{I}\right)$ are the natural set extensions on $\gamma$ and $f$ respectively.
-%JB: "set extension" might be rather technical and hard to understand; also, why "expected"? in the sense of "straightforward"?
-%TF: I already saw this expression in other papers. I'm not sure how to say the same thing clearer in the same amount of space.
 To improve the stability of this criterion, we use an exponential moving average
 \begin{equation}
   W_{\exp}^{\left(m\right)} := \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(m - 1\right)} \enspace \textrm{,}
@@ -650,8 +634,6 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
     \tcp*{Iverson-bracket notation}
 
     $O_{\operatorname{rt}} \leftarrow \left(\sum_{i \in \tilde{\mathcal{I}}} r\!\left(i, \hat{a}\right)\right) / \left(\sum_{i \in \mathcal{I}} r\!\left(i, \hat{a}\right)\right)$
-    %JB: do we need to call a function here or can't we directly write how this is computed (define a variable starting at 0 to which the runtime fraction is added each iteration)?
-    %TF: fixed
 
     $res \leftarrow res \cup \left\lbrace \left( O_{\operatorname{acc}},\, O_{\operatorname{rt}} \right) \right\rbrace$
   }
@@ -683,8 +665,6 @@ Also, there are different choices for the runtime-label prediction model.
 Note that we are not considering all previously listed approaches since a grid search of all combinations would be infeasible.
 Rather, we filter approaches based on preliminary experimental results (cf. Section~\ref{sec:evalprel}) and do the main end-to-end experiments only with a subset.
 The end-to-end experiment configurations are given below.
-%JB: still interesting to see which approaches were considered in preliminary experiments; could also list them here and indicate somehow which methods were only used preliminarily (e.g., by putting "(preliminary experiments only)" or some shorter label/sign behind them)
-%TF: Added some selection methods that are mentioned.
 
 \subsubsection{Ranking.}
 Regarding \emph{ranking} (cf. Section~\ref{sec:main1}), we experiment with the following approaches, including our used hyper-parameter values:
