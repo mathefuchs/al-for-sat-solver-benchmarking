@@ -80,12 +80,12 @@ The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 	\label{def:new-solver-problem}
 \end{definition}
 
-%Note that we know the runtimes of all solvers, except the new one, on all instances.
-%There also is work on collaborative filtering, where runtimes are only partially known, for algorithm selection~\cite{misir2017alors,misir2017data}.
-%MI: this belongs to discussion of related work
+Note that our scenario assumes that we know the runtimes of all solvers, except the new one, on all instances.
+One could also imagine a collaborative filtering scenario, where runtimes are only partially known~\cite{misir2017data,misir2017alors}.
 
-%MI: In the following I stripped out stuff which belongs to related work section. Stick to advertising own approach here.
-Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers, without predicting exact solver runtimes.
+Our approach satisfies several desirable criteria for benchmarking:
+It outputs a \emph{ranking} to compare the new solver against the existing set of solvers.
+For this ranking, we do not even need to predict exact solver runtimes, which is trickier.
 We optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
 We use problem-instance and runtime \emph{features}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
@@ -93,7 +93,7 @@ In particular, we take runtime information from already done experiments into ac
 By doing so, we can control the properties of the benchmarking approach such as its required runtime.
 Rather than solely outputting a binary classification, i.e, the new solver is worse than existing solver A, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
-In particular, we only subsample the benchmark set once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
+In particular, we only subsample the benchmark once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
 Since a new solver idea is rarely best on the first try, it is desired to obtain a solver ranking fast.
 In this way, a new solver idea can be discarded if it performs poorly across the board or may be further tweaked if it shows promising results at least in some cases.
 
@@ -106,43 +106,38 @@ All our source code\footnote{temporary, anonymized version for review: \url{xxx}
 
 \section{Related Work}
 
-Being of high interest in many fields, benchmarking is an active area of research on its own. 
-Recent studies show that benchmark compilation is a difficult endeavor for multiple reasons.
-Dehghani~et~al. describe how a biased benchmark can easily lead to fallacious interpretations~\cite{abs-2107-07002}.
-Nießl~et~al. state that benchmark compilation has many movable parts, e.g, performance measures, aggregation, and handling of missing values.
-Questionable research practices might modify those design elements a-posteriori to fit expectations, leading to biased results~\cite{NiesslHWCB22}.
+Benchmarking is not only of high interest in many fields but also an active research area on its own.
+Recent studies show that benchmark selection is a difficult endeavor for multiple reasons.
+Biased benchmarks can easily lead to fallacious interpretations~\cite{abs-2107-07002}.
+Also, benchmark selection has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
+Questionable research practices might modify these elements a-posteriori to fit expectations, leading to biased results~\cite{NiesslHWCB22}.
 
-Benchmark compilation is an important issue for competitions, e.g., the SAT Competition.
+\subsubsection{Static benchmark selection.}
+
+Benchmark selection is an important issue for competitions, e.g., the SAT Competition.
 In such competitions, the organizers define the rules for composing the corresponding benchmarks.
 Balint et al. provide an overview of benchmark-selection criteria in different solver competitions~\cite{balint2015overview}.
 %JB: not sure if we should provide some details regarding SAT Competition 2022 \cite{sat2022}, previous competitions (if different procedure used; Related-Work section of Matricon et al. (2021) states that) or other competitions (e.g., those in https://www.floc2022.org/floc-olympic-games)
 %TF: @Markus maybe you are better at briefly discussing the  SAT Competition 2022 and previous competitions
 Manthey and Möhle find that competition benchmarks might contain redundant instances, and propose a feature-based approach to remove redundancy~\cite{manthey2016better}.
-M{\i}s{\i}r presents a feature-based approach to reduce benchmark sets by matrix factorization and clustering~\cite{misir2021benchmark}.
+M{\i}s{\i}r presents a feature-based approach to reduce benchmarks by matrix factorization and clustering~\cite{misir2021benchmark}.
 
-%MI: one paragraph for Hoos
-Hoos et al. discuss which properties are most desirable when selecting a set of SAT benchmark instances~\cite{HoosKSS13}.
+Hoos et al. discuss which properties are most desirable when selecting SAT benchmark instances~\cite{HoosKSS13}.
 The selection strategy presented is static, i.e., it does not depend on particular solvers to distinguish.
-Desirable properties are a variety of instances to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoidance of duplicate instances.
-To avoid having too similar instances, they make use of a distance-based approach using the SATzilla features~\cite{XuHHL08,features}.
+Selection criteria are a instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoiding duplicate instances.
+To filter too similar instances, they use a distance-based approach with the SATzilla features~\cite{XuHHL08,features}.
 Their approach \emph{ranks} solvers, is \emph{feature-based}, and \emph{scalable} in the sense that the evaluation time scales linearly with more instances and solvers.
-Also, solvers are \emph{comparable} within their approach in the sense that the obtained PAR-2 score induces a distance between solvers.
-However, they do not optimize for benchmark \emph{runtime} and select instances \emph{randomly}, apart from constraints on the instance hardness and feature distance.
-
-%Our approach should optimally also have these three properties, i.e., a variety of instances without duplicates that are neither too easy nor too hard.
-%While this selection strategy is useful for creating diverse benchmark sets for competitions, it does not optimize for runtime.
-%It is expected that dynamic selection strategies outperform static ones regarding the runtime of experiments. 
-%Dynamic strategies chose instances incrementally, one at a time, by integrating runtime data (of the instances that the solver has been already evaluated on) to make subsequent selection decisions rather than completely choosing the benchmark set upfront.
-
+Also, it allows \emph{scoring} and thereby comparing solvers.
+However, the approach does not optimize for benchmark \emph{runtime} and selects instances \emph{randomly}, apart from constraints on the instance hardness and feature distance.
 
 \begin{table}[tbp]
   \centering
   \begin{tabular}{
-    m{0.3\textwidth}
-    >{\centering\arraybackslash}m{0.15\textwidth}
-    >{\centering\arraybackslash}m{0.15\textwidth}
-    >{\centering\arraybackslash}m{0.15\textwidth}
-    >{\centering\arraybackslash}m{0.15\textwidth}
+    m{0.32\textwidth}
+    >{\centering\arraybackslash}m{0.16\textwidth}
+    >{\centering\arraybackslash}m{0.16\textwidth}
+    >{\centering\arraybackslash}m{0.16\textwidth}
+    >{\centering\arraybackslash}m{0.16\textwidth}
   }
     \hline
     Feature & Hoos~\cite{HoosKSS13} & SMAC~\cite{HutterHL11} & Matricon~\cite{MatriconAFSH21} & Our approach \\
@@ -150,7 +145,7 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
     Ranking & \cmark & \xmark & \cmark & \cmark \\
     Runtime Minimization & \xmark & \cmark & \cmark & \cmark \\
     % Feature-based & \cmark & \cmark & \cmark & \cmark \\
-    Incremental Sampling & \xmark & \xmark & \cmark & \cmark \\
+    Incremental/Non-Random & \xmark & \xmark & \cmark & \cmark \\
     % \tablefootnote{While using a model-based selection strategy to select the next configuration to evaluate, the instance sampling is done randomly.}
     Scoring & \cmark & \xmark & \xmark & \cmark \\
     % \tablefootnote{While they provide a confidence measure, the strategy's output is still only binary, i.e., whether a solver A is better or worse than solver B.}
@@ -158,44 +153,38 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
     \hline
   \end{tabular}
   ~\\[1em]
-  \caption{Support for desired features that are introduced in Section~\ref{sec:intro}.
-	The shown approaches include traditional benchmark-set-selection techniques~\cite{HoosKSS13}, an algorithm configuration system~\cite{HutterHL11}, an existing active-learning approach~\cite{MatriconAFSH21}, as well as our approach.
+  \caption{Support for desired criteria from Section~\ref{sec:intro}.
+	The table compares a static benchmark-selection approach~\cite{HoosKSS13}, an algorithm configuration system~\cite{HutterHL11}, an existing active-learning approach~\cite{MatriconAFSH21}, as well as our approach.
   }
   \label{tab:requirements}
 \end{table}
 
-% MI: one paragraph for SMAC
-Another interesting approach can be found within algorithm configuration systems~\cite{HutterHL11,HoosHL21,Stutzle0P22}.
-The goal is to tune SAT solvers for a given sub-domain of problem instances.
-Although this task is different from our goal, e.g., we do not need to navigate configuration space, they use a similar framework.
-There are mainly two similarities.
-First, both approaches are model-based.
-While SMAC tries to gradually build a model of the solver's performance as a function of the configuration parameters, we want to gradually build a model of a new solver's performance based on already-known runtimes of instances and runtime information on already-known solvers.
-Second, both approaches employ some kind of selection strategy that is based on the previously mentioned model.
-Theirs selects configurations rather than instances though.
-Furthermore, Hutter et. al.~\cite{HutterHL11} use an approach that makes use of exploitation (what configuration parameters are already good) and exploration (parameter space with few data points) to select the next configuration for which to acquire runtime information.
-SMAC's configuration sampling has also proven to be better than random sampling in all tested scenarios and has even proven to be significantly better in most cases~\cite{HutterHL11}.
-While this approach considers the configuration's \emph{runtime}, is \emph{feature-based}, and \emph{scales linearly} by having a fixed time budget, it is not capable of the other three features listed in Table~\ref{tab:requirements}.
+\subsubsection{SAT solver configuration.}
+
+Further related work can be found within the field of algorithm configuration~\cite{HoosHL21,Stutzle0P22}, e.g., the configuration system SMAC~\cite{HutterHL11}.
+There, the goal is to tune SAT solvers for a given sub-domain of problem instances.
+Although this task is different from our goal, e.g., we do not need to navigate configuration space, there are similarities to our approach as well.
+For example, SMAC also employs an iterative, model-based selection procedure, though for configurations rather than instances.
+SMAC's configuration sampling has also proven to be better than random sampling in all tested scenarios and has even proven to be significantly better in most cases.
+While this approach considers the configuration's \emph{runtime}, is \emph{feature-based}, and \emph{scales} by having a fixed time budget, it does not satisfy the other three criteria listed in Table~\ref{tab:requirements}.
 First, an algorithm configurator cannot be used to \emph{rank} a new solver since it only looks at promising solvers/configurations rather than the overall average performance.
 Second, while using a model-based selection strategy to sample configurations, instance sampling is done \emph{randomly}, i.e., without building a model over instances.
-And third, configurations within their approach are not \emph{comparable} since algorithm configuration seeks to find solemnly the best performing configuration.
-%JB: well, the internal meta-model of the configurator allows to estimate the solver performance for particular configurations (rather than solvers), so the approach is kind of interpretable, though regarding configurations (while for comparison to other solvers, only top-configuration performance should be interesting, so the approach is indeed not interpretable regarding solvers)
-%TF: changed
+And third, only few configurations within their approach are \emph{scored} since algorithm configuration seeks to find solemnly the best performing configuration.
 
+\subsubsection{Incremental benchmark selection.}
 
-% MI: one paragraph for Matricon
-Matricon~et~al. present an incremental benchmark instance selection approach~\cite{MatriconAFSH21}.
+Matricon~et~al. present an incremental benchmark selection approach~\cite{MatriconAFSH21}.
 Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-Given a pair of SAT solvers, Matricon et~al. iteratively select a subset of instances until the desired confidence level is reached to decide with high confidence which of the two solvers is better.
+Given a pair of SAT solvers, they iteratively select a subset of instances until the desired confidence level is reached to decide which of the two solvers is better.
 The selection of instances is dependent on the choice of the solvers to distinguish.
-They calculate a scoring metric for all instances (that have not been selected yet), run the experiment with the highest score, and update the confidence.
-Most of the proposed strategies in~\cite{MatriconAFSH21} are instance-based methods, i.e., no model of the solver runtimes is built.
-The main difference is that Matricon et~al. compare a solver to another one, while we compare it to a set of existing solvers.
-Regarding our desired features of adaptive benchmark-set-selection (Table~\ref{tab:requirements}), the aforementioned approach already ticks off the first four features, i.e, it \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
-Although they provide a confidence metric for their prediction, which makes solvers partially \emph{comparable}, it is not clear how similar two given solvers are or on which instances they behave similarly, as the prediction is solely binary.
-Moreover, the major shortcoming lies within it being not \emph{scalable} with the number solvers.
-As they compare only pairs of solvers, evaluating a new solver requires a non-constant number of benchmarks, which in turn requires more runtime.
-
+They calculate a scoring metric for all unselected instances, run the experiment with the highest score, and update the confidence.
+Most of the proposed strategies in~\cite{MatriconAFSH21} are instance-based, i.e., no model of the solver runtimes is built.
+Regarding our desired criteria of benchmark selection (Table~\ref{tab:requirements}), the aforementioned approach \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
+However, the approach only compares solvers binarily rather than providing a \emph{scoring}.
+Thus, it is not clear how similar two given solvers are or on which instances they behave similarly.
+Moreover, a major shortcoming lies is the lacking \emph{scalability} with the number solvers.
+Comparing only pairs of solvers, evaluating a new solver requires sampling several benchmarks.
+In contrast, our approach allows comparing a new solver against a set of existing solvers with one benchmark.
 
 % MI: move to approach if needed there:
 %For the scoring metric, they discuss (1) a random strategy as a baseline, (2) a discrimination strategy based on the work of Gent et al.~\cite{GentHJKMNN14}, (3) a variance-based strategy (select instance with the highest variance in its distribution of running times), (4) an information-gain-based method, and (5) a feature-distance-based strategy.
@@ -206,154 +195,140 @@ As they compare only pairs of solvers, evaluating a new solver requires a non-co
 
 \subsubsection{Active learning (AL).}
 
-\begin{figure}[tbp!]
-  \centering
-  \begin{tabular}[c]{ccc}
-  \begin{subfigure}[b]{0.25\textwidth}
-  \centering
-  \resizebox{!}{2.75cm}{
-  \begin{tikzpicture}
-  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
-  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
-  \node[right] at (-5.9,3.6) {\large Agent (Solver)};
-  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
-  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
-  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
-  \node[right] at (-5.9,2.4) {\large Train. Data};
-  \node (v1) at (-2.8,3.4) {};
-  \node (v2) at (-2.8,2.8) {};
-  \draw[->]  (v1) edge (v2);
-  \node[right] at (-2.8,3.1) {\large $x, y$};
-  \node (v3) at (-2.8,2) {};
-  \node (v4) at (-2.8,1.4) {};
-  \draw[->]  (v3) edge (v4);
-  \draw  (-3.1,1.4) rectangle (-2.5,1);
-  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
-  \node[right] at (-5.9,1.2) {\large Learning Alg.};
-  \node (v5) at (-2.8,1) {};
-  \node (v6) at (-2.8,0.4) {};
-  \draw[->]  (v5) edge (v6);
-  \node[right] at (-5.9,0.25) {\large Approx. Func.};
-  \node at (-2.8,0.25) {\large $f$};
-  \end{tikzpicture}
-  }
-  \caption{Passive}
-  \label{fig:passive}
-  \end{subfigure}
-  &
-  \begin{subfigure}[b]{0.35\textwidth}
-  \centering
-  \resizebox{!}{2.75cm}{
-  \begin{tikzpicture}
-  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
-  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
-  \node[right] at (-5.9,3.6) {\large Agent (Solver)};
-  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
-  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
-  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
-  \node[right] at (-5.9,2.4) {\large Train. Data};
-  \node (v1) at (-2.8,3.4) {};
-  \node (v2) at (-2.8,2.8) {};
-  \draw[->]  (v1) edge (v2);
-  \node[right] at (-2.8,3.1) {\large $x, y$};
-  \node (v3) at (-2.8,2) {};
-  \node (v4) at (-2.8,1.4) {};
-  \draw[->]  (v3) edge (v4);
-  \draw  (-3.1,1.4) rectangle (-2.5,1);
-  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
-  \node[right] at (-5.9,1.2) {\large Learning Alg.};
-  \node (v5) at (-2.8,1) {};
-  \node (v6) at (-2.8,0.4) {};
-  \draw[->]  (v5) edge (v6);
-  \node[right] at (-5.9,0.25) {\large Approx. Func.};
-  \node at (-2.8,0.25) {\large $f$};
-  \node[right] at (-1.2,2.4) {\large Pool};
-  \draw[->, densely dashed] (-2.4,1.2) arc (-90:0:0.8);
-  \draw[->, densely dashed] (-1.6,2.8) arc (0:90:0.8);
-  \node[right] at (-1.6,3.135) {\large $x, ?$};
-  \draw  (-1.6,2.4) ellipse (0.4 and 0.3);
-  \draw[fill=black]  (-1.725,2.5) ellipse (0.07 and 0.07);
-  \draw[fill=black]  (-1.625,2.25) ellipse (0.07 and 0.07);
-  \draw[fill=black]  (-1.425,2.4) ellipse (0.07 and 0.07);
-  \end{tikzpicture}
-  }
-  \caption{Active Pool-based}
-  \label{fig:activepool}
-  \end{subfigure}
-  &
-  \begin{subfigure}[b]{0.35\textwidth}
-  \centering
-  \resizebox{!}{2.75cm}{
-  \begin{tikzpicture}
-  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
-  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
-  \node[right] at (-5.9,3.6) {\large Agent (Solver)};
-  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
-  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
-  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
-  \node[right] at (-5.9,2.4) {\large Train. Data};
-  \node (v1) at (-2.8,3.4) {};
-  \node (v2) at (-2.8,2.8) {};
-  \draw[->]  (v1) edge (v2);
-  \node[right] at (-2.8,3.1) {\large $x, y$};
-  \node (v3) at (-2.8,2) {};
-  \node (v4) at (-2.8,1.4) {};
-  \draw[->]  (v3) edge (v4);
-  \draw  (-3.1,1.4) rectangle (-2.5,1);
-  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
-  \node[right] at (-5.9,1.2) {\large Learning Alg.};
-  \node (v5) at (-2.8,1) {};
-  \node (v6) at (-2.8,0.4) {};
-  \draw[->]  (v5) edge (v6);
-  \node[right] at (-5.9,0.25) {\large Approx. Func.};
-  \node at (-2.8,0.25) {\large $f$};
-  \node[right, label={[align=left]\large Gen.\\\large Model}] at (-0.6,1.85) {};
-  %JB: does the model need to be a GAN or can it also be a different type of model?
-  %TF: not necessarily, changed it
-  \node[right] at (-1.3,3.135) {\large $x, ?$};
-  \draw[->, densely dashed] (-2.4,1.2) arc (-90:90:1.2);
-  \end{tikzpicture}
-  }
-  \caption{Active Synthesis-based}
-  \label{fig:activesynth}
-  \end{subfigure}
-  \end{tabular}
-  
-  \caption{Types of Learning (Inspired by Rubens~et.al.~\cite{RubensESK15})}
-  %JB: slightly larger font size in the figure (at least having the size of the caption) would be nice
-  %TF: made it larger
-  \label{fig:learning}
-\end{figure}  
+%\begin{figure}[tbp!]
+%  \centering
+%  \begin{tabular}[c]{ccc}
+%  \begin{subfigure}[b]{0.25\textwidth}
+%  \centering
+%  \resizebox{!}{2.75cm}{
+%  \begin{tikzpicture}
+%  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
+%  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
+%  \node[right] at (-5.9,3.6) {\large Agent (Solver)};
+%  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
+%  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
+%  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
+%  \node[right] at (-5.9,2.4) {\large Train. Data};
+%  \node (v1) at (-2.8,3.4) {};
+%  \node (v2) at (-2.8,2.8) {};
+%  \draw[->]  (v1) edge (v2);
+%  \node[right] at (-2.8,3.1) {\large $x, y$};
+%  \node (v3) at (-2.8,2) {};
+%  \node (v4) at (-2.8,1.4) {};
+%  \draw[->]  (v3) edge (v4);
+%  \draw  (-3.1,1.4) rectangle (-2.5,1);
+%  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
+%  \node[right] at (-5.9,1.2) {\large Learning Alg.};
+%  \node (v5) at (-2.8,1) {};
+%  \node (v6) at (-2.8,0.4) {};
+%  \draw[->]  (v5) edge (v6);
+%  \node[right] at (-5.9,0.25) {\large Approx. Func.};
+%  \node at (-2.8,0.25) {\large $f$};
+%  \end{tikzpicture}
+%  }
+%  \caption{Passive}
+%  \label{fig:passive}
+%  \end{subfigure}
+%  &
+%  \begin{subfigure}[b]{0.35\textwidth}
+%  \centering
+%  \resizebox{!}{2.75cm}{
+%  \begin{tikzpicture}
+%  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
+%  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
+%  \node[right] at (-5.9,3.6) {\large Agent (Solver)};
+%  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
+%  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
+%  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
+%  \node[right] at (-5.9,2.4) {\large Train. Data};
+%  \node (v1) at (-2.8,3.4) {};
+%  \node (v2) at (-2.8,2.8) {};
+%  \draw[->]  (v1) edge (v2);
+%  \node[right] at (-2.8,3.1) {\large $x, y$};
+%  \node (v3) at (-2.8,2) {};
+%  \node (v4) at (-2.8,1.4) {};
+%  \draw[->]  (v3) edge (v4);
+%  \draw  (-3.1,1.4) rectangle (-2.5,1);
+%  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
+%  \node[right] at (-5.9,1.2) {\large Learning Alg.};
+%  \node (v5) at (-2.8,1) {};
+%  \node (v6) at (-2.8,0.4) {};
+%  \draw[->]  (v5) edge (v6);
+%  \node[right] at (-5.9,0.25) {\large Approx. Func.};
+%  \node at (-2.8,0.25) {\large $f$};
+%  \node[right] at (-1.2,2.4) {\large Pool};
+%  \draw[->, densely dashed] (-2.4,1.2) arc (-90:0:0.8);
+%  \draw[->, densely dashed] (-1.6,2.8) arc (0:90:0.8);
+%  \node[right] at (-1.6,3.135) {\large $x, ?$};
+%  \draw  (-1.6,2.4) ellipse (0.4 and 0.3);
+%  \draw[fill=black]  (-1.725,2.5) ellipse (0.07 and 0.07);
+%  \draw[fill=black]  (-1.625,2.25) ellipse (0.07 and 0.07);
+%  \draw[fill=black]  (-1.425,2.4) ellipse (0.07 and 0.07);
+%  \end{tikzpicture}
+%  }
+%  \caption{Active Pool-based}
+%  \label{fig:activepool}
+%  \end{subfigure}
+%  &
+%  \begin{subfigure}[b]{0.35\textwidth}
+%  \centering
+%  \resizebox{!}{2.75cm}{
+%  \begin{tikzpicture}
+%  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
+%  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
+%  \node[right] at (-5.9,3.6) {\large Agent (Solver)};
+%  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
+%  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
+%  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
+%  \node[right] at (-5.9,2.4) {\large Train. Data};
+%  \node (v1) at (-2.8,3.4) {};
+%  \node (v2) at (-2.8,2.8) {};
+%  \draw[->]  (v1) edge (v2);
+%  \node[right] at (-2.8,3.1) {\large $x, y$};
+%  \node (v3) at (-2.8,2) {};
+%  \node (v4) at (-2.8,1.4) {};
+%  \draw[->]  (v3) edge (v4);
+%  \draw  (-3.1,1.4) rectangle (-2.5,1);
+%  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
+%  \node[right] at (-5.9,1.2) {\large Learning Alg.};
+%  \node (v5) at (-2.8,1) {};
+%  \node (v6) at (-2.8,0.4) {};
+%  \draw[->]  (v5) edge (v6);
+%  \node[right] at (-5.9,0.25) {\large Approx. Func.};
+%  \node at (-2.8,0.25) {\large $f$};
+%  \node[right, label={[align=left]\large Gen.\\\large Model}] at (-0.6,1.85) {};
+%  \node[right] at (-1.3,3.135) {\large $x, ?$};
+%  \draw[->, densely dashed] (-2.4,1.2) arc (-90:90:1.2);
+%  \end{tikzpicture}
+%  }
+%  \caption{Active Synthesis-based}
+%  \label{fig:activesynth}
+%  \end{subfigure}
+%  \end{tabular}
+%  
+%  \caption{Types of Learning (Inspired by Rubens~et.al.~\cite{RubensESK15})}
+%  \label{fig:learning}
+%\end{figure}
 
-%JB: section does not make clear which of the following approaches we will use, i.e., relationship to our work not clear (reads more like fundamentals than related work)
-The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning within recommender systems, especially the \emph{new-user problem}~\cite{RubensESK15}.
+The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning AL within recommender systems, especially the \emph{new-user problem}~\cite{RubensESK15}.
 On the one hand, we want to maximize the utility an instance provides to our model and, on the other hand, minimize the cost (CPU time) that is associated with its acquisition.
-%JB: not sure if this dilemma arises here as well; a dilemma is typical for searching for one optimal solution in continuous space, where there is an incentive to exploit neighborhoods in promising regions; however, if we find an interesting/useful (= good for assessing solver performance) instance in our approach, I'm not sure if we would continue picking similar instances ("exploiting" instead of "exploring") just because we expect them to be useful as well
-%TF: removed the exploration-exploitation dilemma
-
-% Starting with only unlabeled data, e.g., a new user has not yet rated any content, an active-learning algorithm iteratively shows the items that are best suited to refine the user's model based on his previous interaction.
-% In contrast to traditional passive machine-learning methods (Fig.~\ref{fig:passive}), active-learning approaches can actively select for which items to acquire labels~\cite{RubensESK15}.
-% Since the potential runtime of experiments is by magnitudes larger than the model's training time, we only consider incrementing our benchmark set by one instance at a time rather than using batches which is also proposed in current active-learning advances~\cite{SinhaED19,TranDRC19}.
-
+In contrast to traditional passive machine-learning methods with given instance labels, active learning allows selecting instances for which to acquire labels.
 AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,GarzonMG22,2019gaal} and \emph{pool-bas\-ed} approaches \cite{GolbandiKL11,HarpaleY08,KorenBV09}.%SinhaED19,distribAL,TongK01,KapoorGUD07,KornerW06,MelvilleM04}.
-%JB: we can probably cut some citations, the three most important should be sufficient
-%TF: done
-While synthesis-based methods (Fig. \ref{fig:activesynth}) generate instances that might be interesting to label, pool-based methods (Fig. \ref{fig:activepool}) rely on a pool of unlabeled instances from which to draw items.
+While synthesis-based methods generate instances for labeling, pool-based methods rely on a fixed set of unlabeled instances from which to sample.
 
-Recent synthesis-based methods within the field of satisfiability solving show how to generate problem instances with desired properties.
+Recent synthesis-based methods within the field of SAT solving show how to generate problem instances with desired properties.
 This goal is, however, orthogonal to ours~\cite{0001AEMN22,GarzonMG22}.
-While those approaches want to generate problem instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark set.
-
-% MI: here we should limit this to the methods needed for presenting related work for AL in benchmarking:
-Pool-based methods can be further refined into \emph{Error-based} \cite{GolbandiKL11,KorenBV09}, \emph{Un\-cer\-tain\-ty-based} \cite{HarpaleY08,KapoorGUD07,TongK01}, \emph{Distribution-based} methods \cite{distribAL,SinhaED19} and \emph{Ensembles} \cite{KornerW06,MelvilleM04}.
-Error-based strategies pick instances that have the most influence on the model parameters.
-Uncertainty-based methods sample instances close to their perceived decision boundary.
-Distribution-based approaches sample instances whose features are unaccounted for amongst the already sampled instances.
-Finally, ensembles are a meta-strategy that combines the predictions of several different active-learning models into a selection choice.
-
-In the field of SAT-solving, Volpato and Guangyan use uncertainty-sampling-based AL to learn an instance-specific algorithm selector~\cite{volpato2019active}.
+While those approaches want to generate problem instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark.
+Volpato and Guangyan use pool-based AL to learn an instance-specific algorithm selector~\cite{volpato2019active}.
 Rather than benchmarking a solver's overall performance, the goal is to recommend the best solver out of a set of solvers for each SAT instance.
 
+% MI: here we should limit this to the methods needed for presenting related work for AL in benchmarking:
+%JB: should probably just put the citation there where we explain the strategies (in Section 3)
+%Pool-based methods can be further refined into \emph{Error-based} \cite{GolbandiKL11,KorenBV09}, \emph{Un\-cer\-tain\-ty-based} \cite{HarpaleY08,KapoorGUD07,TongK01}, \emph{Distribution-based} methods \cite{distribAL,SinhaED19} and \emph{Ensembles} \cite{KornerW06,MelvilleM04}.
+%Error-based strategies pick instances that have the most influence on the model parameters.
+%Uncertainty-based methods sample instances close to their perceived decision boundary.
+%Distribution-based approaches sample instances whose features are unaccounted for amongst the already sampled instances.
+%Finally, ensembles are a meta-strategy that combines the predictions of several different active-learning models into a selection choice.
 
 \section{Active Learning for SAT Solver Benchmarking}
 \label{sec:main}
@@ -416,7 +391,8 @@ When the stopping criterion is met, we return the predicted score of the given s
 
 % MI: describe initialization and update of model
 
-Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark set by one instance at a time rather than using batches.
+Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
+
 At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
 
 
