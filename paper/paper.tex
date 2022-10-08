@@ -60,15 +60,18 @@
 
 \section{Introduction}
 \label{sec:intro}
+
 One of the main phases of algorithm engineering is benchmarking.
 This is also true for the pro\-po\-si\-tio\-nal sat\-is\-fia\-bi\-li\-ty problem (SAT), the archetypal $\mathcal{NP}$-complete problem.
 While state-of-the-art solvers embark upon more and more problem instances, SAT solver evaluation is steadily getting more costly.
+%JB: not sure about the "while" here -- is the message that (1) evaluation gets costly *since* solvers have to solve more instances or is it that (2) solvers are threoretically able to solve more instances, but evaluation gets costlier anyway
 Competitive SAT solvers are the result of extensive experimentation and a variety of ideas and considerations~\cite{FroleyksHIJS21,sat2022}.
 While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
-The goal of traditional approaches is to select a representative set of instances for ranking solvers based on a scoring scheme~\cite{Gelder11,HoosKSS13}.
-SAT~Competitions typically use the widely adopted PAR-2 score, i.e, the average runtime with a penalty term of $2 \tau$ for timeouts with time-limit $\tau$~\cite{FroleyksHIJS21}.
+Instead, the primary goal of traditional approaches is to select a representative set of instances for ranking solvers with a scoring scheme~\cite{Gelder11,HoosKSS13}.
+SAT~Competitions typically use the widely adopted PAR-2 score, i.e, the average runtime with a penalty of $2 \tau$ for timeouts with time limit~$\tau$~\cite{FroleyksHIJS21}.
 
-In this paper, we present a novel active learning based benchmark selection approach which is able to predict the rank of a new solver with high accuracy in only a fraction of the time needed to evaluate the full benchmark.
+In this paper, we present a novel benchmark selection approach based on active learning.
+Our approach is able to predict the rank of a new solver with high accuracy in only a fraction of the time needed to evaluate the full benchmark.
 The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 
 \begin{definition}[New-Solver Problem]
@@ -80,40 +83,24 @@ The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 %There also is work on collaborative filtering, where runtimes are only partially known, for algorithm selection~\cite{misir2017alors,misir2017data}.
 %MI: this belongs to discussion of related work
 
-%We predict the solver ranking induced by this scoring, without predicting exact solver runtimes.
-
-%This allows for both comparing the solvers as well as identifying solvers with similar behavior if looking at individual predictions per instance.
-%JB: is there any further behavior we can deduce about a solver scoring apart from a performance ranking? "similar behavior" could IMHO be something like two solvers being fast/slow on the same instances, but that cannot be deduced from overall score
-%TF: made it clearer
-%MI: makes no sense in the context
-
-
 %MI: In the following I stripped out stuff which belongs to related work section. Stick to advertising own approach here.
-Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers.
+Our benchmarking process outputs a \emph{ranking} to compare the new solver against the existing set of solvers, without predicting exact solver runtimes.
 We optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
 We use problem-instance and runtime \emph{features}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
-By doing so, we have a greater impact on the properties of the benchmarking approach such as its required runtime.
-Sampling instances incrementally means taking runtime information from already done experiments into account when choosing the next.
-Rather than solely outputting a binary classification, i.e, the new solver is worse than solver A, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing approaches.
-%JB: we should rename the "interpretability" criterion (make it more specific), term "interpretability" can have lots of different meanings and our specific meaning is not very intuitive
-%TF: Renamed it to "comparability"
-%MI: Renamed it to "scoring"
+In particular, we take runtime information from already done experiments into account when choosing the next.
+By doing so, we can control the properties of the benchmarking approach such as its required runtime.
+Rather than solely outputting a binary classification, i.e, the new solver is worse than existing solver A, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
-%JB: for what do we measure cost here?
-%TF: made it clearer
-We avoid comparing pairs of solvers, which requires a non-constant number of benchmark sets.
-%JB: need to discuss this; logarithmic (compare one-vs rest) / log-linear (compare each pair) effort might be sufficient if the binary-search-/recursive-sorting-like procedure used
-%TF: "non-constant number of benchmark sets"
-Since a new solver idea is rarely best on the first try but requires more or less tweaking, it is desired to obtain a solver ranking fast.
+In particular, we only subsample the benchmark set once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
+Since a new solver idea is rarely best on the first try, it is desired to obtain a solver ranking fast.
 In this way, a new solver idea can be discarded if it performs poorly across the board or may be further tweaked if it shows promising results at least in some cases.
 
-To sum up our contribution, we take the SAT Competition~2022 Anniversary Track benchmark~\cite{sat2022} (5355 instances, full runtimes of 28 solvers), perform cross-validation by treating each solver as new once, and predict these solvers' PAR-2 rank with about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime that would be needed to evaluate these solvers on the complete set of instances.
-Both results are averages across all cross-validation iterations.
-%JB: I think we should expand a bit more on experimental design (how many instances/solvers, what do we compare), and the key results; I think it's okay if the intro becomes a bit longer (and in turn, the overview of the approach's features can be cut a bit)
-%TF: added a bit more information
+We evaluate our approach with the SAT Competition~2022 Anniversary Track benchmark~\cite{sat2022}, consisting of 5355~instances and full runtimes of 28~solvers.
+We perform cross-validation by treating each solver as new once, and predict these solvers' PAR-2 rank.
+On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime that would be needed to evaluate these solvers on the complete set of instances.
 
-For reproducibility, all our source code\footnote{temporary, anonymized version for review: \url{xxx}} and and data\footnote{temporary, anonymized version for review: \url{xxx}} are available on GitHub.
+All our source code\footnote{temporary, anonymized version for review: \url{xxx}} and and data\footnote{temporary, anonymized version for review: \url{xxx}} are available on GitHub.
 
 
 \section{Related Work}
