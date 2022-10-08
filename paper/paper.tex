@@ -136,20 +136,20 @@ Note that all approaches already make use of problem-instance features as it sho
 %TF: added it back to the table
 
 \subsubsection{Traditional Benchmark Selection.}
-Recent studies~\cite{abs-2107-07002,NiesslHWCB22} show that selecting a benchmark set in general is a difficult endeavor for multiple reasons.
-Dehghani~et.~al.~\cite{abs-2107-07002} describe how a biased benchmarking set can easily lead to fallacious interpretations.
-Moreover, Nießl~et.~al.~\cite{NiesslHWCB22} state that benchmark-set design has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
-Questionable research practices might modify those design elements a-posteriori to fit expectations, leading to biased results.
+Recent studies show that selecting a benchmark set in general is a difficult endeavor for multiple reasons.
+Dehghani~et~al. describe how a biased benchmarking set can easily lead to fallacious interpretations~\cite{abs-2107-07002}.
+Moreover, Nießl~et~al. state that benchmark-set design has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
+Questionable research practices might modify those design elements a-posteriori to fit expectations, leading to biased results~\cite{NiesslHWCB22}.
 
-Benchmark-set selection is an important issue for solver competitions, e.g., the SAT Competition.
+Benchmark selection is an important issue for solver competitions, e.g., the SAT Competition.
 In such competitions, the organizers define the rules for composing the corresponding benchmarks.
-Balint et al.~\cite{balint2015overview} provide an overview of benchmark-selection criteria in different solver competitions.
+Balint et al. provide an overview of benchmark-selection criteria in different solver competitions~\cite{balint2015overview}.
 %JB: not sure if we should provide some details regarding SAT Competition 2022 \cite{sat2022}, previous competitions (if different procedure used; Related-Work section of Matricon et al. (2021) states that) or other competitions (e.g., those in https://www.floc2022.org/floc-olympic-games)
 %TF: @Markus maybe you are better at briefly discussing the  SAT Competition 2022 and previous competitions
-Manthey and Möhle~\cite{manthey2016better} find that competition benchmarks might contain redundant instances, and propose a feature-based approach to remove redundancy.
-M{\i}s{\i}r~\cite{misir2021benchmark} presents a feature-based approach to reduce benchmark sets by matrix factorization and clustering.
+Manthey and Möhle find that competition benchmarks might contain redundant instances, and propose a feature-based approach to remove redundancy~\cite{manthey2016better}.
+M{\i}s{\i}r presents a feature-based approach to reduce benchmark sets by matrix factorization and clustering~\cite{misir2021benchmark}.
 
-Hoos et. al.~\cite{HoosKSS13} discuss which properties are most desirable when selecting a set of SAT benchmark instances.
+Hoos et al. discuss which properties are most desirable when selecting a set of SAT benchmark instances~\cite{HoosKSS13}.
 The selection strategy presented is static, i.e., it does not depend on particular solvers to distinguish.
 Desirable properties are a variety of instances (avoids over-fitting of solver approaches), adapted instance hardness (not too easy but also not too hard; solvers cannot be distinguished if too many time-out or finish immediately), and no duplicates (having duplicates gives those instances more weight).
 To avoid having too similar instances, they make use of a distance-based approach using the SATzilla features~\cite{XuHHL08,features}.
@@ -200,10 +200,10 @@ However, they do not optimize for benchmark \emph{runtime} and select instances 
 \end{table}
 
 \subsubsection{SAT solver configuration.}
-Another interesting approach can be found within algorithm-configuration systems~\cite{HutterHL11,HoosHL21,Stutzle0P22}.
+Another interesting approach can be found within algorithm configuration systems~\cite{HutterHL11,HoosHL21,Stutzle0P22}.
 The goal is to tune SAT solvers for a given sub-domain of problem instances.
 
-SMAC~\cite{HutterHL11} tries to find a close-to-optimal configuration for a given SAT solver on a given set of instances.
+SMAC tries to find a close-to-optimal configuration for a given SAT solver on a given set of instances~\cite{HutterHL11}.
 %JB: discussion of SMAC is too long, we should cut it a bit
 %TF: Agreed. Not sure however where. I find it useful to discuss the similarities and differences between algorithm configuration and our problem.
 Although this task is different from our goal, e.g., we do not need to navigate configuration space, they use a similar framework.
@@ -227,27 +227,27 @@ And third, configurations within their approach are not \emph{comparable} since 
 %TF: changed
 
 \subsubsection{Incremental benchmark-set-selection.}
-Matricon et.~al.~\cite{MatriconAFSH21} present an incremental benchmark-set-selection approach.
+Matricon et~al.~\cite{MatriconAFSH21} present an incremental benchmark-set-selection approach.
 Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-The main difference is that Matricon et.~al. compare a solver to another one, while we compare it to a set of existing solvers.
+The main difference is that Matricon et~al. compare a solver to another one, while we compare it to a set of existing solvers.
 To the best of our knowledge, we are the first to tackle the latter problem.
 %JB: again, I think there are too many details for describing this single approach
 %TF: unsure what to cut as the concrete approaches are also used later in the main section
 
-Given a pair of SAT solvers, Matricon et.~al. want to iteratively select a subset of instances to decide with high confidence which of the two solvers is better.
+Given a pair of SAT solvers, Matricon et~al. want to iteratively select a subset of instances to decide with high confidence which of the two solvers is better.
 The selection of instances is dependent on the choice of the solvers to distinguish.
 They calculate a scoring metric for all instances (that have not been selected yet), run the experiment with the highest score, and update the confidence.
 If the confidence exceeds a threshold (e.g., 95\%), they stop iterating.
 %Otherwise, the aforementioned steps are repeated until the desired confidence level is reached or the pool of instances is exhausted.
 Most of the proposed strategies in~\cite{MatriconAFSH21} are instance-based methods, i.e., no model of the solver runtimes is built.
 
-For the scoring metric, they discuss (1) a random strategy as a baseline, (2) a discrimination strategy based on the work of Gent et. al.~\cite{GentHJKMNN14}, (3) a variance-based strategy (select instance with the highest variance in its distribution of running times), (4) an information-gain-based method, and (5) a feature-distance-based strategy.
+For the scoring metric, they discuss (1) a random strategy as a baseline, (2) a discrimination strategy based on the work of Gent et al.~\cite{GentHJKMNN14}, (3) a variance-based strategy (select instance with the highest variance in its distribution of running times), (4) an information-gain-based method, and (5) a feature-distance-based strategy.
 To update the confidence level after each experiment, they discuss using (1) a fixed subset size, (2) a Wilcoxon test, and (3) a distribution-based method.
 Their experiments show that random instance selection with a Wilcoxon test as the stopping criterion performs consistently well across different data sets in the sense that it belongs to the Pareto front or is close to it in all cases.
 %JB: in our evaluation, we should state whether our results are consistent with this or not
 %TF: will do
 
-Regarding our desired features of adaptive benchmark-set-selection (Table~\ref{tab:requirements}), the aforementioned approach already ticks off the first four features, i.e., it \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
+Regarding our desired features of adaptive benchmark-set-selection (Table~\ref{tab:requirements}), the aforementioned approach already ticks off the first four features, i.e, it \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
 Although they provide a confidence metric for their prediction, which makes solvers partially \emph{comparable}, it is not clear how similar two given solvers are or on which instances they behave similarly, as the prediction is solely binary.
 Moreover, the major shortcoming lies within it being not \emph{scalable} with the number solvers.
 As they compare only pairs of solvers, evaluating a new solver requires a non-constant number of benchmark sets, which in turn requires more runtime.
@@ -389,8 +389,8 @@ AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,
 %TF: done
 While synthesis-based methods (Fig. \ref{fig:activesynth}) generate instances that might be interesting to label, pool-based methods (Fig. \ref{fig:activepool}) rely on a pool of unlabeled instances from which to draw items.
 
-Recent synthesis-based methods within the field of satisfiability solving~\cite{0001AEMN22,GarzonMG22} show how to generate problem instances with desired properties.
-This goal is, however, orthogonal to ours.
+Recent synthesis-based methods within the field of satisfiability solving show how to generate problem instances with desired properties.
+This goal is, however, orthogonal to ours~\cite{0001AEMN22,GarzonMG22}.
 While those approaches want to generate problem instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark set.
 
 Pool-based methods can be further refined into \emph{Error-based} \cite{GolbandiKL11,KorenBV09}, \emph{Un\-cer\-tain\-ty-based} \cite{HarpaleY08,KapoorGUD07,TongK01}, \emph{Distribution-based} methods \cite{distribAL,SinhaED19} and \emph{Ensembles} \cite{KornerW06,MelvilleM04}.
@@ -399,13 +399,9 @@ Uncertainty-based methods sample instances close to their perceived decision bou
 Distribution-based approaches sample instances whose features are unaccounted for amongst the already sampled instances.
 Finally, ensembles are a meta-strategy that combines the predictions of several different active-learning models into a selection choice.
 
-In the field of SAT-solving, Volpato and Guangyan~\cite{volpato2019active} use uncertainty-sampling-based AL to learn an instance-specific algorithm selector.
+In the field of SAT-solving, Volpato and Guangyan use uncertainty-sampling-based AL to learn an instance-specific algorithm selector~\cite{volpato2019active}.
 Rather than benchmarking a solver's overall performance, the goal is to recommend the best solver out of a set of solvers for each SAT instance.
 
-\subsubsection{Summary.}
-To sum up this section, we have shown both traditional and recent benchmark-set-selection approaches.
-Moreover, we have briefly outlined how active-learning techniques can help to incrementally select benchmark sets.
-In the following sections, we present an active-learning-based benchmark-set-selection approach that solves the \emph{New-Solver Problem} while optimizing for runtime and fulfilling both comparability and scalability.
 
 \section{Active Learning for SAT Solver Benchmarking}
 \label{sec:main}
@@ -581,12 +577,12 @@ Based on this classification, they assign a custom score to each instance.
 By selecting instances with the highest score, they try to favor instances that are predictive of the final ranking.
 %This assumes, though, that the new solver $\hat{a}$ behaves similarly to the existing solvers.
 
-Gent~et.~al.~\cite{GentHJKMNN14} make use of a concept known from racing for automated model selection.
+Gent~et~al.~\cite{GentHJKMNN14} make use of a concept known from racing for automated model selection.
 Given a particular instance and a parameter $\rho$, a solver is $\rho$-dominated if it is at least $\rho$ times worse than the best solver on this problem instance.
 By selecting instances with the highest amount of $\rho$-dominated solvers, they hope to sample instances that provide the best discriminatory power to distinguish the runtimes of a new contestant.
 
 Finally, we also implement some of the selection approaches described by Matricon~et.al.~\cite{MatriconAFSH21}.
-Besides uniformly random sampling and the aforementioned discrimination-based method by Gent~et.~al.~\cite{GentHJKMNN14}, they also describe a variance-based selection approach.
+Besides uniformly random sampling and the aforementioned discrimination-based method by Gent~et~al.~\cite{GentHJKMNN14}, they also describe a variance-based selection approach.
 The variance-based strategy selects instances with the highest runtime variance per average runtime.
 We also implement a logarithmized version of this, i.e., the highest log-runtime variance per average log runtime.
  
