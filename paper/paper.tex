@@ -26,7 +26,7 @@
 
 \begin{document}
 
-\title{Active Learning for SAT solver Benchmarking}
+\title{Active Learning for SAT Solver Benchmarking}
 
 \author{
 	Tobias Fuchs\orcidID{0000-0001-9727-2878} (\Letter) \and \\
@@ -44,7 +44,7 @@
 \maketitle
 
 \begin{abstract}
-  Experimentation, in particular the evaluation of the runtime of a concrete implementation, is one of the most important phases in the development of algorithms.
+  Benchmarking is one of the most important phases in the development of algorithms.
   This also applies to solutions of the SAT problem (propositional sat\-is\-fia\-bi\-li\-ty).
   While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
   Benchmark compilation selects representative instances from a pool of instances such that they reliably discriminate SAT solvers based on their runtime.
@@ -136,7 +136,7 @@ Note that all approaches already make use of problem-instance features as it sho
 %JB: as commented above, we should either remove this criterion or show it in the table
 %TF: added it back to the table
 
-\subsubsection{Traditional benchmark-set-selection.}
+\subsubsection{Traditional Benchmark Selection.}
 Recent studies~\cite{abs-2107-07002,NiesslHWCB22} show that selecting a benchmark set in general is a difficult endeavor for multiple reasons.
 Dehghani~et.~al.~\cite{abs-2107-07002} describe how a biased benchmarking set can easily lead to fallacious interpretations.
 Moreover, Nießl~et.~al.~\cite{NiesslHWCB22} state that benchmark-set design has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
@@ -409,7 +409,7 @@ To sum up this section, we have shown both traditional and recent benchmark-set-
 Moreover, we have briefly outlined how active-learning techniques can help to incrementally select benchmark sets.
 In the following sections, we present an active-learning-based benchmark-set-selection approach that solves the \emph{New-Solver Problem} while optimizing for runtime and fulfilling both comparability and scalability.
 
-\section{Active Learning for SAT solver Benchmarking}
+\section{Active Learning for SAT Solver Benchmarking}
 \label{sec:main}
 Our framework follows a simple three-step schema (Alg.~\ref{algALBenchmark}).
 %JB: as the algorithm is rather simple and has different parts to be plugged in, I think we should rebrand it as "framework" rather than algorithm (and change the term consistently in text)
@@ -423,10 +423,11 @@ At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mat
 %Refer to the next sections for more details.
 
 \begin{algorithm}
-  \caption{Incremental benchmarking framework}
+  \caption{Incremental Benchmarking Framework}
   \label{algALBenchmark}
 
-  \KwIn{A pool of instances $\mathcal{I}$, a set of known solvers $\mathcal{A}$ with known runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and a new solver $\hat{a} \notin \mathcal{A}$.}
+  \KwIn{Instances $\mathcal{I}$, Solvers $\mathcal{A}$, Runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$}
+  \KwIn{New Solver $\hat{a} \notin \mathcal{A}$}
 
   $\mathcal{M} \leftarrow \textrm{init model with $\mathcal{A}$, $\mathcal{I}$, $r$, and $\hat{a}$}$
   
