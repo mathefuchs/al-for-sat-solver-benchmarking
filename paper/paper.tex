@@ -369,6 +369,8 @@ Section~\ref{sec:main3} concludes with possible stopping conditions.
 \subsection{Incremental Benchmarking Framework}
 \label{sec:main-framework}
 
+Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
+
 Our framework follows a simple three-step schema.
 Algorithm~\ref{algALBenchmark} outlines the procedure. 
 While the stopping condition is not met (line~1), we select \emph{one} problem instance from the pool of instances (line~2) and evaluate the new solver $\hat{a}$ on it (line~3).
@@ -409,8 +411,6 @@ When the stopping criterion is met, we return the predicted score of the given s
 
 
 
-
-
 \subsection{Solver Model}
 \label{sec:main-model}
 
@@ -420,23 +420,28 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
 At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
 
 
-\subsection{Predicting Rankings}
-\label{sec:main1}
-In order to predict a ranking of solver $\hat{a}$ amidst its competitors, we need to infer its performance on all instances, even the ones on which we have not evaluated it.
-To do so, there are generally two notions of this problem, i.e., regression and classification.
-A regression model tries to predict the \mbox{PAR-2} runtime of $\hat{a}$ on all instances based on the samples that have been selected.
-Then, the ranking is induced by the average predictions.
-Alternatively, a classification model can be used to predict some discrete runtime labels of $\hat{a}$ on all instances.
-Similarly, the average runtime label determines the ranking.
 
-Preliminary experiments, as well as research in portfolio solvers~\cite{NgokoCT19,CollauttiMMO13}, have shown however that directly predicting runtimes without any transformation does not work well in practice.
+\subsection{Runtime Preprocessing and Rank Prediction}
+\label{sec:main1}
+
+%In order to predict a ranking of solver $\hat{a}$ amidst its competitors, we need to infer its performance on all instances, even the ones on which we have not evaluated it.
+%To do so, there are generally two notions of this problem, i.e, regression and classification.
+%A regression model tries to predict the \mbox{PAR-2} runtime of $\hat{a}$ on all instances based on the samples that have been selected.
+%Then, the ranking is induced by the average predictions.
+%Alternatively, a classification model can be used to predict some discrete runtime labels of $\hat{a}$ on all instances.
+%Similarly, the average runtime label determines the ranking.
+% MI: skipping this elaboration, since we do not use regression
+
+Preliminary experiments, as well as research in portfolio solvers, have shown however that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
 %JB: Collauti at el. still predict actual (though normalized) runtimes rather than discrete labels, they only heavily discretize runtimes when using them as features
 %TF: added "without any transformation"
-%In our experiments, the mean squared error was within the same magnitude as the values to be predicted.
+In our experiments, the mean squared error was within the same magnitude as the values to be predicted.
 In contrast to that, discretizing runtimes and using those labels in the model's training and prediction yields good results (cf.~Section~\ref{sec:eval}).
-The following paragraphs motivate why it makes sense to discretize runtimes.
+%The following paragraphs motivate why it makes sense to discretize runtimes.%MI: no further motivation found, commented out
 %JB: we should probably cut this a bit
 %TF: I've commented out a few sentences but we probably need to cut more.
+
+
 
 We use a function $\gamma\!: {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ to transform runtime observations.
 In our experiments, this function is a clustering algorithm.
@@ -447,15 +452,15 @@ To determine a ranking based on those labels, we define
   \operatorname{score}\!\left(a\right) := \frac{1}{|\mathcal{I}|} \sum_{i \in \mathcal{I}} w_{a,i} \cdot \left(\gamma\!\left(a, i\right) - 1\right) \enspace \textrm{,}
   %JB: does the "-1" provide any benefits, or does it only shift scores?
   %TF: it is used to resemble the 0-indexed implementation. I'm also not happy with this, but using \lbrace 0, \dots, k - 1 \rbrace does also look ugly.
+  %MI: Why is it so important to have this zero-based?
   \label{eq:rankingeq}
 \end{equation}
-with $w_{a,i} := 2$ (PAR-\emph{2} penalty factor) if $\gamma\!\left(a, i\right) = k$ else $w_{a,i} := 1$.
+with $w_{a,i} := 2$ if $\gamma\!\left(a, i\right) = k$ else $w_{a,i} := 1$.
 To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma\!\left(a, i\right)$ by the model's predictions $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
 %JB: as "$\operatorname{score}$" is not visibly different to the rest of the text, we should use some other way of highlighting
 %TF: replaced it with emph{score} for now
 
-Turning a regression into a classification problem, discretization is a useful tool.
-However, it does not provide much value if the resulting cluster labels are not predictive of the PAR-2 ranking we seek to predict.
+Discretization would not provide much value if the resulting cluster labels were not predictive of the PAR-2 ranking we seek to predict.
 In our work, we use a hierarchical-clustering approach with a single-link criterion for $k = 3$.
 For the SAT Competition~2022 Anniversary Track instances~\cite{sat2022}, this ranking approach is capable of correctly deciding for almost all pairs of solvers which one is faster (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$).
 Moreover, it decides all solvers correctly if the difference in the cluster-label-ranking scores between two solvers is at least \SI{0.11}{}.
@@ -465,6 +470,18 @@ This shows that monotonicity and score distances between ranks align quite well 
 
 % In that sense, we also experiment with a combination of runtime-label ranking and the PAR-2 ranking of the subsample if the difference in label ranking scores drops below a certain threshold.
 % Besides that, we additionally consider using the past $l$ model predictions in a voting approach for stability.
+
+That discretized runtimes are sufficient for distinguishing solvers can also be shown by comparing the fraction of solver pairs whose runtimes are significantly different.
+Within the SAT~Competition~2022 Anniversary Track, about \SI{89.95}{\%} of solver pairs are significantly different (according to a Wilcoxon-signed-rank test with $\alpha = 0.05$).
+While only time-out labels (solver times out or not on a particular instance) are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs, discrete-runtime labels are sufficient to distinguish about \SI{87.83}{\%} of solver pairs.
+%\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
+This means that we do not lose much discriminatory power using discrete runtime labels.
+%The number of significant comparisons between solvers \emph{alone}, though, does only offer limited insights as we might achieve significant differences in all pairs by assigning some randomly skewed values as labels.
+%JB: thus, we should reorder this section to mention the argument "significant difference" (this paragraph) first and "deciding solver pairs" (previous paragraph, stronger argument) second (rather than giving the stronger argument first, making the second argument superfluous)
+%TF: Removed the previous sentence
+The predictiveness of the PAR-2 score, the labels' discriminatory power, as well as that it enables us to use classification, show the clear advantage of runtime discretization.
+%JB: at the same time with what? with the other benefits?
+%TF: removed redundant phrase
 
 %\begin{table}[tbp]
 %  \centering
@@ -513,22 +530,10 @@ This shows that monotonicity and score distances between ranks align quite well 
 %  \end{tabular}
 %\end{table}
 
-That discretized runtimes are sufficient for distinguishing solvers can also be shown by comparing the fraction of solver pairs whose runtimes are significantly different.
-Within the SAT~Competition~2022 Anniversary Track, about \SI{89.95}{\%} of solver pairs are significantly different (according to a Wilcoxon-signed-rank test with $\alpha = 0.05$).
-While only time-out labels (solver times out or not on a particular instance) are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs, discrete-runtime labels are sufficient to distinguish about \SI{87.83}{\%} of solver pairs.
-%\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
-This means that we do not lose much discriminatory power using discrete runtime labels.
-%The number of significant comparisons between solvers \emph{alone}, though, does only offer limited insights as we might achieve significant differences in all pairs by assigning some randomly skewed values as labels.
-%JB: thus, we should reorder this section to mention the argument "significant difference" (this paragraph) first and "deciding solver pairs" (previous paragraph, stronger argument) second (rather than giving the stronger argument first, making the second argument superfluous)
-%TF: Removed the previous sentence
-The predictiveness of the PAR-2 score, the labels' discriminatory power, as well as that it enables us to use classification, show the clear advantage of runtime discretization.
-%JB: at the same time with what? with the other benefits?
-%TF: removed redundant phrase
-
 
 \subsection{Instance Sampling}
 \label{sec:main2}
-Our instance-sampling strategies (also refer to Alg.~\ref{algALBenchmark}; line 4) can be divided into two categories.
+Our instance-sampling strategies (also refer to Algorithm~\ref{algALBenchmark}; line 4) can be divided into two categories.
 First, we present possible baseline approaches including existing work on instance-based selection strategies~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
 %JB: approaches under "Second" are also at least "inspired by existing work" and probably also pick "interesting" instances, so distinction between the two categories of approaches not entirely clear
 %TF: made it clearer. First = instance-based methods, second = model-based methods
@@ -590,7 +595,7 @@ The term $\operatorname{H}\!\left(i, n\right)$ is computed for every possible ru
 \subsection{Stopping Criteria}
 \label{sec:main3}
 Similar to the instance-selection strategies, we can also divide stopping criteria into baseline and active-learning-based approaches.
-Also, refer to~Alg.~\ref{algALBenchmark}, line~3.
+Also, refer to~Algorithm~\ref{algALBenchmark}, line~3.
 While a fixed subset-size criterion, e.g., only sample \SI{20}{\%} of all available instances, is an example of the former, a stopping criterion based on a Wilcoxon signed-rank test or the convergence of the model's predictions is an example for the latter.
 
 The Wilcoxon stopping criterion stops the iterative active-learning algorithm when we are on average certain enough that the predicted runtime labels are sufficiently different in comparison to the other solvers.
@@ -608,7 +613,7 @@ To improve the stability of this criterion, we use an exponential moving average
 \begin{equation}
   W_{\exp}^{\left(m\right)} := \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(m - 1\right)} \enspace \textrm{,}
 \end{equation}
-whereby $m$ denotes the count of iterations within Alg.~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
+whereby $m$ denotes the count of iterations within Algorithm~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
 
 The model-convergence stopping criterion is less sophisticated in comparison.
 It simply stops the active-learning process (Alg.~\ref{algALBenchmark}) if within the last $l$ iterations the ranking that is induced by the model's predictions (Eq.~\ref{eq:rankingeq}) remains unchanged.
@@ -622,8 +627,8 @@ Given all the previously presented instantiations for Alg.~\ref{algALBenchmark},
 
 \subsection{Optimization Goal}
 \label{sec:goal}
-As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Def.~\ref{def:new-solver-problem}).
-By running Alg.~\ref{algALBenchmark}, we obtain a prediction model $\mathcal{M}$ that provides us with a scoring function \emph{score}.
+As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
+By running Algorithm~\ref{algALBenchmark}, we obtain a prediction model $\mathcal{M}$ that provides us with a scoring function \emph{score}.
 Also, it outputs the fraction of runtime that is needed to arrive at its conclusion.
 First and foremost, our goal is to provide the engineer of new SAT solvers with an accurate ranking.
 We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly by the given ranking (cf. Alg.~\ref{alg:eval}).
@@ -644,7 +649,7 @@ Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\
 
 \subsection{Evaluation Framework}
 \label{sec:evalframe}
-To evaluate a concrete instantiation of Alg.~\ref{algALBenchmark} (a concrete choice for all the sub-routines), we perform cross-validation on our set of solvers.
+To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark} (a concrete choice for all the sub-routines), we perform cross-validation on our set of solvers.
 That means that each solver once plays the role of the new solver.
 Alg.~\ref{alg:eval} shows this.
 Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage.
