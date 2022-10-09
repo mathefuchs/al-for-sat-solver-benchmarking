@@ -91,14 +91,14 @@ We use problem-instance and runtime \emph{features}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
 In particular, we take runtime information from already done experiments into account when choosing the next.
 By doing so, we can control the properties of the benchmarking approach such as its required runtime.
-Rather than solely outputting a binary classification, i.e, the new solver is worse than existing solver A, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
+Rather than solely outputting a binary classification, i.e, the new solver is worse than an existing solver, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
 In particular, we only subsample the benchmark once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
 Since a new solver idea is rarely best on the first try, it is desired to obtain a solver ranking fast.
 In this way, a new solver idea can be discarded if it performs poorly across the board or may be further tweaked if it shows promising results at least in some cases.
 
 We evaluate our approach with the SAT Competition~2022 Anniversary Track benchmark~\cite{sat2022}, consisting of 5355~instances and full runtimes of 28~solvers.
-We perform cross-validation by treating each solver as new once, and predict these solvers' PAR-2 rank.
+We perform cross-validation by treating each solver as new once and predicting these solvers' PAR-2 rank.
 On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime that would be needed to evaluate these solvers on the complete set of instances.
 
 All our source code\footnote{temporary, anonymized version for review: \url{xxx}} and and data\footnote{temporary, anonymized version for review: \url{xxx}} are available on GitHub.
@@ -124,7 +124,7 @@ M{\i}s{\i}r presents a feature-based approach to reduce benchmarks by matrix fac
 
 Hoos et al. discuss which properties are most desirable when selecting SAT benchmark instances~\cite{HoosKSS13}.
 The selection strategy presented is static, i.e., it does not depend on particular solvers to distinguish.
-Selection criteria are a instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoiding duplicate instances.
+Selection criteria are instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoiding duplicate instances.
 To filter too similar instances, they use a distance-based approach with the SATzilla features~\cite{XuHHL08,features}.
 Their approach \emph{ranks} solvers, is \emph{feature-based}, and \emph{scalable} in the sense that the evaluation time scales linearly with more instances and solvers.
 Also, it allows \emph{scoring} and thereby comparing solvers.
@@ -182,7 +182,7 @@ Most of the proposed strategies in~\cite{MatriconAFSH21} are instance-based, i.e
 Regarding our desired criteria of benchmark selection (Table~\ref{tab:requirements}), the aforementioned approach \emph{ranks} solvers, optimizes for \emph{runtime}, is \emph{feature-based}, and uses \emph{incremental non-random} sampling.
 However, the approach only compares solvers binarily rather than providing a \emph{scoring}.
 Thus, it is not clear how similar two given solvers are or on which instances they behave similarly.
-Moreover, a major shortcoming lies is the lacking \emph{scalability} with the number solvers.
+Moreover, a major shortcoming is the lacking \emph{scalability} with the number of solvers.
 Comparing only pairs of solvers, evaluating a new solver requires sampling several benchmarks.
 In contrast, our approach allows comparing a new solver against a set of existing solvers with one benchmark.
 
@@ -312,7 +312,7 @@ In contrast, our approach allows comparing a new solver against a set of existin
 
 The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning AL within recommender systems, especially the \emph{new-user problem}~\cite{RubensESK15}.
 On the one hand, we want to maximize the utility an instance provides to our model and, on the other hand, minimize the cost (CPU time) that is associated with its acquisition.
-In contrast to traditional passive machine-learning methods with given instance labels, active learning allows selecting instances for which to acquire labels.
+In contrast to traditional passive machine-learning methods with given instance labels, active learning allows for selecting instances for which to acquire labels.
 AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,GarzonMG22,2019gaal} and \emph{pool-bas\-ed} approaches \cite{GolbandiKL11,HarpaleY08,KorenBV09}.%SinhaED19,distribAL,TongK01,KapoorGUD07,KornerW06,MelvilleM04}.
 While synthesis-based methods generate instances for labeling, pool-based methods rely on a fixed set of unlabeled instances from which to sample.
 
