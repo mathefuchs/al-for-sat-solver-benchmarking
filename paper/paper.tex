@@ -589,6 +589,7 @@ We are solemnly interested in the induced ranking in this case.
 
 
 \section{Experimental Design}
+\label{sec:exdesign}
 
 Given all the previously presented instantiations for Algorithm~\ref{algALBenchmark}, this section briefly outlines our experimental design, including our optimization goal, evaluation framework, used data sets, hyper-parameter choices, as well as implementation details.
 % hyper-parameter values that we experiment with
@@ -689,11 +690,13 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main-model}), we experiment with 
   \begin{itemize}
     \item
     History size: consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability.
-    Given a particular ranking decision, the latest $x$ predictions vote on the winner.
-    %JB: confuses me a bit as it sounds we rank first and then vote on a winner; isn't it the other way around?
+    The latest $x$ predictions vote on the winner.
+    %JB: confuses me a bit as it sounds like we rank first and then vote on a winner; isn't it the other way around?
+    %TF: Removed confusing sentence
     \item
     Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker.
     %JB: as clarification: one these two solvers has to be the new solver, right? if yes, would write it explicitly
+    %TF: Not necessarily
     As discussed in Section~\ref{sec:main-model}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
   \end{itemize}
 \end{itemize}
@@ -735,6 +738,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experime
     %JB: why this fraction and not an absolute number of instances? the definition here might make stopping in early iterations rather likely, as just very few consecutive instances are needed (which might happen by coincidence; e.g., for ~5k instances, 2% minimum amount-> ~100 instances, 1% convergence duration -> ~1 instance), while the criterion becomes harder in later iterations
     %TF: for that reason, it is combined with the "minimum amount". Using fractions makes the approach more useful when adapting it to benchmarks of different sizes.
     %JB: yes, but (1) even combination with "minimum amount" can make stopping very easy (see my example) and (2) fraction for convergence could also be relative to absolute number of instances (which is constant over AL run) rather than fraction of currently sampled instances (which increases over AL run)
+    %TF: I'm sure that both would make sense. Isn't 1% convergence duration of 5k about ~50 instances?
   \end{itemize}
 
   \item Wilcoxon criterion
@@ -747,7 +751,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experime
 
 \subsubsection{Runtime-label prediction model.}
 
-As a runtime-label prediction model, we only make use of one method that has proven to be successful in preliminary experiments (cf.~Section~\ref{sec:evalprel}).
+As runtime-label prediction model, we only make use of one fixed model since an exhaustive grid search would be infeasible (cf.~Section~\ref{sec:evalprel}).
 Our model of choice is an ensemble, stacking a quadratic-discriminant analysis\footnote{With a regularization parameter of zero and a singular value threshold of zero} onto a random forest model\footnote{With \emph{entropy} splitting criterion and \emph{balanced} class weights} using a decision tree\footnote{With \emph{Gini} impurity splitting criterion; choosing the best split for each branching decision and maximum tree depth of 5 levels} to weight its members.
 If not stated explicitly, all other model parameters default to the presets of \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/stable/index.html}; Version 1.0.2}~\cite{scikit-learn}.
 
@@ -764,62 +768,74 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 
 \section{Evaluation}
 \label{sec:eval}
-Now that we are all set, we want to, first, discuss preliminary results including the choice of the runtime-discretization method and the choice of the machine-learning predictor.
-Thereafter, we look at end-to-end results and instance-family importance.
+Before evaluating our approach end-to-end as described in Section~\ref{sec:exdesign}, we discuss the choice of the runtime-discretization method and the machine-learning predictor.
+Thereafter, we look at the results of our active-learning approach.
+Selection decisions of the aforementioned approach also reveal the importance of different problem-instance families to our model.
+Instance families comprise instances that are derived from the same application domain, e.g., planning, cryptography, etc., and are a useful tool for both analyzing solver performance and portfolio creation.
 %JB: instance families not really motivated till now, only appear in abstract and in text regarding stratification
+%TF: Added a sentence for clarification. We could introduce more details in section 4.3.
 
-\subsection{Preliminary Results}
+\subsection{Runtime Prediction}
 \label{sec:evalprel}
 %JB: if we dedicate a whole section to these results, we should probably rename this section (not "preliminary" in the typical sense); for TACAS, I guess this can be cut a bit
-An exhaustive grid search of all approaches outlined in Section~\ref{sec:main} is infeasible.
-We are, therefore, narrowing down the search by filtering based on preliminary results.
-Since all relevant decisions, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}, revolve around the choice of prediction model, we are first looking at the \emph{Matthews Correlation Coefficient} (MCC) scores~\cite{gorodkin2004comparing,matthews1975comparison} that a particular prediction model achieves.
+%TF: cut the section down a bit, renamed to "runtime prediction"
+An exhaustive grid search of all active-learning approaches outlined in Section~\ref{sec:main} and different runtime-prediction models is infeasible.
+Therefore, we use the runtime-prediction model that produced the best results for all further experiments.
+We compare runtime predictors by looking at the \emph{Matthews Correlation Coefficient} (MCC) scores~\cite{gorodkin2004comparing,matthews1975comparison} of the classification task.
 MCC scores are great in dealing with class imbalances in contrast to conventional metrics like accuracy.
 
-\begin{table}
-  \centering
-  \caption{
-  	Time-out prediction Matthews Correlation Coefficient performances.
-  	Results are obtained using cross-validation.
-  	We provide \SI{64}{\%} of ground-truth for training, use \SI{16}{\%} as a validation set, and \SI{20}{\%} as a test set (5-fold cross-validation).
-  }
-  \label{tab:mcc}
-  \begin{tabular}{lc}
-    Prediction Model & Avg. MCC (Std.) \\
-    \hline
-    Stacking ensemble (QDA, RF)           & 0.9527 (0.0292) \\
-    Quadratic-discriminant analysis (QDA) & 0.9290 (0.0339) \\
-    Random forest (RF)                    & 0.8530 (0.0479) \\
-    AdaBoost with decision trees          & 0.8384 (0.0444) \\
-    AdaBoost with logistic regression     & 0.8158 (0.0985) \\
-    Decision tree                         & 0.8059 (0.0707) \\
-    Logistic regression                   & 0.8052 (0.1018) \\
-    kNN classifier                        & 0.7885 (0.1521) \\
-    MLP classifier                        & 0.7760 (0.1408) \\
-    Support-vector classifier             & 0.7757 (0.2149) \\
-    Naive Bayes                           & 0.7306 (0.1394) \\
-    \hline
-  \end{tabular}
-\end{table}
+% \begin{table}
+%   \centering
+%   \caption{
+%   	Time-out prediction Matthews Correlation Coefficient performances.
+%   	Results are obtained using cross-validation.
+%   	We provide \SI{64}{\%} of ground-truth for training, use \SI{16}{\%} as a validation set, and \SI{20}{\%} as a test set (5-fold cross-validation).
+%   }
+%   \label{tab:mcc}
+%   \begin{tabular}{lc}
+%     Prediction Model & Avg. MCC (Std.) \\
+%     \hline
+%     Stacking ensemble (QDA, RF)           & 0.9527 (0.0292) \\
+%     Quadratic-discriminant analysis (QDA) & 0.9290 (0.0339) \\
+%     Random forest (RF)                    & 0.8530 (0.0479) \\
+%     AdaBoost with decision trees          & 0.8384 (0.0444) \\
+%     AdaBoost with logistic regression     & 0.8158 (0.0985) \\
+%     Decision tree                         & 0.8059 (0.0707) \\
+%     Logistic regression                   & 0.8052 (0.1018) \\
+%     kNN classifier                        & 0.7885 (0.1521) \\
+%     MLP classifier                        & 0.7760 (0.1408) \\
+%     Support-vector classifier             & 0.7757 (0.2149) \\
+%     Naive Bayes                           & 0.7306 (0.1394) \\
+%     \hline
+%   \end{tabular}
+% \end{table}
 
 % Stacking MCC
 % 0.888221577313471
 % 0.04753979056930393
 
-To obtain the results in Table~\ref{tab:mcc}, we perform cross-validation among all solvers: we assume that all other solver runtimes are known and provide \SI{64}{\%} of ground-truth runtime labels of the target solver for training, use \SI{16}{\%} as a validation set for hyper-parameter tuning, and \SI{20}{\%} as a test set (5-fold cross-validation).
+%To obtain the results in Table~\ref{tab:mcc},
+We perform cross-validation among all solvers: we assume that all other solver runtimes are known and provide \SI{64}{\%} of ground-truth runtime labels of the target solver for training, use \SI{16}{\%} as a validation set for hyper-parameter tuning of the runtime predictor, and \SI{20}{\%} as a test set (5-fold cross-validation).
 This is repeated for each solver once.
 Note that we perform cross-validation on two levels, i.e., among the solvers and the target solver runtimes.
 We report the average performances on the test sets.
-Since the differences in the MCC-performance distributions of the best and second-best approaches are statistically significant regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$, we only use the best approach for all further experiments as a prediction model.
 
-As a runtime discretization technique, we use hierarchical clustering with $k = 3$ using a log-single-link criterion for all further experiments.
+ML classification models that we have tried include random forests, decision trees, quadratic-discriminant analysis, AdaBoost, logistic regression, $k$-nearest neighbor, multi-layer perceptrons, support vector machines, and naive Bayes.
+A stacking ensemble consisting of quadratic-discriminant analysis and random forests performed best.
+It produces an MCC score of \SI{0.9527}{} for time-out prediction and \SI{0.8882}{} for runtime-label prediction.
+The results are significantly better than any other model that we have tried regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$.
+
+%Since the differences in the MCC-performance distributions of the best and second-best approaches are statistically significant regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$, we only use the best approach for all further experiments as a prediction model.
+
+For runtime discretization, we use hierarchical clustering with $k = 3$ using a log-single-link criterion for all further experiments.
 Each non-time-out runtime starts in a separate interval.
 We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
 As already mentioned in Section~\ref{sec:main-model}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
-Also, preliminary experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
+Also, experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
 Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
-Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
+%Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
 %JB: "similar experiment as above" - reference unclear; what do you want to say?
+%TF: Removed the sentence
 
 \subsection{Experimental Results}
 \subsubsection{Tuning our algorithm.}
@@ -979,7 +995,8 @@ Thereby, the sampled instances account for about \SI{5.24}{\%} of instances and 
 Moreover, the PAR-2 accuracy is about \SI{92.33}{\%}, the average Spearman correlation between the PAR-2 ranking and the predicted ranking scores about \SI{0.9572}{}, and the weighted objective $O_{\delta} = 0.9193$.
 %JB: many numbers, but some qualitative (and positively sounding, i.e., saying that our approach indeed is useful) interpretation would be nice
 
-\subsubsection{Instance-family importance.}
+\subsection{Instance-Family Importance}
+
 For all configurations of our approach that sample on average less than \SI{10}{\%} of all 5355 instances, we look at the particular instances and families that are selected by our active-learning approach.
 Thereby, the average benchmark set contains about \SI{192.34}{} instances.
 Table~\ref{tab:familiesa} lists the ten most frequent families that are chosen.
