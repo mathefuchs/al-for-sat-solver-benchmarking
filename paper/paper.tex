@@ -345,8 +345,8 @@ Section~\ref{sec:main-stopping} concludes with possible stopping conditions.
 \subsection{Incremental Benchmarking Framework}
 \label{sec:main-framework}
 
-Our framework to score a new solver~$\hat{a}$ follows a simple three-step procedure, outlined in Algorithm~\ref{algALBenchmark}:
-While the stopping condition is not met (line~1), we select \emph{one} problem instance from the pool of instances with the help of a prediction model~$\mathcal{M}$ (line~2) and evaluate the new solver~$\hat{a}$ on this instance (line~3).
+Our framework to score a new solver~$\hat{a}$ follows a three-step procedure, outlined in Algorithm~\ref{algALBenchmark}:
+While the stopping condition is not met (line~1), we select \emph{one} SAT instance from the pool of instances with the help of a prediction model~$\mathcal{M}$ (line~2) and evaluate the new solver~$\hat{a}$ on this instance (line~3).
 We then use the acquired result to update the prediction model~$\mathcal{M}$ (line~4).
 When the stopping criterion is met, we return the predicted score of the new solver~$\hat{a}$ (line~5).
 
@@ -390,30 +390,32 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
 
 % MI: describe initialization and update of model
 
-
 Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
-We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \hat a$ to denote all solvers including the new solver. 
-At the core of the model $\mathcal{M}$ is a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
+We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \lbrace \hat a \rbrace$ to denote all solvers including the new solver. 
+Model $\mathcal{M}$ provides a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
 
-To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma(a, e)$ by the model's predictions $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
-
+To be applicable to a new solver $\hat{a}$, whose runtimes are unknown, we extend \emph{score} by replacing $\gamma(a, e)$ with the model's predictions $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
+%JB: "score" and "gamma" aren't defined yet, so there is nothing to extend; score isn't even defined here, only "s", while later sections still use "score"
 
 \subsubsection{Runtime Transformation.}
 
-We transform the runtimes into discrete runtime classes which are determined on a per instance basis.
-For each instance $e \in \mathcal{I}$, we use a single-link hierarchial clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of the $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
+We transform the runtimes into discrete runtime labels on a per-instance basis.
+For each instance $e \in \mathcal{I}$, we use a single-link hierarchical clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of the $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
 For instances with many timeouts, we have to manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
 %TF: maybe a bit unclear. We do not manually fix anything. There is always one cluster with only time-outs if there are any.
-The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows.
+%JB: was wondering about that as well; how do we exactly create the timeout cluster? do we only cluster with k-1, removing timeout instances, or is the timeout cluster an ordinary cluster (which might also contain on-timeout instances)?
+The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 
 Given an instance $e \in \mathcal{I}$, a solver $a \in A$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
-In our preliminary experiments, we achieved higher accuracy with prediction of such discrete runtime labels than with prediction of raw runtimes. 
-The mean squared error of raw runtime prediction was within the same magnitude as the values to be predicted. 
+In preliminary experiments, we achieved higher accuracy predicting such discrete runtime labels than predicting raw runtimes. 
+The mean squared error of raw runtime regression was within the same magnitude as the values to be predicted. 
 %MI: how much more accurate are we with discrete runtime labels
-Research in portfolio solvers has also shown that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
+Research on portfolio solvers has also shown that directly predicting runtimes without any transformation does not work well in practice~\cite{CollauttiMMO13,NgokoCT19}.
+%JB: maybe we should phrase this more defensively or just leave out this argument (might be dataset-dependend), (1) e.g., SATzilla 2008 does predict runtimes and (2) we could also have treid to predict normalized runtimes like Collautti et al. instead of discretizing (though prediction performance would probably still have been bad in our case)
 
-To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : A \rightarrow [1, 2 \cdot k]$ as follows.
+To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : A \rightarrow [1, 2 \cdot k]$ as follows:
+%
 \begin{align}
   s_k(a) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
   &&
@@ -423,22 +425,20 @@ To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in t
   \end{cases}
   \label{eq:rankingeq}
 \end{align}
-
-The scoring function $s_k$ induces a ranking among solvers. 
-In preliminary experiments, we compared the ranking induced by $s_3$ to the ranking induced by the PAR-2 score which is commonly used in SAT competitions~\cite{FroleyksHIJS21}. 
-The Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{0.988} which is very close to the optimal value of 1~\cite{de2016comparing}.
-
-That discretized runtimes are sufficient for discriminating solvers can also be shown by comparing the fraction of solver pairs whose runtimes are significantly different. 
-In preliminary experiments, we used a Wilcoxon signed rank test with $\alpha = 0.05$ to compare solver pairs by their runtime vectors.
-Within the SAT~Competition~2022 Anniversary track, about \SI{89.95}{\%} of solver pairs are significantly different according to that measure.
-The strongly discretized runtimes $\gamma_2$ are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs, while $\gamma_3$ is sufficient to distinguish about \SI{87.83}{\%} of solver pairs.
-
-% MI: Enough justification, commented out the following
-%For the SAT Competition~2022 Anniversary track instances, this ranking approach is capable of correctly deciding for almost all pairs of solvers which one is faster (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$).
+%
+I.e., we apply a PAR-2 scoring, which is commonly used in SAT competitions~\cite{FroleyksHIJS21}, on the discrete labels.
+The scoring function $s_k$ induces a ranking among solvers.
+ 
+However, we need to ensure that discretized labels still discriminate solvers and align with the actual PAR-2 ranking.
+We analyzed the ranking induced by $s_3$ in preliminary experiments with the SAT Competition~2022 Anniversary Track~\cite{sat2022}.
+According to a Wilcoxon-signed-rank test with $\alpha = 0.05$, \SI{87.83}{\%} of solver pairs have significantly different scores after discretization, only a slight drop compared to \SI{89.95}{\%} before discretization.
+%While only time-out labels (solver times out or not on a particular instance) are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs.
+%\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
+Further, our ranking approach is capable of correctly deciding for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
 %Moreover, it decides all solvers correctly if the difference in the cluster-label-ranking scores between two solvers is at least \SI{0.11}{}.
-
-This shows that monotonicity and score distances between ranks align quite well between both ranking methods.
-The correlation between $s_k$-induced and PAR-2 induced ranks, the discriminatory power of $\gamma_k$, as well as that it enables us to use classification, show the clear advantage of runtime discretization.
+%Refer to Table~\ref{tab:discreteranking} for a comparison with the PAR-2 ranking.
+In particular, the Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{0.988}{}, which is very close to the optimal value of 1~\cite{de2016comparing}.
+All these results show that discretized runtimes are suitable for our framework.
 
 %\begin{table}[tbp]
 %  \centering
