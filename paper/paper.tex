@@ -415,9 +415,9 @@ Research in portfolio solvers has also shown that directly predicting runtimes w
 
 To determine solver ranks, we define the adapted scoring function $s : A \rightarrow [1, 2 \cdot k]$ as follows.
 \begin{align*}
-  \operatorname{s}(a) &:= \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
+  \operatorname{s}(a) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
   &&
-  \gamma'_k(a, e) &:= \begin{cases}
+  \gamma'_k(a, e) := \begin{cases}
   	2 \cdot \gamma_k(a, e) 	& \text{if } \gamma_k(a, e) = k\\
 	\gamma_k(a, e)	& \text{otherwise}
   \end{cases}
