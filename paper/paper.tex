@@ -111,6 +111,7 @@ Recent studies show that benchmark selection is a difficult endeavor for multipl
 Biased benchmarks can easily lead to fallacious interpretations~\cite{abs-2107-07002}.
 Also, benchmark selection has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
 Questionable research practices might modify these elements a-posteriori to fit expectations, leading to biased results~\cite{NiesslHWCB22}.
+In the following, we discuss related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
 
 \subsubsection{Static benchmark selection.}
 
@@ -159,7 +160,7 @@ However, the approach does not optimize for benchmark \emph{runtime} and selects
   \label{tab:requirements}
 \end{table}
 
-\subsubsection{SAT solver configuration.}
+\subsubsection{Algorithm configuration.}
 
 Further related work can be found within the field of algorithm configuration~\cite{HoosHL21,Stutzle0P22}, e.g., the configuration system SMAC~\cite{HutterHL11}.
 There, the goal is to tune SAT solvers for a given sub-domain of problem instances.
@@ -336,8 +337,8 @@ Rather than benchmarking a solver's overall performance, the goal is to recommen
 In this section, we present the details of our approach.
 Section~\ref{sec:main-framework} describes the general procedure.
 Section~\ref{sec:main-model} specifies the details of the underlying prediction model and discusses how we may derive a solver ranking from that model.
-Possible criteria for sampling instances are discussed in Section~\ref{sec:main2}.
-Section~\ref{sec:main3} concludes with possible stopping conditions.
+Possible criteria for sampling instances are discussed in Section~\ref{sec:main-sampling}.
+Section~\ref{sec:main-stopping} concludes with possible stopping conditions.
 
 
 \subsection{Incremental Benchmarking Framework}
@@ -486,7 +487,7 @@ The predictiveness of the PAR-2 score, the labels' discriminatory power, as well
 
 
 \subsection{Instance Sampling}
-\label{sec:main2}
+\label{sec:main-sampling}
 Our instance-sampling strategies (also refer to Algorithm~\ref{algALBenchmark}; line 4) can be divided into two categories.
 First, we present possible baseline approaches including existing work on instance-based selection strategies~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
 Second, we show promising machine-learning-based sampling strategies that make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
@@ -544,7 +545,7 @@ The term $\operatorname{H}\!\left(i, n\right)$ is computed for every possible ru
 %We then select the instance $i$ whose entropy of runtime-label votes by the different ensemble members is the highest.
 
 \subsection{Stopping Criteria}
-\label{sec:main3}
+\label{sec:main-stopping}
 Similar to the instance-selection strategies, we can also divide stopping criteria into baseline and active-learning-based approaches.
 Also, refer to~Algorithm~\ref{algALBenchmark}, line~3.
 While a fixed subset-size criterion, e.g., only sample \SI{20}{\%} of all available instances, is an example of the former, a stopping criterion based on a Wilcoxon signed-rank test or the convergence of the model's predictions is an example for the latter.
@@ -656,7 +657,7 @@ Rather, we filter approaches based on preliminary experimental results (cf. Sect
 The end-to-end experiment configurations are given below.
 
 \subsubsection{Ranking.}
-Regarding \emph{ranking} (cf. Section~\ref{sec:main1}), we experiment with the following approaches, including our used hyper-parameter values:
+Regarding \emph{ranking} (cf. Section~\ref{sec:main-model}), we experiment with the following approaches, including our used hyper-parameter values:
 %JB: as parts of these approaches are mostly new to readers (Section 3.1 only explains prediction-based ranking in general, neither observed ranking nor history nor fallback), I'm not sure if we should provide further motivation/explanation here); also applies to other components of experimental design
 %TF: I've tried to add some more information. 
 \begin{itemize}
@@ -664,14 +665,14 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main1}), we experiment with the f
   \item Predicted ranking induced by runtime-label predictions
   \begin{itemize}
     \item History size: consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability. Given a particular ranking decision, the latest $x$ predictions vote on the winner.
-    \item Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker. As discussed in Section~\ref{sec:main1}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
+    \item Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker. As discussed in Section~\ref{sec:main-model}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
     %JB: "difference of ranking" between a pair of new solver and another solver? or has this phrase a different meaning?
     %TF: tried to clarify
   \end{itemize}
 \end{itemize}
 
 \subsubsection{Selection.}
-For \emph{selection} (cf. Section~\ref{sec:sampling1}), we experiment with the following methods, including our used hyper-parameter values:
+For \emph{selection} (cf. Section~\ref{sec:main-sampling}), we experiment with the following methods, including our used hyper-parameter values:
 %JB: the referenced sampling section describes more methods than the ones listed below, so I guess some methods got dropped after preliminary experiments
 %TF: added them
 \begin{itemize}
@@ -697,7 +698,7 @@ For \emph{selection} (cf. Section~\ref{sec:sampling1}), we experiment with the f
 \end{itemize}
 
 \subsubsection{Stopping.}
-For \emph{stopping} decisions (cf. Section~\ref{sec:main3}), we experiment with the following criteria, including our used hyper-parameter values:
+For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experiment with the following criteria, including our used hyper-parameter values:
 \begin{itemize}
   \item Fixed subset size of \SI{10}{\%} or \SI{20}{\%} of instances
   \item Ranking convergence criterion
@@ -784,7 +785,7 @@ Since the differences in the MCC-performance distributions of the best and secon
 As a runtime discretization technique, we use hierarchical clustering with $k = 3$ using a log-single-link criterion for all further experiments.
 Each non-time-out runtime starts in a separate interval.
 We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
-As already mentioned in Section~\ref{sec:main1}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
+As already mentioned in Section~\ref{sec:main-model}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
 Also, preliminary experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
 Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
 Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
