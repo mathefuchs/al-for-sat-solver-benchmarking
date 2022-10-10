@@ -1144,12 +1144,14 @@ A possible explanation is that \emph{cryptography} instances are too similar, wh
 In this work, we have discussed possible solutions to the \emph{New-Solver Problem}:
 Given a new solver, we want to find its ranking amidst its competitors.
 Our approaches provide accurate ranking predictions while only needing a fraction of the runtime resources that a full evaluation on all benchmarking instances would need.
+We can determine a new solver's PAR-2 ranking with about \SI{92}{\%} accuracy, while only needing \SI{10}{\%} of the full-evaluation time.
 We use a runtime discretization technique as this enables us to transform the regression problem of directly predicting runtimes into the much simpler notion of classification.
 We have shown that, albeit being more simple, the classification of discrete runtime labels produces good results.
 We have evaluated several ranking algorithms, instance-selection approaches, and stopping criteria within our sequential active-learning process.
-A model-uncertainty-based selection approach in combination with runtime-label-prediction ranking and a ranking-convergence stopping criterion showed the consistently best results.
+%A model-uncertainty-based selection approach in combination with runtime-label-prediction ranking and a ranking-convergence stopping criterion showed the consistently best results in most cases.
 %JB: "consistently best" -- it's the best approach for one delta, but not sure regarding other deltas nor its sensitivity to hyperparameters
-We also took a brief look at which instance families are the most prevalent when sampling instances.
+%TF: commented out
+We also took a brief look at which problem-instance families are the most prevalent in selection decisions.
 
 \subsection{Future Work}
 
@@ -1162,8 +1164,10 @@ Our current approach selects instances one at a time.
 Running benchmarks on a computing cluster with $n$ cores benefits from having a batch of $n$ instances at a time.
 This is, however, not trivial since, on the one hand, a higher $n$ leads to less \emph{active learning} (because of bigger batch sizes) and, on the other hand, it is not clear how to synchronize the model update and instance selection without a barrier lock, which wastes a lot of runtime resources.
 
-On a more general note, it would make sense to generalize this evaluation framework for arbitrary $\mathcal{NP}$-complete problems.
+On a more general note, it would make sense to generalize this evaluation framework for arbitrary $\mathcal{NP}$-complete problems as all discussed active-learning methods are agnostic to the underlying problem.
+Solely the runtime-prediction model might need some tweaking.
 %JB: is there some methodological generalization needed or can't we just apply the same framework (instantiating the instance-feature part differently) to these use cases?
+%TF: clarified
 Those problems share most of the relevant properties of SAT solving, i.e., there are established problem-instance features, a full benchmark run takes days, and creating new problem solvers traditionally requires expert knowledge to hand-select instances of interest.
 
 
