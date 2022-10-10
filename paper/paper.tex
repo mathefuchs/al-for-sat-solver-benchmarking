@@ -113,7 +113,7 @@ Also, benchmark selection has many movable parts, e.g., performance measures, ag
 Questionable research practices might modify these elements a-posteriori to fit expectations, leading to biased results~\cite{NiesslHWCB22}.
 In the following, we discuss related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
 
-\subsubsection{Static benchmark selection.}
+\subsubsection{Static Benchmark Selection.}
 
 Benchmark selection is an important issue for competitions, e.g., the SAT Competition.
 In such competitions, the organizers define the rules for composing the corresponding benchmarks.
@@ -160,7 +160,7 @@ However, the approach does not optimize for benchmark \emph{runtime} and selects
   \label{tab:requirements}
 \end{table}
 
-\subsubsection{Algorithm configuration.}
+\subsubsection{Algorithm Configuration.}
 
 Further related work can be found within the field of algorithm configuration~\cite{HoosHL21,Stutzle0P22}, e.g., the configuration system SMAC~\cite{HutterHL11}.
 There, the goal is to tune SAT solvers for a given sub-domain of problem instances.
@@ -172,7 +172,7 @@ First, an algorithm configurator cannot be used to \emph{rank} a new solver sinc
 Second, while using a model-based selection strategy to sample configurations, instance sampling is done \emph{randomly}, i.e., without building a model over instances.
 And third, only few configurations within their approach are \emph{scored} since algorithm configuration seeks to find solemnly the best performing configuration.
 
-\subsubsection{Incremental benchmark selection.}
+\subsubsection{Incremental Benchmark Selection.}
 
 Matricon~et~al. present an incremental benchmark selection approach~\cite{MatriconAFSH21}.
 Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
@@ -194,7 +194,7 @@ In contrast, our approach allows comparing a new solver against a set of existin
 %JB: in our evaluation, we should state whether our results are consistent with this or not
 %TF: will do
 
-\subsubsection{Active learning (AL).}
+\subsubsection{Active Learning (AL).}
 
 %\begin{figure}[tbp!]
 %  \centering
@@ -396,6 +396,7 @@ Model $\mathcal{M}$ provides a prediction function $f : \mathcal{\hat A} \times 
 
 To be applicable to a new solver $\hat{a}$, whose runtimes are unknown, we extend \emph{score} by replacing $\gamma(a, e)$ with the model's predictions $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
 %JB: "score" and "gamma" aren't defined yet, so there is nothing to extend; score isn't even defined here, only "s", while later sections still use "score"
+%JB: also, each model only predicts for one solver (there is no model covering multiple solvers), so I'm not sure whether introducing the solver as parameter makes sense
 
 \subsubsection{Runtime Transformation.}
 
@@ -491,42 +492,40 @@ All these results show that discretized runtimes are suitable for our framework.
 \subsection{Instance Sampling}
 \label{sec:main-sampling}
 
-Selecting an instance based on the model is the core functionality of our method (cf. Algorithm~\ref{algALBenchmark}, Line 2). 
-In this section, we introduce our sampling strategies that make use of the model's label-prediction function $f$ which are inspired by existing work within the realms of active learning~\cite{settles2009active}.
-We implement a model-uncertainty based approach and a model-based information-gain sampling strategy.
-These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels denoted by $f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$. 
+Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line 2).
+In this section, we introduce our sampling strategies, which make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
+We implement a model-uncertainty and an information-gain sampling strategy.
+These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels.
+Let $f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$ denote this modified prediction function.
 
+\subsubsection{Model Uncertainty Sampling.}
 
-\subsubsection{Model Uncertainty Based Sampling.}
-
-The model-uncertainty-based approach simply selects the instance that is closest to the model's decision boundary.
+The model-uncertainty sampling strategy simply selects the instance that is closest to the model's decision boundary.
 
 \begin{equation*}
   \underset{e \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
+  %JB: \tilde I is undefined
 \end{equation*}
 
+\subsubsection{Information Gain Sampling.}
 
-\subsubsection{Information Gain Based Sampling.}
-
-The model-based information-gain sampling strategy selects the instance with the highest expected entropy reduction.
-To be more specific, we select the instance $e$ that maximizes $IG(e)$ which is specified as follows. 
+The information-gain sampling strategy selects the instance with the highest expected entropy reduction regarding the runtime labels of the instance.
+To be more specific, we select the instance $e$ that maximizes $IG(e)$, which is specified as follows:
 
 \begin{equation*}
-  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{H}(e, n)
+  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{\hat H}_n(e)
 \end{equation*}
 
-Here $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ for all $a \in \mathcal{A}$ and $\operatorname{H}(e, n)$ denotes the entropy of the runtime labels including the runtime label of $\hat{a}$ which is $n$.
-The term $\operatorname{H}(e, n)$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
+Here, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{H}(e, n)$ denotes the entropy of these labels plus $n$ as the runtime label for $\hat{a}$.
+The term $\operatorname{\hat H}_n(e)$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
 
 %JB: if this is info gain regarding runtimes, doesn't Eq. (4) mean that we would prefer instances with low entropy of runtime distribution after considering the new solver, i.e., instances that are not very discriminatory?
 %TF: I don't think so. We want to maximize the reduction in entropy of the runtime labels. Low entropy afterward -> we know that the solver behaves similarly to existing ones.
-
-
+%JB: but if we want to discriminate between solvers, what does it help to know that solver behaves similarly to other solvers?
 
 %Finally, the voting-based committee-disagreement approach requires a committee of $c$ models.
 %Rather than having a single prediction function $f$, there is a separate function $f_j$ for all committee members $j \in \left\lbrace 1, \dots, c  \right\rbrace$.
 %We then select the instance $i$ whose entropy of runtime-label votes by the different ensemble members is the highest.
-
 
 
 % MI: The following belongs either to Related Work or to Experimental Design (commented out)
@@ -535,8 +534,6 @@ The term $\operatorname{H}(e, n)$ is computed for every possible runtime label $
 %Apart from obvious baseline instance-selection strategies, i.e., random sampling and neighborhood-aware sampling (randomly choosing among the instances with the highest amount of non-sampled $k$ neighbors), we also implement existing instance-selection strategies.
 
 %Bossek and Wagner~\cite{Bossek021a} introduce a custom ranking-score metric incorporating the number of \emph{good} pairs and \emph{bad} pairs.
-%JB: some selection methods, like this one, are not mentioned later anymore (in particular, not in experimental design), so we don't need to describe them in detail (maybe mention them shortly if used in preliminary experiments, but turned out to be not useful)
-%TF: I've cut the section down a bit
 %A good solver pair, regarding a particular instance, are solvers that perform according to their global ranking.
 %Otherwise, it is a \emph{bad} pair.
 %Based on this classification, they assign a custom score to each instance.
