@@ -493,28 +493,29 @@ The correlation between $s_k$-induced and PAR-2 induced ranks, the discriminator
 Selecting an instance based on the model is the core functionality of our method (cf. Algorithm~\ref{algALBenchmark}, Line 2). 
 In this section, we introduce our sampling strategies that make use of the model's label-prediction function $f$ which are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 We implement a model-uncertainty based approach and a model-based information-gain sampling strategy.
+These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels denoted by $f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$. 
 
-These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels, i.e., 
-\begin{equation*}
-  f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k
-\end{equation*}
 
 \subsubsection{Model Uncertainty Based Sampling.}
 
-The model-uncertainty-based approach simply selects the instance that is closest to the model's decision boundary and, of course, not already selected, i.e.,
+The model-uncertainty-based approach simply selects the instance that is closest to the model's decision boundary.
+
 \begin{equation*}
   \underset{e \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
 \end{equation*}
 
+
 \subsubsection{Information Gain Based Sampling.}
 
 The model-based information-gain sampling strategy selects the instance with the highest expected entropy reduction.
-To be more specific, we select the instance $e$ that maximizes
+To be more specific, we select the instance $e$ that maximizes $IG(e)$ which is specified as follows. 
+
 \begin{equation*}
   \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{H}(e, n)
 \end{equation*}
-whereby $\operatorname{H}\!\left(i\right)$ denotes the entropy of the runtime labels $\gamma\!\left(a, i\right)$ for all $a \in \mathcal{A}$ and $\operatorname{H}\!\left(i, n\right)$ denotes the entropy of the runtime labels including the runtime label of $\hat{a}$ which is $n$.
-The term $\operatorname{H}\!\left(i, n\right)$ is computed for every possible runtime label $n$.
+
+Here $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ for all $a \in \mathcal{A}$ and $\operatorname{H}(e, n)$ denotes the entropy of the runtime labels including the runtime label of $\hat{a}$ which is $n$.
+The term $\operatorname{H}(e, n)$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
 
 %JB: if this is info gain regarding runtimes, doesn't Eq. (4) mean that we would prefer instances with low entropy of runtime distribution after considering the new solver, i.e., instances that are not very discriminatory?
 %TF: I don't think so. We want to maximize the reduction in entropy of the runtime labels. Low entropy afterward -> we know that the solver behaves similarly to existing ones.
@@ -561,30 +562,28 @@ In this section, we present two dynamic stopping criteria, the Wilcoxon and the 
 
 
 \subsubsection{Wilcoxon Stopping Criterion}
+
 The Wilcoxon stopping criterion stops the iterative active learning algorithm when we are on average certain enough that the predicted runtime labels are sufficiently different in comparison to the other solvers.
 
+To be more specific, we use the average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $w(S,P)$ of the two runtime label distributions $S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}$ and $P=\{ f(\hat a, e) \mid e \in \mathcal{I} \}$. 
 
-To be more specific, we stop when
-\begin{equation}
-  W_{\hat{a}} := \frac{1}{\left\lvert \mathcal{A} \right\rvert} \sum_{a \in \mathcal{A}} \operatorname{wilcoxon}_{\alpha}\!\left(\gamma\!\left(a, \mathcal{I}\right), f\!\left(\hat{a}, \mathcal{I}\right) \right)
-\end{equation}
-drops below a certain threshold.
-Thereby, \emph{wilcoxon} denotes the $p$-value of a Wilcoxon signed-rank test of the runtime-label distributions and $\gamma\!\left(a, \mathcal{I}\right)$ and $f\!\left(\hat{a}, \mathcal{I}\right)$ are the natural set extensions on $\gamma$ and $f$ respectively.
-To improve the stability of this criterion, we use an exponential moving average to smooth out outliers.
+\begin{equation*}
+  W_{\hat{a}} := \frac{1}{\lvert \mathcal{A} \rvert} \sum_{a \in \mathcal{A}} \operatorname{w}(S, P)
+\end{equation*}
 
-%whereby $m$ denotes the count of iterations within Algorithm~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
-%\begin{equation}
-%  W_{\exp}^{\left(m\right)} := \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(m - 1\right)}
-%\end{equation}
+To improve the stability of this criterion, we use an exponential moving average to smooth out outliers as follows and stop as soon as $W^{(i)}_{\hat{a}}$ drops below a certain threshold.
 
-
+\begin{align*}
+	W_{\exp}^{\left(0\right)} &:= 1\\
+	W_{\exp}^{\left(i\right)} &:= \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(i - 1\right)}
+\end{align*}
 
 
 \subsubsection{Model Convergence Stopping Criterion}
 
 The model-convergence stopping criterion is less sophisticated in comparison.
 It simply stops the active-learning process if within the last $l$ iterations the ranking that is induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged.
-Note that the concrete values of $s_k(a)$ might still change.
+Note that the concrete values of $s_k(\hat a)$ might still change.
 We are solemnly interested in the induced ranking in this case.
 
 
