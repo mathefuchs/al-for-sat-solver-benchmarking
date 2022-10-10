@@ -502,7 +502,7 @@
 \pgfsetrectcap%
 \pgfsetroundjoin%
 \pgfsetlinewidth{1.505625pt}%
-\definecolor{currentstroke}{rgb}{0.121569,0.466667,0.705882}%
+\definecolor{currentstroke}{rgb}{0.105882,0.619608,0.466667}%
 \pgfsetstrokecolor{currentstroke}%
 \pgfsetdash{}{0pt}%
 \pgfpathmoveto{\pgfqpoint{0.894215in}{0.671142in}}%
@@ -544,12 +544,12 @@
 \begin{pgfscope}%
 \pgfpathrectangle{\pgfqpoint{0.746177in}{0.679475in}}{\pgfqpoint{8.347374in}{2.483778in}}%
 \pgfusepath{clip}%
-\pgfsetrectcap%
+\pgfsetbuttcap%
 \pgfsetroundjoin%
 \pgfsetlinewidth{1.505625pt}%
-\definecolor{currentstroke}{rgb}{0.172549,0.627451,0.172549}%
+\definecolor{currentstroke}{rgb}{0.850980,0.372549,0.007843}%
 \pgfsetstrokecolor{currentstroke}%
-\pgfsetdash{}{0pt}%
+\pgfsetdash{{5.550000pt}{2.400000pt}}{0.000000pt}%
 \pgfpathmoveto{\pgfqpoint{0.899482in}{0.671142in}}%
 \pgfpathlineto{\pgfqpoint{0.949853in}{1.484494in}}%
 \pgfpathlineto{\pgfqpoint{1.062543in}{1.553215in}}%
@@ -591,12 +591,12 @@
 \begin{pgfscope}%
 \pgfpathrectangle{\pgfqpoint{0.746177in}{0.679475in}}{\pgfqpoint{8.347374in}{2.483778in}}%
 \pgfusepath{clip}%
-\pgfsetrectcap%
+\pgfsetbuttcap%
 \pgfsetroundjoin%
 \pgfsetlinewidth{1.505625pt}%
-\definecolor{currentstroke}{rgb}{0.839216,0.152941,0.156863}%
+\definecolor{currentstroke}{rgb}{0.458824,0.439216,0.701961}%
 \pgfsetstrokecolor{currentstroke}%
-\pgfsetdash{}{0pt}%
+\pgfsetdash{{9.600000pt}{2.400000pt}{1.500000pt}{2.400000pt}}{0.000000pt}%
 \pgfpathmoveto{\pgfqpoint{0.878529in}{0.671142in}}%
 \pgfpathlineto{\pgfqpoint{0.935662in}{1.739744in}}%
 \pgfpathlineto{\pgfqpoint{0.942340in}{1.808465in}}%
@@ -665,30 +665,6 @@
 \pgfusepath{stroke}%
 \end{pgfscope}%
 \begin{pgfscope}%
-\pgfsetbuttcap%
-\pgfsetmiterjoin%
-\definecolor{currentfill}{rgb}{1.000000,1.000000,1.000000}%
-\pgfsetfillcolor{currentfill}%
-\pgfsetfillopacity{0.800000}%
-\pgfsetlinewidth{1.003750pt}%
-\definecolor{currentstroke}{rgb}{0.800000,0.800000,0.800000}%
-\pgfsetstrokecolor{currentstroke}%
-\pgfsetstrokeopacity{0.800000}%
-\pgfsetdash{}{0pt}%
-\pgfpathmoveto{\pgfqpoint{4.135127in}{0.927853in}}%
-\pgfpathlineto{\pgfqpoint{7.829270in}{0.927853in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{7.879270in}{0.927853in}}{\pgfqpoint{7.879270in}{0.977853in}}%
-\pgfpathlineto{\pgfqpoint{7.879270in}{1.992899in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{7.879270in}{2.042899in}}{\pgfqpoint{7.829270in}{2.042899in}}%
-\pgfpathlineto{\pgfqpoint{4.135127in}{2.042899in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{4.085127in}{2.042899in}}{\pgfqpoint{4.085127in}{1.992899in}}%
-\pgfpathlineto{\pgfqpoint{4.085127in}{0.977853in}}%
-\pgfpathquadraticcurveto{\pgfqpoint{4.085127in}{0.927853in}}{\pgfqpoint{4.135127in}{0.927853in}}%
-\pgfpathlineto{\pgfqpoint{4.135127in}{0.927853in}}%
-\pgfpathclose%
-\pgfusepath{stroke,fill}%
-\end{pgfscope}%
-\begin{pgfscope}%
 \pgfsetrectcap%
 \pgfsetroundjoin%
 \pgfsetlinewidth{1.505625pt}%
@@ -703,7 +679,7 @@
 \begin{pgfscope}%
 \pgfsetbuttcap%
 \pgfsetroundjoin%
-\definecolor{currentfill}{rgb}{0.121569,0.466667,0.705882}%
+\definecolor{currentfill}{rgb}{0.105882,0.619608,0.466667}%
 \pgfsetfillcolor{currentfill}%
 \pgfsetlinewidth{1.003750pt}%
 \definecolor{currentstroke}{rgb}{1.000000,1.000000,1.000000}%
@@ -732,7 +708,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.885127in,y=1.767899in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Ranking convergence criterion}%
+\pgftext[x=4.735127in,y=1.767899in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Ranking convergence criterion}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -749,7 +725,7 @@
 \begin{pgfscope}%
 \pgfsetbuttcap%
 \pgfsetroundjoin%
-\definecolor{currentfill}{rgb}{0.172549,0.627451,0.172549}%
+\definecolor{currentfill}{rgb}{0.850980,0.372549,0.007843}%
 \pgfsetfillcolor{currentfill}%
 \pgfsetlinewidth{1.003750pt}%
 \definecolor{currentstroke}{rgb}{1.000000,1.000000,1.000000}%
@@ -778,7 +754,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.885127in,y=1.421217in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Wilcoxon criterion}%
+\pgftext[x=4.735127in,y=1.421217in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Wilcoxon criterion}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -795,7 +771,7 @@
 \begin{pgfscope}%
 \pgfsetbuttcap%
 \pgfsetroundjoin%
-\definecolor{currentfill}{rgb}{0.839216,0.152941,0.156863}%
+\definecolor{currentfill}{rgb}{0.458824,0.439216,0.701961}%
 \pgfsetfillcolor{currentfill}%
 \pgfsetlinewidth{1.003750pt}%
 \definecolor{currentstroke}{rgb}{1.000000,1.000000,1.000000}%
@@ -824,7 +800,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.885127in,y=1.074535in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Fixed subset size}%
+\pgftext[x=4.735127in,y=1.074535in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Fixed subset size}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%
