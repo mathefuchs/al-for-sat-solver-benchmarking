@@ -775,7 +775,7 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 Before evaluating our approach end-to-end as described in Section~\ref{sec:exdesign}, we discuss the choice of the runtime-discretization method and the machine-learning predictor.
 Thereafter, we look at the results of our active-learning approach.
 Selection decisions of the aforementioned approach also reveal the importance of different problem-instance families to our model.
-Instance families comprise instances that are derived from the same application domain, e.g., planning, cryptography, etc., and are a useful tool for both analyzing solver performance and portfolio creation.
+Instance families comprise instances that are derived from the same application domain, e.g., planning, cryptography, etc., and are a useful tool for both analyzing solver performance and portfolios.
 %JB: instance families not really motivated till now, only appear in abstract and in text regarding stratification
 %TF: Added a sentence for clarification. We could introduce more details in section 4.3.
 
@@ -847,24 +847,28 @@ Other clustering approaches that we have tried include hierarchical clustering w
 
 Our main end-to-end experiments follow the evaluation framework that has been introduced in Section~\ref{sec:evalframe}.
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches listed in Section~\ref{sec:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
-The plotted lines represent the best performing configurations per ranking approach (Fig.~\ref{fig:annitraincolorranking}), per selection approach (Fig.~\ref{fig:annitraincolorselection}), and per stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
+Evaluating a particular configuration with Algorithm~\ref{alg:eval}, returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
+The plotted lines represent the best performing configurations (convex hull) per top-level hyper-parameter choice, i.e., per ranking approach (Fig.~\ref{fig:annitraincolorranking}), per selection approach (Fig.~\ref{fig:annitraincolorselection}), and per stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
 %JB: as far as I understand it, the lines only compare some top-level hyperparameters, but for each of these hyperparemeters, take the best (= Pareto front) out of some more fine-grained settings (the hyperparameters of the hyperparameters, so to speak), so it's no really "each possible choice" in the sense of actual, individual configurations, but rather a combination of configurations
-Colors indicate the different hyper-parameter instantiations.
-To be more specific, they represent the Pareto front of all configurations with the respective instantiations.
+%Colors indicate the different hyper-parameter instantiations.
+%To be more specific, they represent the Pareto front of all configurations with the respective instantiations.
 
-Regarding the ranking approach (Fig.~\ref{fig:annitraincolorranking}), using the ranking that is induced by our runtime-label predictions consistently performs better than the partially observed PAR-2 ranking for each possible value of $\delta$.
+Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the $s_3$-induced ranking consistently outperforms the partially observed PAR-2 ranking for each possible value of $\delta$.
 %JB: as in previous comment: consistent outperformance not guaranteed in case the lines are not individual approaches, but Pareto fronts within the compared categories (which means that different parts of the line might be related to different hyperparameter settings)
-%This was expected since a possible bias in the selection decisions of the model is accounted for when using the model's predictions for ranking.
+%TF: The lines are in any case no individual approaches as individual approaches are only points. So, any lines in this plot are a "combination" of configs. It's only a question of how to combine.
 This is expected since selection decisions are not random.
 For example, we might sample more instances of one family if it benefits discrimination of solvers.
 While the partially observed PAR-2 score is skewed, the prediction model can account for this.
 
 Regarding the selection approaches (Fig.~\ref{fig:annitraincolorselection}), the model-based uncertainty strategy performs best in most cases.
 However, the model-based information-gain sampling is beneficial if runtime is strongly favored (very small $\delta$; runtime fraction less than \SI{5}{\%}).
+Random sampling is outperformed by the model-based uncertainty strategy in all cases showing the benefit of active learning.
+By actively choosing the next experiment to run based on a model, we are more accurate in predicting the PAR-2 ranking of the solvers on the underlying dataset.
 %JB: we should also describe performance of random sampling, which is visible in plot as well
+%TF: added a few sentences
 
 Regarding the stopping criterion (Fig.~\ref{fig:annitraincolorstopping}), the ranking convergence criterion performs the most consistently well.
-If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
+If accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
 
 \begin{figure}[tbp!]
   \centering
@@ -913,6 +917,7 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   	Each line entails the front of Pareto-optimal configurations with the respective instantiation.
   }
   %JB: not sure if the color palette in the plots is grayscale-/color-blind-friendly; consider changing the palette (see https://colorbrewer2.org/#type=qualitative&scheme=Set3&n=3 ) and using different line types for each color
+  %TF: done
   \label{fig:e2eallsolvers}
 \end{figure}
 
@@ -986,31 +991,47 @@ If PAR-2 accuracy is strongly favored (very high $\delta$), the Wilcoxon stoppin
   \label{fig:annitrainoptgoal}
 \end{figure}
 
-Table~\ref{tab:paretotable} also shows the performance of particular hyper-parameter choices for different values of $\delta$.
-%JB: some plot for comparison would be better than a truncated table showing a variety hyperparameter configs
-Thereby, we observe that for small $\delta$ (runtime more important) our approaches preferably use easy instances to get a good sense of the PAR-2 ranking fast, e.g., row with $\delta = 0.15$.
-%JB: the "e.g." part needs more explanation (how can we see that easy instances used? -> fraction runtime vs. fraction instances)
-In contrast to that, harder instances are preferred for higher values of $\delta$, i.e., the sampled fraction of runtime is greater than the fraction of instances.
-In our opinion, the row with $\delta = 0.85$ represents the best trade-off between runtime and PAR-2 accuracy.
-%JB: this is a scientific article, not an opinion piece :-); all deltas represent different trade-offs, so I would not claim to have found a best trade-off (probably depends on user which kind of trade-off is most desired)
+Figure~\ref{fig:annitrainoptgoal} also shows an interesting difference between different optimization goals.
+It shows how different configurations select instances with different difficulties.
+If it is, on the one hand, desired to get a \emph{rough} estimate of a solver's performance fast (low $\delta$), corresponding approaches favor selecting many \emph{easy} problem instances (fraction of instances bigger than the fraction of runtime within $\tilde{\mathcal{I}}$).
+By having many observations, it is easier to build a model.
+If it is, on the other hand, desired to get a \emph{good} estimate of a solver's performance in a moderate amount of time (high $\delta$), corresponding approaches favor selecting fewer \emph{difficult} problem instances (fraction of instances smaller than the fraction of runtime within $\tilde{\mathcal{I}}$).
+
 
 \subsubsection{Full dataset evaluation.}
+
 Having selected the most promising hyper-parameters, we run our end-to-end active-learning experiments on the complete Anniversary Track dataset (5355 instances).
-The best-performing approach for $\delta = 0.85$ (since this was the most promising trade-off on the tuning set) uses runtime-label prediction ranking, model-based uncertainty sampling, and a ranking-convergence stopping criterion.
-Thereby, the sampled instances account for about \SI{5.24}{\%} of instances and about \SI{10.35}{\%} of runtime.
-Moreover, the PAR-2 accuracy is about \SI{92.33}{\%}, the average Spearman correlation between the PAR-2 ranking and the predicted ranking scores about \SI{0.9572}{}, and the weighted objective $O_{\delta} = 0.9193$.
+The best-performing approach for $\delta = 0.85$ uses runtime-label prediction ranking, model-based uncertainty sampling, and a ranking-convergence stopping criterion.
+It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{10.35}{\%} of the runtime that would be needed to evaluate the solver on the full dataset ($O_{\operatorname{rt}}$).
+This trade-off provides a better way of prototyping and evaluating new SAT solvers rather than evaluating them on a manually picked subset based on domain knowledge.
+The sampled instances account for about \SI{5.24}{\%} of instances indicating the preference for selecting more difficult instances as already discussed in the previous section.
+The average Spearman correlation between the PAR-2 ranking and the predicted ranking scores is about \SI{0.9572}{} indicating that the differences in PAR-2 scores are quite similar to $s_3$ scores.
+Because of that, the runtime-prediction model helps determine on what problem instances solvers perform similarly or are better/worse.
 %JB: many numbers, but some qualitative (and positively sounding, i.e., saying that our approach indeed is useful) interpretation would be nice
+%TF: revised this section
 
 \subsection{Instance-Family Importance}
 
-For all configurations of our approach that sample on average less than \SI{10}{\%} of all 5355 instances, we look at the particular instances and families that are selected by our active-learning approach.
-Thereby, the average benchmark set contains about \SI{192.34}{} instances.
-Table~\ref{tab:familiesa} lists the ten most frequent families that are chosen.
-For example, \emph{planning} instances account for on average \SI{19.14}{} of the \SI{192.34}{} benchmark instances.
-In contrast to that, Table~\ref{tab:familiesb} shows the families that are sampled the most often relative to their occurrences in the underlying dataset.
-There are, for example, only nine \emph{circuit-multiplier} instances in the complete dataset.
-However, we sample on average \SI{1.59}{} of them.
-%JB: there should be some (qualitative) interpretation (based on our results, is the sample interesting/special family-wise or not?) rather than just dropping a table into the paper and mainly explaining its structure
+Selection decisions of our approach also reveal the importance of different problem-instance families to our model.
+Instance families comprise instances that are derived from the same application domain, e.g., planning, cryptography, etc., and are a useful tool for both analyzing solver performance and portfolios.
+
+Figure~\ref{fig:annifinalfamilies} shows a scatter plot of problem-instance families regarding their occurrence within the dataset and the average occurrence in benchmarks created by active learning.
+We use the best-performing configurations for all $\delta \in \left[0, 1\right]$ and examine the selection decisions by the active-learning approach on the SAT Competition~2022 Anniversary Track benchmark set~\cite{sat2022}.
+While most families appear by the same fraction in the dataset and in active-learning-selected benchmarks, there are a few outliers that need some further discussion.
+Problem instances of the families \emph{fpga}, \emph{quasigroup-completion}, and \emph{planning} are especially helpful to our model in distinguishing solvers.
+Instances of these families are selected over-proportionally in comparison to their fraction in the dataset.
+In contrast to that, instances of the biggest family, i.e., \emph{hardware-verification}, roughly appear with the same fraction in the dataset and in active-learning-selected benchmarks.
+Finally, instances of the family \emph{cryptography} are less important in distinguishing solvers than their huge weight in the dataset suggests.
+A possible explanation is that \emph{cryptography} instances are too similar, which means that a smaller fraction of them is sufficient to determine a solver's performance on all of them.
+
+% For all configurations of our approach that sample on average less than \SI{10}{\%} of all 5355 instances, we look at the particular instances and families that are selected by our active-learning approach.
+% Thereby, the average benchmark set contains about \SI{192.34}{} instances.
+% Table~\ref{tab:familiesa} lists the ten most frequent families that are chosen.
+% For example, \emph{planning} instances account for on average \SI{19.14}{} of the \SI{192.34}{} benchmark instances.
+% In contrast to that, Table~\ref{tab:familiesb} shows the families that are sampled the most often relative to their occurrences in the underlying dataset.
+% There are, for example, only nine \emph{circuit-multiplier} instances in the complete dataset.
+% However, we sample on average \SI{1.59}{} of them.
+% %JB: there should be some (qualitative) interpretation (based on our results, is the sample interesting/special family-wise or not?) rather than just dropping a table into the paper and mainly explaining its structure
 
 % \begin{table}[tb!]
 %   %JB: "fraction" here only draws family-specific comparison of sample vs. full dataset, but does not compare overall distribution of families in sample/dataset; might be interesting to have scatterplot with "(relative) frequency of family in sample" vs. "(relative) frequency of family in dataset" (does not allow to show all family labels (though we probably could manually label some families), but allows to show all families)
@@ -1110,7 +1131,7 @@ However, we sample on average \SI{1.59}{} of them.
     \input{../plots/anni_final_families.pgf}
   }
   \caption{
-    Scatter plot showing the \emph{importance} of different instance families.
+    Scatter plot showing the \emph{importance} of different instance families to our model.
     The x-axis shows the fraction of instances within a particular family in the complete SAT Competition~2022 Anniversary Track benchmark set~\cite{sat2022}.
     The y-axis shows the average fraction of instances within a particular family that is selected by our active-learning strategies.
     The dashed line represents families that are represented with the same fraction in, both, our dataset and the incremental benchmark sets $\tilde{\mathcal{I}}$ that are chosen by our approach.
@@ -1119,6 +1140,7 @@ However, we sample on average \SI{1.59}{} of them.
 \end{figure}
 
 \section{Conclusion}
+
 In this work, we have discussed possible solutions to the \emph{New-Solver Problem}:
 Given a new solver, we want to find its ranking amidst its competitors.
 Our approaches provide accurate ranking predictions while only needing a fraction of the runtime resources that a full evaluation on all benchmarking instances would need.
@@ -1130,6 +1152,7 @@ A model-uncertainty-based selection approach in combination with runtime-label-p
 We also took a brief look at which instance families are the most prevalent when sampling instances.
 
 \subsection{Future Work}
+
 In future work, it may be of interest to compare further ranking algorithms, instance-selection approaches, and stopping criteria.
 Furthermore, it is possible to formulate the runtime discretization as an optimization problem.
 Given a dataset, optimization could select the discretization technique with the best discriminatory power rather than selecting one approach upfront by hand.
