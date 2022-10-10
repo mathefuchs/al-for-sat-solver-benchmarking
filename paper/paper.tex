@@ -413,7 +413,7 @@ The mean squared error of raw runtime prediction was within the same magnitude a
 Research in portfolio solvers has also shown that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
 
 To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : A \rightarrow [1, 2 \cdot k]$ as follows.
-\begin{align*}
+\begin{align}
   s_k(a) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
   &&
   \gamma'_k(a, e) := \begin{cases}
@@ -421,7 +421,7 @@ To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in t
 	\gamma_k(a, e)	& \text{otherwise}
   \end{cases}
   \label{eq:rankingeq}
-\end{align*}
+\end{align}
 
 The scoring function $s_k$ induces a ranking among solvers. 
 In preliminary experiments, we compared the ranking induced by $s_3$ to the ranking induced by the PAR-2 score which is commonly used in SAT competitions~\cite{FroleyksHIJS21}. 
@@ -490,13 +490,40 @@ The correlation between $s_k$-induced and PAR-2 induced ranks, the discriminator
 \subsection{Instance Sampling}
 \label{sec:main-sampling}
 
-Our instance-sampling strategies (also refer to Algorithm~\ref{algALBenchmark}; line 4) can be divided into two categories.
-First, we present possible baseline approaches including existing work on instance-based selection strategies~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
-Second, we show promising machine-learning-based sampling strategies that make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
+Selecting an instance based on the model is the core functionality of our method (cf. Algorithm~\ref{algALBenchmark}, Line 2). 
+In this section, we introduce our sampling strategies that make use of the model's label-prediction function $f$ which are inspired by existing work within the realms of active learning~\cite{settles2009active}.
+We implement a model-uncertainty based approach and a model-based information-gain sampling strategy.
+%, and a voting-based committee-disagreement approach.
+
+These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels, i.e., 
+\begin{equation*}
+  f'\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left[0, 1\right]^k
+\end{equation*}
+
+\subsubsection{Model Uncertainty Based Sampling.}
+
+The model-uncertainty-based approach simply selects the instance that is closest to the model's decision boundary and, of course, not already selected, i.e.,
+\begin{equation*}
+  \underset{e \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
+\end{equation*}
+
+\subsubsection{Information Gain Based Sampling.}
+
+The model-based information-gain sampling strategy selects the instance with the highest expected entropy reduction.
+To be more specific, we select the instance $e$ that maximizes
+\begin{equation*}
+  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{H}(e, n)
+\end{equation*}
+whereby $\operatorname{H}\!\left(i\right)$ denotes the entropy of the runtime labels $\gamma\!\left(a, i\right)$ for all $a \in \mathcal{A}$ and $\operatorname{H}\!\left(i, n\right)$ denotes the entropy of the runtime labels including the runtime label of $\hat{a}$ which is $n$.
+The term $\operatorname{H}\!\left(i, n\right)$ is computed for every possible runtime label $n$.
+
+%Finally, the voting-based committee-disagreement approach requires a committee of $c$ models.
+%Rather than having a single prediction function $f$, there is a separate function $f_j$ for all committee members $j \in \left\lbrace 1, \dots, c  \right\rbrace$.
+%We then select the instance $i$ whose entropy of runtime-label votes by the different ensemble members is the highest.
+
 
 
 % MI: The following belongs either to Related Work or to Experimental Design (commented out)
-
 %\subsubsection{Baselines and existing approaches.}
 %\label{sec:sampling1}
 %Apart from obvious baseline instance-selection strategies, i.e., random sampling and neighborhood-aware sampling (randomly choosing among the instances with the highest amount of non-sampled $k$ neighbors), we also implement existing instance-selection strategies.
@@ -518,40 +545,18 @@ Second, we show promising machine-learning-based sampling strategies that make u
 %The variance-based strategy selects instances with the highest runtime variance per average runtime.
 %We also implement a logarithmized version of this, i.e., the highest log-runtime variance per average log runtime.
 
- 
-\subsubsection{Active-learning-based instance selection.}
-\label{sec:sampling2}
-For conciseness, we only present two of our active-learning-based instance-selection approaches, which show the most promising results.
-We implement a model-uncertainty-based approach and a model-based information-gain sampling strategy.
-%, and a voting-based committee-disagreement approach.
-
-These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels, i.e., 
-\begin{equation}
-  f'\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left[0, 1\right]^k  \enspace \textrm{.}
-\end{equation}
-The model-uncertainty-based approach simply selects the instance that is closest to the model's decision boundary and, of course, not already selected, i.e.,
-\begin{equation}
-  \underset{e \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, i\right)_{n} \right\rvert \enspace \textrm{.}
-\end{equation}
-
-The model-based information-gain sampling strategy selects the instance with the highest expected entropy reduction.
-To be more specific, we select the instance $i$ that maximizes
-\begin{equation}
-  \operatorname{IG}\!\left(i\right) := \operatorname{H}\!\left(i\right) - \sum_{n = 1}^{k} f'\!\left(\hat{a}, i\right)_{n} \operatorname{H}\!\left(i, n\right) \enspace \textrm{,}
-\end{equation}
-whereby $\operatorname{H}\!\left(i\right)$ denotes the entropy of the runtime labels $\gamma\!\left(a, i\right)$ for all $a \in \mathcal{A}$ and $\operatorname{H}\!\left(i, n\right)$ denotes the entropy of the runtime labels including the runtime label of $\hat{a}$ which is $n$.
-The term $\operatorname{H}\!\left(i, n\right)$ is computed for every possible runtime label $n$.
-
-%Finally, the voting-based committee-disagreement approach requires a committee of $c$ models.
-%Rather than having a single prediction function $f$, there is a separate function $f_j$ for all committee members $j \in \left\lbrace 1, \dots, c  \right\rbrace$.
-%We then select the instance $i$ whose entropy of runtime-label votes by the different ensemble members is the highest.
 
 \subsection{Stopping Criteria}
 \label{sec:main-stopping}
-Similar to the instance-selection strategies, we can also divide stopping criteria into baseline and active-learning-based approaches.
-Also, refer to~Algorithm~\ref{algALBenchmark}, line~3.
-While a fixed subset-size criterion, e.g., only sample \SI{20}{\%} of all available instances, is an example of the former, a stopping criterion based on a Wilcoxon signed-rank test or the convergence of the model's predictions is an example for the latter.
 
+%Similar to the instance-selection strategies, we can also divide stopping criteria into baseline and active-learning-based approaches.
+%Also, refer to~Algorithm~\ref{algALBenchmark}, line~3.
+%While a fixed subset-size criterion, e.g., only sample \SI{20}{\%} of all available instances, is an example of the former, a stopping criterion based on a Wilcoxon signed-rank test or the convergence of the model's predictions is an example for the latter.
+
+In this section, we present two dynamic stopping criteria, the Wilcoxon and the Model Uncertainty stopping criteria (cf. Algorithm~\ref{algALBenchmark}, Line~1). 
+
+
+\subsubsection{Wilcoxon Stopping Criterion}
 The Wilcoxon stopping criterion stops the iterative active-learning algorithm when we are on average certain enough that the predicted runtime labels are sufficiently different in comparison to the other solvers.
 To be more specific, we stop when
 \begin{equation}
@@ -562,14 +567,18 @@ drops below a certain threshold.
 %TF: I don't think so. We want to maximize the reduction in entropy of the runtime labels. Low entropy afterward -> we know that the solver behaves similarly to existing ones.
 Thereby, \emph{wilcoxon} denotes the $p$-value of a Wilcoxon signed-rank test of the runtime-label distributions and $\gamma\!\left(a, \mathcal{I}\right)$ and $f\!\left(\hat{a}, \mathcal{I}\right)$ are the natural set extensions on $\gamma$ and $f$ respectively.
 To improve the stability of this criterion, we use an exponential moving average
+
 \begin{equation}
   W_{\exp}^{\left(m\right)} := \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(m - 1\right)} \enspace \textrm{,}
 \end{equation}
+
 whereby $m$ denotes the count of iterations within Algorithm~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
 
+\subsubsection{Model Convergence Stopping Criterion}
+
 The model-convergence stopping criterion is less sophisticated in comparison.
-It simply stops the active-learning process (Algorithm~\ref{algALBenchmark}) if within the last $l$ iterations the ranking that is induced by the model's predictions (Eq.~\ref{eq:rankingeq}) remains unchanged.
-Note that the concrete values of $\operatorname{score}\!\left(a\right)$ might still change.
+It simply stops the active-learning process if within the last $l$ iterations the ranking that is induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged.
+Note that the concrete values of $s_k(a)$ might still change.
 We are solemnly interested in the induced ranking in this case.
 
 
