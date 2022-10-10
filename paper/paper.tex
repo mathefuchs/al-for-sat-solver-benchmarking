@@ -588,6 +588,7 @@ Note that the concrete values of $s_k(\hat a)$ might still change.
 We are solemnly interested in the induced ranking in this case.
 
 
+
 \section{Experimental Design}
 \label{sec:exdesign}
 
@@ -598,14 +599,15 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
 \label{sec:goal}
 
 As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-By running Algorithm~\ref{algALBenchmark}, we obtain a prediction model $\mathcal{M}$ that provides us with a scoring function \emph{score}.
-Also, it outputs the fraction of runtime that is needed to arrive at its conclusion.
+We create a prediction model $\mathcal{M}$ as described in Section~\ref{sec:main-model} that provides us with a scoring function $s_k$.
+% MI: Let this be the evaluation result:
+%Also, it outputs the fraction of runtime that is needed to arrive at its conclusion.
 First and foremost, our goal is to provide the engineer of new SAT solvers with an accurate ranking.
-We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly by the given ranking (cf. Algorithm~\ref{alg:eval}).
+We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly by the given ranking (cf.~Algorithm~\ref{alg:eval}).
 For now, we exclude the equality of solvers since data shows that the PAR-2 scores of all our solvers are different.
 So, possible ranking decisions may be, for example, solver $a$ is better than $b$ or $b$ is better than $a$.
 The ranking accuracy is affected by whether this decision is correctly made.
-Matricon et. al.~\cite{MatriconAFSH21} also evaluate their approach by the fraction of solver pairs that is correctly decided.
+%Matricon et. al.~\cite{MatriconAFSH21} also evaluate their approach by the fraction of solver pairs that is correctly decided.
 Second, we also have to optimize for runtime.
 The \emph{fraction of runtime} that the algorithm needs to arrive at its conclusion is denoted by $O_{\operatorname{rt}} \in \left[0, 1\right]$ (lower is better).
 This metric puts the runtime summed over the sampled instances in relation to the runtime summed over all instances in the dataset (cf. Algorithm~\ref{alg:eval}).
@@ -632,28 +634,32 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
   \caption{Evaluation Framework}
   \label{alg:eval}
 
-  \KwIn{A pool of instances $\mathcal{I}$, a set of solvers $\mathcal{S}$ with known runtimes $r\!: \mathcal{S} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and PAR-2 scores $par2\!: \mathcal{S} \rightarrow \mathbb{R}$ for each solver.}
+  %\KwIn{A pool of instances $\mathcal{I}$, a set of solvers $\mathcal{S}$ with known runtimes $r\!: \mathcal{S} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and PAR-2 scores $par2\!: \mathcal{S} \rightarrow \mathbb{R}$ for each solver.}
+  \KwIn{Solvers $\mathcal{A}$, Instaces $\mathcal{I}$, Runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow [0, \tau]$}
+  \KwOut{Average ranking accuracy $\bar{O}_{\operatorname{acc}}$, Average fraction of runtime $\bar{O}_{\operatorname{rt}}$}
+  \BlankLine
 
   $res \leftarrow \emptyset$
 
-  \For{$\hat{a} \in \mathcal{S}$}{
-    $\mathcal{A} \leftarrow \mathcal{S} \setminus \left\lbrace \hat{a} \right\rbrace$
+  \For{$\hat{a} \in \mathcal{A}$}{
+    $\mathcal{A}' \leftarrow \mathcal{S} \setminus \left\lbrace \hat{a} \right\rbrace$
 
-    $\left( score,\, \tilde{\mathcal{I}} \right) \leftarrow \operatorname{runALAlgorithm}\!\left(\mathcal{I}, \mathcal{A}, \left.r\right|_{\mathcal{A} \times \mathcal{I}}, \hat{a}\right)$ \tcp*{Refer to Algorithm~\ref{algALBenchmark}}
+    $\left( s, \tilde{\mathcal{I}} \right) \leftarrow \operatorname{runALAlgorithm}\!\left(\mathcal{I}, \mathcal{A}', r, \hat{a}\right)$ \tcp*{Refer to Algorithm~\ref{algALBenchmark}}
 
-    $O_{\operatorname{acc}} \leftarrow \left(\sum_{a \in \mathcal{A}} \left[\operatorname{sign}\!\left(score\!\left(a\right) - score\!\left(\hat{a}\right)\right) = \operatorname{sign}\!\left(par2\!\left(a\right) - par2\!\left(\hat{a}\right)\right) \right]\right) / |\mathcal{A}|$
+    $O_{\operatorname{acc}} \leftarrow \frac{1}{|\mathcal{A}|} \sum\limits_{a \in \mathcal{A}} \left[\operatorname{sign}(s(a) - s(\hat{a})) = \operatorname{sign}(par2(a) - par2(\hat{a})) \right]$
     
     \tcp*{Iverson-bracket notation}
     %JB: maybe we can simplify the expresson, since readers might be unfamiliar with that notation (I had to look it up)
 
-    $O_{\operatorname{rt}} \leftarrow \left(\sum_{i \in \tilde{\mathcal{I}}} r\!\left(i, \hat{a}\right)\right) / \left(\sum_{i \in \mathcal{I}} r\!\left(i, \hat{a}\right)\right)$
+	$r' \leftarrow \sum\limits_{i \in \tilde{\mathcal{I}}} r(i, \hat{a})$\;
+	$r \leftarrow \sum\limits_{i \in \mathcal{I}} r(i, \hat{a})$\;
+    $O_{\operatorname{rt}} \leftarrow \frac{r'}{r}$
 
     $res \leftarrow res \cup \left\lbrace \left( O_{\operatorname{acc}},\, O_{\operatorname{rt}} \right) \right\rbrace$
   }
 
-  $\left( \bar{O}_{\operatorname{acc}},\, \bar{O}_{\operatorname{rt}} \right) \leftarrow \operatorname{mean}\!\left( res \right)$
-
-  \KwOut{Return the average ranking accuracy $\bar{O}_{\operatorname{acc}}$ and the average fraction of runtime needed $\bar{O}_{\operatorname{rt}}$.}
+  $\left( \bar{O}_{\operatorname{acc}},\, \bar{O}_{\operatorname{rt}} \right) \leftarrow \operatorname{mean}\!\left( res \right)$ \;
+  \Return $\left( \bar{O}_{\operatorname{acc}},\, \bar{O}_{\operatorname{rt}} \right)$
 \end{algorithm}
 
 \subsection{Data}
