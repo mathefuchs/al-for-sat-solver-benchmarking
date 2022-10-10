@@ -403,6 +403,7 @@ To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma(a, e)
 We transform the runtimes into discrete runtime classes which are determined on a per instance basis.
 For each instance $e \in \mathcal{I}$, we use a single-link hierarchial clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of the $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
 For instances with many timeouts, we have to manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
+%TF: maybe a bit unclear. We do not manually fix anything. There is always one cluster with only time-outs if there are any.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows.
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 
@@ -767,6 +768,7 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 
 \section{Evaluation}
 \label{sec:eval}
+
 Before evaluating our approach end-to-end as described in Section~\ref{sec:exdesign}, we discuss the choice of the runtime-discretization method and the machine-learning predictor.
 Thereafter, we look at the results of our active-learning approach.
 Selection decisions of the aforementioned approach also reveal the importance of different problem-instance families to our model.
@@ -776,6 +778,7 @@ Instance families comprise instances that are derived from the same application 
 
 \subsection{Runtime Prediction}
 \label{sec:evalprel}
+
 %JB: if we dedicate a whole section to these results, we should probably rename this section (not "preliminary" in the typical sense); for TACAS, I guess this can be cut a bit
 %TF: cut the section down a bit, renamed to "runtime prediction"
 An exhaustive grid search of all active-learning approaches outlined in Section~\ref{sec:main} and different runtime-prediction models is infeasible.
@@ -838,9 +841,10 @@ Other clustering approaches that we have tried include hierarchical clustering w
 
 \subsection{Experimental Results}
 \subsubsection{Tuning our algorithm.}
+
 Our main end-to-end experiments follow the evaluation framework that has been introduced in Section~\ref{sec:evalframe}.
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches listed in Section~\ref{sec:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
-The plotted lines represent the Pareto front for each possible choice of ranking approaches (Fig.~\ref{fig:annitraincolorranking}), selection approaches (Fig.~\ref{fig:annitraincolorselection}), and stopping criteria (Fig.~\ref{fig:annitraincolorstopping}).
+The plotted lines represent the best performing configurations per ranking approach (Fig.~\ref{fig:annitraincolorranking}), per selection approach (Fig.~\ref{fig:annitraincolorselection}), and per stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
 %JB: as far as I understand it, the lines only compare some top-level hyperparameters, but for each of these hyperparemeters, take the best (= Pareto front) out of some more fine-grained settings (the hyperparameters of the hyperparameters, so to speak), so it's no really "each possible choice" in the sense of actual, individual configurations, but rather a combination of configurations
 Colors indicate the different hyper-parameter instantiations.
 To be more specific, they represent the Pareto front of all configurations with the respective instantiations.
