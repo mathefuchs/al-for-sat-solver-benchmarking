@@ -392,10 +392,10 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
 
 
 Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
-At the core of the model $\mathcal{M}$ is a prediction function $f : \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
+We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \hat a$ to denote all solvers including the new solver. 
+At the core of the model $\mathcal{M}$ is a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
 
-To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma\!\left(a, i\right)$ by the model's predictions $f\!: \left(\mathcal{A} \cup 
-\left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
+To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma(a, e)$ by the model's predictions $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
 
 
 \subsubsection{Runtime Transformation.}
@@ -493,11 +493,10 @@ The correlation between $s_k$-induced and PAR-2 induced ranks, the discriminator
 Selecting an instance based on the model is the core functionality of our method (cf. Algorithm~\ref{algALBenchmark}, Line 2). 
 In this section, we introduce our sampling strategies that make use of the model's label-prediction function $f$ which are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 We implement a model-uncertainty based approach and a model-based information-gain sampling strategy.
-%, and a voting-based committee-disagreement approach.
 
 These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels, i.e., 
 \begin{equation*}
-  f'\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left[0, 1\right]^k
+  f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k
 \end{equation*}
 
 \subsubsection{Model Uncertainty Based Sampling.}
@@ -516,6 +515,11 @@ To be more specific, we select the instance $e$ that maximizes
 \end{equation*}
 whereby $\operatorname{H}\!\left(i\right)$ denotes the entropy of the runtime labels $\gamma\!\left(a, i\right)$ for all $a \in \mathcal{A}$ and $\operatorname{H}\!\left(i, n\right)$ denotes the entropy of the runtime labels including the runtime label of $\hat{a}$ which is $n$.
 The term $\operatorname{H}\!\left(i, n\right)$ is computed for every possible runtime label $n$.
+
+%JB: if this is info gain regarding runtimes, doesn't Eq. (4) mean that we would prefer instances with low entropy of runtime distribution after considering the new solver, i.e., instances that are not very discriminatory?
+%TF: I don't think so. We want to maximize the reduction in entropy of the runtime labels. Low entropy afterward -> we know that the solver behaves similarly to existing ones.
+
+
 
 %Finally, the voting-based committee-disagreement approach requires a committee of $c$ models.
 %Rather than having a single prediction function $f$, there is a separate function $f_j$ for all committee members $j \in \left\lbrace 1, \dots, c  \right\rbrace$.
@@ -557,22 +561,24 @@ In this section, we present two dynamic stopping criteria, the Wilcoxon and the 
 
 
 \subsubsection{Wilcoxon Stopping Criterion}
-The Wilcoxon stopping criterion stops the iterative active-learning algorithm when we are on average certain enough that the predicted runtime labels are sufficiently different in comparison to the other solvers.
+The Wilcoxon stopping criterion stops the iterative active learning algorithm when we are on average certain enough that the predicted runtime labels are sufficiently different in comparison to the other solvers.
+
+
 To be more specific, we stop when
 \begin{equation}
   W_{\hat{a}} := \frac{1}{\left\lvert \mathcal{A} \right\rvert} \sum_{a \in \mathcal{A}} \operatorname{wilcoxon}_{\alpha}\!\left(\gamma\!\left(a, \mathcal{I}\right), f\!\left(\hat{a}, \mathcal{I}\right) \right)
 \end{equation}
 drops below a certain threshold.
-%JB: if this is info gain regarding runtimes, doesn't Eq. (4) mean that we would prefer instances with low entropy of runtime distribution after considering the new solver, i.e., instances that are not very discriminatory?
-%TF: I don't think so. We want to maximize the reduction in entropy of the runtime labels. Low entropy afterward -> we know that the solver behaves similarly to existing ones.
 Thereby, \emph{wilcoxon} denotes the $p$-value of a Wilcoxon signed-rank test of the runtime-label distributions and $\gamma\!\left(a, \mathcal{I}\right)$ and $f\!\left(\hat{a}, \mathcal{I}\right)$ are the natural set extensions on $\gamma$ and $f$ respectively.
-To improve the stability of this criterion, we use an exponential moving average
+To improve the stability of this criterion, we use an exponential moving average to smooth out outliers.
 
-\begin{equation}
-  W_{\exp}^{\left(m\right)} := \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(m - 1\right)} \enspace \textrm{,}
-\end{equation}
+%whereby $m$ denotes the count of iterations within Algorithm~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
+%\begin{equation}
+%  W_{\exp}^{\left(m\right)} := \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(m - 1\right)}
+%\end{equation}
 
-whereby $m$ denotes the count of iterations within Algorithm~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
+
+
 
 \subsubsection{Model Convergence Stopping Criterion}
 
