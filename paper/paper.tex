@@ -331,26 +331,26 @@ Rather than benchmarking a solver's overall performance, the goal is to recommen
 %Distribution-based approaches sample instances whose features are unaccounted for amongst the already sampled instances.
 %Finally, ensembles are a meta-strategy that combines the predictions of several different active-learning models into a selection choice.
 
+
 \section{Active Learning for SAT Solver Benchmarking}
 \label{sec:main}
 
 In this section, we present the details of our approach.
-Section~\ref{sec:main-framework} describes the general procedure.
-Section~\ref{sec:main-model} specifies the details of the underlying prediction model and discusses how we may derive a solver ranking from that model.
-Possible criteria for sampling instances are discussed in Section~\ref{sec:main-sampling}.
+Section~\ref{sec:main-framework} describes the general framework.
+Section~\ref{sec:main-model} specifies the details of the underlying prediction model and describes how we may derive a solver ranking from that model.
+We discuss possible criteria for sampling instances in Section~\ref{sec:main-sampling}.
 Section~\ref{sec:main-stopping} concludes with possible stopping conditions.
 
 
 \subsection{Incremental Benchmarking Framework}
 \label{sec:main-framework}
 
-Our framework follows a simple three-step schema.
-Algorithm~\ref{algALBenchmark} outlines the procedure. 
-While the stopping condition is not met (line~1), we select \emph{one} problem instance from the pool of instances (line~2) and evaluate the new solver $\hat{a}$ on it (line~3).
-We then use the acquired result to update the model (line~4).
-When the stopping criterion is met, we return the predicted score of the given solver $\hat{a}$.
+Our framework to score a new solver~$\hat{a}$ follows a simple three-step procedure, outlined in Algorithm~\ref{algALBenchmark}:
+While the stopping condition is not met (line~1), we select \emph{one} problem instance from the pool of instances with the help of a prediction model~$\mathcal{M}$ (line~2) and evaluate the new solver~$\hat{a}$ on this instance (line~3).
+We then use the acquired result to update the prediction model~$\mathcal{M}$ (line~4).
+When the stopping criterion is met, we return the predicted score of the new solver~$\hat{a}$ (line~5).
 
-Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
+Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches, which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
 
 \begin{algorithm}
 % MI: comment in to rename to framework and remove numbering:
@@ -368,22 +368,21 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
   %$\mathcal{M} \leftarrow \textrm{init model with $\mathcal{A}$, $\mathcal{I}$, $r$, and $\hat{a}$}$
   %$\tilde{\mathcal{I}} \leftarrow \emptyset$
 
-  \While{$\operatorname{not} \, \operatorname{stop}\!\left(\mathcal{M}\right)$}{
-    $s \leftarrow \operatorname{selectNextInstance}\!\left(\mathcal{M}\right)$
+  \While(\tcp*[f]{cf. Section~\ref{sec:main-stopping}}){$\operatorname{not} \, \operatorname{stop}\!\left(\mathcal{M}\right)$}{
+    $s \leftarrow \operatorname{selectNextInstance}\!\left(\mathcal{M}\right)$ \tcp*{cf. Section~\ref{sec:main-sampling}}
 
     $t \leftarrow \operatorname{runExperiment}\!\left(\hat{a},\,  s\right)$  \tcp*{Runs $\hat{a}$ on $s$ with time-out $\tau$}
 
     %$\tilde{\mathcal{I}} \leftarrow \tilde{\mathcal{I}} \cup \left\lbrace s \right\rbrace$
 
-    $\operatorname{updateModel}\!\left(\mathcal{M},\, s,\, t\right)$
+    $\operatorname{updateModel}\!\left(\mathcal{M},\, s,\, t\right)$ \tcp*{cf. Section~\ref{sec:main-model}}
   }
   
-  \Return $\operatorname{predictScore}\!\left(\mathcal{M}, \hat{a}\right)$
+  \Return $\operatorname{predictScore}\!\left(\mathcal{M}\right)$ \tcp*{cf. Section~\ref{sec:main-model}}
 
   %$\operatorname{score}\!\left(\right) \leftarrow \operatorname{predictScores}\!\left(\mathcal{M}\right)$
   %\KwOut{Return tuple of scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ and the selected instances $\tilde{\mathcal{I}}$.}
 \end{algorithm}
-
 
 
 \subsection{Solver Model}
