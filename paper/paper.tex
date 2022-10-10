@@ -335,8 +335,7 @@ Rather than benchmarking a solver's overall performance, the goal is to recommen
 
 In this section, we present the details of our approach.
 Section~\ref{sec:main-framework} describes the general procedure.
-Section~\ref{sec:main-model} specifies the details of the underlying prediction model.
-Section~\ref{sec:main1} discusses how we may derive a solver ranking from that model.
+Section~\ref{sec:main-model} specifies the details of the underlying prediction model and discusses how we may derive a solver ranking from that model.
 Possible criteria for sampling instances are discussed in Section~\ref{sec:main2}.
 Section~\ref{sec:main3} concludes with possible stopping conditions.
 
@@ -344,13 +343,13 @@ Section~\ref{sec:main3} concludes with possible stopping conditions.
 \subsection{Incremental Benchmarking Framework}
 \label{sec:main-framework}
 
-Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
-
 Our framework follows a simple three-step schema.
 Algorithm~\ref{algALBenchmark} outlines the procedure. 
 While the stopping condition is not met (line~1), we select \emph{one} problem instance from the pool of instances (line~2) and evaluate the new solver $\hat{a}$ on it (line~3).
 We then use the acquired result to update the model (line~4).
 When the stopping criterion is met, we return the predicted score of the given solver $\hat{a}$.
+
+Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
 
 \begin{algorithm}
 % MI: comment in to rename to framework and remove numbering:
@@ -391,42 +390,30 @@ When the stopping criterion is met, we return the predicted score of the given s
 
 % MI: describe initialization and update of model
 
-Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
 
-At the core of the model $\mathcal{M}$ is a prediction function $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
-
-
-
-\subsection{Runtime Preprocessing and Rank Prediction}
-\label{sec:main1}
-
-%In order to predict a ranking of solver $\hat{a}$ amidst its competitors, we need to infer its performance on all instances, even the ones on which we have not evaluated it.
-%To do so, there are generally two notions of this problem, i.e, regression and classification.
-%A regression model tries to predict the \mbox{PAR-2} runtime of $\hat{a}$ on all instances based on the samples that have been selected.
-%Then, the ranking is induced by the average predictions.
-%Alternatively, a classification model can be used to predict some discrete runtime labels of $\hat{a}$ on all instances.
-%Similarly, the average runtime label determines the ranking.
-% MI: skipping this elaboration, since we do not use regression
-
-Preliminary experiments, as well as research in portfolio solvers, have shown however that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
-In our experiments, the mean squared error was within the same magnitude as the values to be predicted.
-In contrast to that, discretizing runtimes and using those labels in the model's training and prediction yields good results (cf.~Section~\ref{sec:eval}).
-%The following paragraphs motivate why it makes sense to discretize runtimes.%MI: no further motivation found, commented out
-%JB: we should probably cut this a bit
-%TF: I've commented out a few sentences but we probably need to cut more.
+Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
+At the core of the model $\mathcal{M}$ is a prediction function $f : \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
 
 
 
-We use a function $\gamma\!: {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ to transform runtime observations.
-In our experiments, this function is a clustering algorithm.
-Note that this transformation is done per instance to adapt to different instance difficulties. 
-Also, we define ${\gamma\!\left(a, i\right) := k}$ iff $r\!\left(a, i\right) = \,\perp$ for all $a \in \mathcal{A}$ and $i \in \mathcal{I}$.
+\subsubsection{Runtime Transformation.}
+
+We transform the runtimes into discrete runtime classes which are determined on a per instance basis.
+For each instance $e \in \mathcal{I}$, we use a hierarchial clustering algorithm to assign the runtimes in $\{ r(a, e) \mid a \in A \}$ to one of the $k$ clusters $C_1, \dots, C_k$.
+Without loss of generality, the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
+For instances with many timeouts, we manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
+The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows.
+$$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
+
+Given an instance $e \in \mathcal{I}$, a solver $a \in A$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
+In our preliminary experiments, we achieved higher accuracy with prediction of such discrete runtime labels than with prediction of raw runtimes. 
+The mean squared error of raw runtime prediction was within the same magnitude as the values to be predicted. 
+%MI: how much more accurate are we with discrete runtime labels
+Research in portfolio solvers has also shown that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
+
 To determine a ranking based on those labels, we define
 \begin{equation}
-  \operatorname{score}\!\left(a\right) := \frac{1}{|\mathcal{I}|} \sum_{i \in \mathcal{I}} w_{a,i} \cdot \left(\gamma\!\left(a, i\right) - 1\right) \enspace \textrm{,}
-  %JB: does the "-1" provide any benefits, or does it only shift scores?
-  %TF: it is used to resemble the 0-indexed implementation. I'm also not happy with this, but using \lbrace 0, \dots, k - 1 \rbrace does also look ugly.
-  %MI: Why is it so important to have this zero-based?
+  \operatorname{score}\!\left(a\right) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} w_{a,i} \cdot \gamma(a, i)
   \label{eq:rankingeq}
 \end{equation}
 with $w_{a,i} := 2$ if $\gamma\!\left(a, i\right) = k$ else $w_{a,i} := 1$.
@@ -504,28 +491,30 @@ Our instance-sampling strategies (also refer to Algorithm~\ref{algALBenchmark}; 
 First, we present possible baseline approaches including existing work on instance-based selection strategies~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
 Second, we show promising machine-learning-based sampling strategies that make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 
-\subsubsection{Baselines and existing approaches.}
-\label{sec:sampling1}
-Apart from obvious baseline instance-selection strategies, i.e., random sampling and neighborhood-aware sampling (randomly choosing among the instances with the highest amount of non-sampled $k$ neighbors), we also implement existing instance-selection strategies.
 
-Bossek and Wagner~\cite{Bossek021a} introduce a custom ranking-score metric incorporating the number of \emph{good} pairs and \emph{bad} pairs.
+% MI: The following belongs either to Related Work or to Experimental Design (commented out)
+
+%\subsubsection{Baselines and existing approaches.}
+%\label{sec:sampling1}
+%Apart from obvious baseline instance-selection strategies, i.e., random sampling and neighborhood-aware sampling (randomly choosing among the instances with the highest amount of non-sampled $k$ neighbors), we also implement existing instance-selection strategies.
+
+%Bossek and Wagner~\cite{Bossek021a} introduce a custom ranking-score metric incorporating the number of \emph{good} pairs and \emph{bad} pairs.
 %JB: some selection methods, like this one, are not mentioned later anymore (in particular, not in experimental design), so we don't need to describe them in detail (maybe mention them shortly if used in preliminary experiments, but turned out to be not useful)
 %TF: I've cut the section down a bit
-A good solver pair, regarding a particular instance, are solvers that perform according to their global ranking.
-%So if solver $a$ is better than solver $b$ on instance $i$ and $a$ is also in total better than $b$, it is a \emph{good} solver pair on $i$.
-Otherwise, it is a \emph{bad} pair.
-Based on this classification, they assign a custom score to each instance.
-By selecting instances with the highest score, they try to favor instances that are predictive of the final ranking.
-%This assumes, though, that the new solver $\hat{a}$ behaves similarly to the existing solvers.
+%A good solver pair, regarding a particular instance, are solvers that perform according to their global ranking.
+%Otherwise, it is a \emph{bad} pair.
+%Based on this classification, they assign a custom score to each instance.
+%By selecting instances with the highest score, they try to favor instances that are predictive of the final ranking.
 
-Gent~et~al.~\cite{GentHJKMNN14} make use of a concept known from racing for automated model selection.
-Given a particular instance and a parameter $\rho$, a solver is $\rho$-dominated if it is at least $\rho$ times worse than the best solver on this problem instance.
-By selecting instances with the highest amount of $\rho$-dominated solvers, they hope to sample instances that provide the best discriminatory power to distinguish the runtimes of a new contestant.
+%Gent~et~al.~\cite{GentHJKMNN14} make use of a concept known from racing for automated model selection.
+%Given a particular instance and a parameter $\rho$, a solver is $\rho$-dominated if it is at least $\rho$ times worse than the best solver on this problem instance.
+%By selecting instances with the highest amount of $\rho$-dominated solvers, they hope to sample instances that provide the best discriminatory power to distinguish the runtimes of a new contestant.
 
-Finally, we also implement some of the selection approaches described by Matricon~et.al.~\cite{MatriconAFSH21}.
-Besides uniformly random sampling and the aforementioned discrimination-based method by Gent~et~al.~\cite{GentHJKMNN14}, they also describe a variance-based selection approach.
-The variance-based strategy selects instances with the highest runtime variance per average runtime.
-We also implement a logarithmized version of this, i.e., the highest log-runtime variance per average log runtime.
+%Finally, we also implement some of the selection approaches described by Matricon~et.al.~\cite{MatriconAFSH21}.
+%Besides uniformly random sampling and the aforementioned discrimination-based method by Gent~et~al.~\cite{GentHJKMNN14}, they also describe a variance-based selection approach.
+%The variance-based strategy selects instances with the highest runtime variance per average runtime.
+%We also implement a logarithmized version of this, i.e., the highest log-runtime variance per average log runtime.
+
  
 \subsubsection{Active-learning-based instance selection.}
 \label{sec:sampling2}
@@ -539,7 +528,7 @@ These methods require the model's predictions to also include probabilities for 
 \end{equation}
 The model-uncertainty-based approach simply selects the instance that is closest to the model's decision boundary and, of course, not already selected, i.e.,
 \begin{equation}
-  \underset{i \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, i\right)_{n} \right\rvert \enspace \textrm{.}
+  \underset{e \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, i\right)_{n} \right\rvert \enspace \textrm{.}
 \end{equation}
 
 The model-based information-gain sampling strategy selects the instance with the highest expected entropy reduction.
