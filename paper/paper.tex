@@ -401,8 +401,7 @@ To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma\!\lef
 \subsubsection{Runtime Transformation.}
 
 We transform the runtimes into discrete runtime classes which are determined on a per instance basis.
-For each instance $e \in \mathcal{I}$, we use a single-link hierarchial clustering algorithm to assign the runtimes in $\{ r(a, e) \mid a \in A \}$ to one of the $k$ clusters $C_1, \dots, C_k$.
-Without loss of generality, the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
+For each instance $e \in \mathcal{I}$, we use a single-link hierarchial clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of the $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
 For instances with many timeouts, we have to manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows.
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
@@ -413,7 +412,7 @@ The mean squared error of raw runtime prediction was within the same magnitude a
 %MI: how much more accurate are we with discrete runtime labels
 Research in portfolio solvers has also shown that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
 
-To determine solver ranks, we define the adapted scoring function $s_k : A \rightarrow [1, 2 \cdot k]$ as follows.
+To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : A \rightarrow [1, 2 \cdot k]$ as follows.
 \begin{align*}
   s_k(a) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
   &&
@@ -490,6 +489,7 @@ The correlation between $s_k$-induced and PAR-2 induced ranks, the discriminator
 
 \subsection{Instance Sampling}
 \label{sec:main-sampling}
+
 Our instance-sampling strategies (also refer to Algorithm~\ref{algALBenchmark}; line 4) can be divided into two categories.
 First, we present possible baseline approaches including existing work on instance-based selection strategies~\cite{Bossek021a,GentHJKMNN14,MatriconAFSH21}.
 Second, we show promising machine-learning-based sampling strategies that make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
