@@ -406,6 +406,7 @@ For instances with many timeouts, we have to manually fix the clustering results
 %TF: maybe a bit unclear. We do not manually fix anything. There is always one cluster with only time-outs if there are any.
 %JB: was wondering about that as well; how do we exactly create the timeout cluster? do we only cluster with k-1, removing timeout instances, or is the timeout cluster an ordinary cluster (which might also contain on-timeout instances)?
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
+%
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 
 Given an instance $e \in \mathcal{I}$, a solver $a \in A$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
@@ -501,7 +502,7 @@ Let $f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$ d
 \subsubsection{Model Uncertainty Sampling.}
 
 The model-uncertainty sampling strategy simply selects the instance that is closest to the model's decision boundary.
-
+%
 \begin{equation*}
   \underset{e \in \mathcal{I} \setminus \tilde{\mathcal{I}}}{\arg\min} \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
   %JB: \tilde I is undefined
@@ -511,7 +512,7 @@ The model-uncertainty sampling strategy simply selects the instance that is clos
 
 The information-gain sampling strategy selects the instance with the highest expected entropy reduction regarding the runtime labels of the instance.
 To be more specific, we select the instance $e$ that maximizes $IG(e)$, which is specified as follows:
-
+%
 \begin{equation*}
   \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{\hat H}_n(e)
 \end{equation*}
@@ -556,21 +557,20 @@ The term $\operatorname{\hat H}_n(e)$ is computed for every possible runtime lab
 %Also, refer to~Algorithm~\ref{algALBenchmark}, line~3.
 %While a fixed subset-size criterion, e.g., only sample \SI{20}{\%} of all available instances, is an example of the former, a stopping criterion based on a Wilcoxon signed-rank test or the convergence of the model's predictions is an example for the latter.
 
-In this section, we present two dynamic stopping criteria, the Wilcoxon and the Model Uncertainty stopping criteria (cf. Algorithm~\ref{algALBenchmark}, Line~1). 
+In this section, we present two dynamic stopping criteria, the Wilcoxon and the Model Uncertainty Stopping Criterion (cf. Algorithm~\ref{algALBenchmark}, Line~1).
 
 
 \subsubsection{Wilcoxon Stopping Criterion}
 
-The Wilcoxon stopping criterion stops the iterative active learning algorithm when we are on average certain enough that the predicted runtime labels are sufficiently different in comparison to the other solvers.
-
-To be more specific, we use the average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $w(S,P)$ of the two runtime label distributions $S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}$ and $P=\{ f(\hat a, e) \mid e \in \mathcal{I} \}$. 
-
+The Wilcoxon stopping criterion stops the active-learning process when we are certain enough that the predicted runtime labels of the new solver are sufficiently different from the labels of the existing solvers.
+We use the average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $w(S,P)$ of the two runtime label distributions $S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}$ for an existing solver $a$ and $P=\{ f(\hat a, e) \mid e \in \mathcal{I} \}$ for the new solver $\hat{a}$:
+%
 \begin{equation*}
   W_{\hat{a}} := \frac{1}{\lvert \mathcal{A} \rvert} \sum_{a \in \mathcal{A}} \operatorname{w}(S, P)
 \end{equation*}
-
-To improve the stability of this criterion, we use an exponential moving average to smooth out outliers as follows and stop as soon as $W^{(i)}_{\hat{a}}$ drops below a certain threshold.
-
+%
+To improve the stability of this criterion, we use an exponential moving average to smooth out outliers and stop as soon as $W^{(i)}_{\exp}$ drops below a certain threshold:
+%
 \begin{align*}
 	W_{\exp}^{\left(0\right)} &:= 1\\
 	W_{\exp}^{\left(i\right)} &:= \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(i - 1\right)}
@@ -580,7 +580,7 @@ To improve the stability of this criterion, we use an exponential moving average
 \subsubsection{Model Convergence Stopping Criterion}
 
 The model-convergence stopping criterion is less sophisticated in comparison.
-It simply stops the active-learning process if within the last $l$ iterations the ranking that is induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged.
+It stops the active-learning process if the ranking induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged within the last $l$ iterations.
 Note that the concrete values of $s_k(\hat a)$ might still change.
 We are solemnly interested in the induced ranking in this case.
 
