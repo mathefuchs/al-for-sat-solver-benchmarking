@@ -568,46 +568,50 @@ To improve the stability of this criterion, we use an exponential moving average
 whereby $m$ denotes the count of iterations within Algorithm~\ref{algALBenchmark} and $W_{\exp}^{\left(0\right)} := 1$.
 
 The model-convergence stopping criterion is less sophisticated in comparison.
-It simply stops the active-learning process (Alg.~\ref{algALBenchmark}) if within the last $l$ iterations the ranking that is induced by the model's predictions (Eq.~\ref{eq:rankingeq}) remains unchanged.
+It simply stops the active-learning process (Algorithm~\ref{algALBenchmark}) if within the last $l$ iterations the ranking that is induced by the model's predictions (Eq.~\ref{eq:rankingeq}) remains unchanged.
 Note that the concrete values of $\operatorname{score}\!\left(a\right)$ might still change.
 We are solemnly interested in the induced ranking in this case.
 
 
 \section{Experimental Design}
-Given all the previously presented instantiations for Alg.~\ref{algALBenchmark}, this section briefly outlines our experimental design, including our optimization goal, evaluation framework, used data sets, hyper-parameter choices, as well as implementation details.
+
+Given all the previously presented instantiations for Algorithm~\ref{algALBenchmark}, this section briefly outlines our experimental design, including our optimization goal, evaluation framework, used data sets, hyper-parameter choices, as well as implementation details.
 % hyper-parameter values that we experiment with
 
 \subsection{Optimization Goal}
 \label{sec:goal}
+
 As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
 By running Algorithm~\ref{algALBenchmark}, we obtain a prediction model $\mathcal{M}$ that provides us with a scoring function \emph{score}.
 Also, it outputs the fraction of runtime that is needed to arrive at its conclusion.
 First and foremost, our goal is to provide the engineer of new SAT solvers with an accurate ranking.
-We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly by the given ranking (cf. Alg.~\ref{alg:eval}).
+We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly by the given ranking (cf. Algorithm~\ref{alg:eval}).
 For now, we exclude the equality of solvers since data shows that the PAR-2 scores of all our solvers are different.
 So, possible ranking decisions may be, for example, solver $a$ is better than $b$ or $b$ is better than $a$.
 The ranking accuracy is affected by whether this decision is correctly made.
 Matricon et. al.~\cite{MatriconAFSH21} also evaluate their approach by the fraction of solver pairs that is correctly decided.
 Second, we also have to optimize for runtime.
 The \emph{fraction of runtime} that the algorithm needs to arrive at its conclusion is denoted by $O_{\operatorname{rt}} \in \left[0, 1\right]$ (lower is better).
-This metric puts the runtime summed over the sampled instances in relation to the runtime summed over all instances in the dataset (cf. Alg.~\ref{alg:eval}).
+This metric puts the runtime summed over the sampled instances in relation to the runtime summed over all instances in the dataset (cf. Algorithm~\ref{alg:eval}).
 Overall, we want to find an approach that maximizes
+%
 \begin{equation}
   O_\delta := \delta O_{\operatorname{acc}} + \left(1 - \delta\right) \left(1 - O_{\operatorname{rt}}\right) \enspace \textrm{,}
   \label{eq:opt}
 \end{equation} 
+%
 whereby $\delta \in \left[0, 1\right]$ allows for linear weighting between the two optimization goals $O_{\operatorname{acc}}$ and $O_{\operatorname{rt}}$.
 Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on a $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
 
 \subsection{Evaluation Framework}
 \label{sec:evalframe}
+
 To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark} (a concrete choice for all the sub-routines), we perform cross-validation on our set of solvers.
 That means that each solver once plays the role of the new solver.
-Alg.~\ref{alg:eval} shows this.
+Algorithm~\ref{alg:eval} shows this.
 Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage.
 Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$.
 
-\vspace{-0.2cm}
 \begin{algorithm}[htbp]
   \caption{Evaluation Framework}
   \label{alg:eval}
@@ -619,11 +623,12 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
   \For{$\hat{a} \in \mathcal{S}$}{
     $\mathcal{A} \leftarrow \mathcal{S} \setminus \left\lbrace \hat{a} \right\rbrace$
 
-    $\left( score,\, \tilde{\mathcal{I}} \right) \leftarrow \operatorname{runALAlgorithm}\!\left(\mathcal{I}, \mathcal{A}, \left.r\right|_{\mathcal{A} \times \mathcal{I}}, \hat{a}\right)$ \tcp*{Refer to Alg.~\ref{algALBenchmark}}
+    $\left( score,\, \tilde{\mathcal{I}} \right) \leftarrow \operatorname{runALAlgorithm}\!\left(\mathcal{I}, \mathcal{A}, \left.r\right|_{\mathcal{A} \times \mathcal{I}}, \hat{a}\right)$ \tcp*{Refer to Algorithm~\ref{algALBenchmark}}
 
     $O_{\operatorname{acc}} \leftarrow \left(\sum_{a \in \mathcal{A}} \left[\operatorname{sign}\!\left(score\!\left(a\right) - score\!\left(\hat{a}\right)\right) = \operatorname{sign}\!\left(par2\!\left(a\right) - par2\!\left(\hat{a}\right)\right) \right]\right) / |\mathcal{A}|$
     
     \tcp*{Iverson-bracket notation}
+    %JB: maybe we can simplify the expresson, since readers might be unfamiliar with that notation (I had to look it up)
 
     $O_{\operatorname{rt}} \leftarrow \left(\sum_{i \in \tilde{\mathcal{I}}} r\!\left(i, \hat{a}\right)\right) / \left(\sum_{i \in \mathcal{I}} r\!\left(i, \hat{a}\right)\right)$
 
@@ -634,9 +639,9 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
 
   \KwOut{Return the average ranking accuracy $\bar{O}_{\operatorname{acc}}$ and the average fraction of runtime needed $\bar{O}_{\operatorname{rt}}$.}
 \end{algorithm}
-\vspace{-0.2cm}
 
 \subsection{Data}
+
 In our experiments, we work with the SAT~Competition~2022 Anniversary Track instances~\cite{sat2022}.
 The dataset consists of 5355 instances with respective runtime data.
 It has complete runtimes of 28 solvers.
@@ -652,39 +657,42 @@ This smaller dataset allows for a more extensive exploration of hyper-parameter 
 
 \subsection{Hyper-parameters}
 \label{sec:hyper}
-Given Alg.~\ref{algALBenchmark}, there are several possible instantiations for the three phases, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}.
+
+Given Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three phases, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}.
 Also, there are different choices for the runtime-label prediction model.
 Note that we are not considering all previously listed approaches since a grid search of all combinations would be infeasible.
 Rather, we filter approaches based on preliminary experimental results (cf. Section~\ref{sec:evalprel}) and do the main end-to-end experiments only with a subset.
 The end-to-end experiment configurations are given below.
 
 \subsubsection{Ranking.}
+
 Regarding \emph{ranking} (cf. Section~\ref{sec:main-model}), we experiment with the following approaches, including our used hyper-parameter values:
-%JB: as parts of these approaches are mostly new to readers (Section 3.1 only explains prediction-based ranking in general, neither observed ranking nor history nor fallback), I'm not sure if we should provide further motivation/explanation here); also applies to other components of experimental design
-%TF: I've tried to add some more information. 
+
 \begin{itemize}
   \item Observed PAR-2 ranking of already sampled instances
   \item Predicted ranking induced by runtime-label predictions
   \begin{itemize}
-    \item History size: consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability. Given a particular ranking decision, the latest $x$ predictions vote on the winner.
-    \item Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker. As discussed in Section~\ref{sec:main-model}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
-    %JB: "difference of ranking" between a pair of new solver and another solver? or has this phrase a different meaning?
-    %TF: tried to clarify
+    \item
+    History size: consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability.
+    Given a particular ranking decision, the latest $x$ predictions vote on the winner.
+    %JB: confuses me a bit as it sounds we rank first and then vote on a winner; isn't it the other way around?
+    \item
+    Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker.
+    %JB: as clarification: one these two solvers has to be the new solver, right? if yes, would write it explicitly
+    As discussed in Section~\ref{sec:main-model}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
   \end{itemize}
 \end{itemize}
 
 \subsubsection{Selection.}
+
 For \emph{selection} (cf. Section~\ref{sec:main-sampling}), we experiment with the following methods, including our used hyper-parameter values:
-%JB: the referenced sampling section describes more methods than the ones listed below, so I guess some methods got dropped after preliminary experiments
-%TF: added them
+
 \begin{itemize}
   \item Random sampling 
   \item Model-based uncertainty sampling
   \begin{itemize}
     \item Fallback threshold: use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
-    \item Runtime scaling: prefer instances with the greatest uncertainty per average runtime (\texttt{True} or \texttt{False}).
-    %JB: how does this scaling work exactly? divide runtimes by average runtime of all solvers on that instance?
-    %TF: yes
+    \item Runtime scaling: prefer instances with the greatest uncertainty per average (over all solvers) runtime (\texttt{True} or \texttt{False}).
   \end{itemize}
 
   \item Model-based information-gain sampling
@@ -700,7 +708,9 @@ For \emph{selection} (cf. Section~\ref{sec:main-sampling}), we experiment with t
 \end{itemize}
 
 \subsubsection{Stopping.}
+
 For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experiment with the following criteria, including our used hyper-parameter values:
+
 \begin{itemize}
   \item Fixed subset size of \SI{10}{\%} or \SI{20}{\%} of instances
   \item Ranking convergence criterion
@@ -709,6 +719,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experime
     \item Convergence duration: stop if the predicted ranking stays the same for the last \SI{1}{\%} or \SI{2}{\%} of sampled instances.
     %JB: why this fraction and not an absolute number of instances? the definition here might make stopping in early iterations rather likely, as just very few consecutive instances are needed (which might happen by coincidence; e.g., for ~5k instances, 2% minimum amount-> ~100 instances, 1% convergence duration -> ~1 instance), while the criterion becomes harder in later iterations
     %TF: for that reason, it is combined with the "minimum amount". Using fractions makes the approach more useful when adapting it to benchmarks of different sizes.
+    %JB: yes, but (1) even combination with "minimum amount" can make stopping very easy (see my example) and (2) fraction for convergence could also be relative to absolute number of instances (which is constant over AL run) rather than fraction of currently sampled instances (which increases over AL run)
   \end{itemize}
 
   \item Wilcoxon criterion
@@ -720,6 +731,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experime
 \end{itemize}
 
 \subsubsection{Runtime-label prediction model.}
+
 As a runtime-label prediction model, we only make use of one method that has proven to be successful in preliminary experiments (cf.~Section~\ref{sec:evalprel}).
 Our model of choice is an ensemble, stacking a quadratic-discriminant analysis\footnote{With a regularization parameter of zero and a singular value threshold of zero} onto a random forest model\footnote{With \emph{entropy} splitting criterion and \emph{balanced} class weights} using a decision tree\footnote{With \emph{Gini} impurity splitting criterion; choosing the best split for each branching decision and maximum tree depth of 5 levels} to weight its members.
 If not stated explicitly, all other model parameters default to the presets of \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/stable/index.html}; Version 1.0.2}~\cite{scikit-learn}.
@@ -730,6 +742,7 @@ If not stated explicitly, all other model parameters default to the presets of \
 %Possible values are 10, 20, 30, 40, and 50.
 
 \subsection{Implementation Details}
+
 For reproducibility, our source code, all experiments, and data are available on GitHub\footnote{\url{https://github.com/mathefuchs/al-for-SAT solver-benchmarking}}.
 Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions and \emph{gbd-tools}~\cite{IserS18} for SAT-instance retrieval.
 
