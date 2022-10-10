@@ -394,14 +394,16 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
 Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
 At the core of the model $\mathcal{M}$ is a prediction function $f : \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within the previously mentioned three steps.
 
+To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma\!\left(a, i\right)$ by the model's predictions $f\!: \left(\mathcal{A} \cup 
+\left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
 
 
 \subsubsection{Runtime Transformation.}
 
 We transform the runtimes into discrete runtime classes which are determined on a per instance basis.
-For each instance $e \in \mathcal{I}$, we use a hierarchial clustering algorithm to assign the runtimes in $\{ r(a, e) \mid a \in A \}$ to one of the $k$ clusters $C_1, \dots, C_k$.
+For each instance $e \in \mathcal{I}$, we use a single-link hierarchial clustering algorithm to assign the runtimes in $\{ r(a, e) \mid a \in A \}$ to one of the $k$ clusters $C_1, \dots, C_k$.
 Without loss of generality, the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
-For instances with many timeouts, we manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
+For instances with many timeouts, we have to manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows.
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 
@@ -411,16 +413,18 @@ The mean squared error of raw runtime prediction was within the same magnitude a
 %MI: how much more accurate are we with discrete runtime labels
 Research in portfolio solvers has also shown that directly predicting runtimes without any transformation does not work well in practice~\cite{NgokoCT19,CollauttiMMO13}.
 
-To determine a ranking based on those labels, we define
-\begin{equation}
-  \operatorname{score}\!\left(a\right) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} w_{a,i} \cdot \gamma(a, i)
+To determine solver ranks, we define the adapted scoring function $s : A \rightarrow [1, 2 \cdot k]$ as follows.
+\begin{align*}
+  \operatorname{s}(a) &:= \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
+  &&
+  \gamma'_k(a, e) &:= \begin{cases}
+  	2 \cdot \gamma_k(a, e) 	& \text{if } \gamma_k(a, e) = k\\
+	\gamma_k(a, e)	& \text{otherwise}
+  \end{cases}
   \label{eq:rankingeq}
-\end{equation}
-with $w_{a,i} := 2$ if $\gamma\!\left(a, i\right) = k$ else $w_{a,i} := 1$.
-To be applicable to $\hat{a}$, we extend \emph{score} by replacing $\gamma\!\left(a, i\right)$ by the model's predictions $f\!: \left(\mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace\right) \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
+\end{align*}
 
 Discretization would not provide much value if the resulting cluster labels were not predictive of the PAR-2 ranking we seek to predict.
-In our work, we use a hierarchical-clustering approach with a single-link criterion for $k = 3$.
 For the SAT Competition~2022 Anniversary Track instances~\cite{sat2022}, this ranking approach is capable of correctly deciding for almost all pairs of solvers which one is faster (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$).
 Moreover, it decides all solvers correctly if the difference in the cluster-label-ranking scores between two solvers is at least \SI{0.11}{}.
 %Refer to Table~\ref{tab:discreteranking} for a comparison with the PAR-2 ranking.
