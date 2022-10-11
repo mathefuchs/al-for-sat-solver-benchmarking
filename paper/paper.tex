@@ -153,7 +153,7 @@ However, the approach does not optimize for benchmark \emph{runtime} and selects
     \hline
   \end{tabular}
   ~\\[1em]
-  \caption{Comparison of features of our benchmark selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
+  \caption{Comparison of features of our benchmark-selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
   }
   \label{tab:requirements}
 \end{table}
@@ -334,14 +334,14 @@ Rather than benchmarking a solver's overall performance, the goal is to recommen
 \label{sec:main}
 
 The outline of our benchmarking framework is depicted in Algorithm~\ref{algALBenchmark}. 
-Given a set of known solvers $\mathcal{A}$, instances $\mathcal{I}$ and runtimes $r$, we first create a prediction model~$\mathcal{M}$ for the new solver $\hat a$ (Line~1). 
-The prediction model is used to repeatedly select an instance (Line~4) for benchmarking $\hat a$ (Line~5). 
+Given a set of known solvers $\mathcal{A}$, instances $\mathcal{I}$ and runtimes $r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a$ (Line~1). 
+The prediction model~$\mathcal{M}$ is used to repeatedly select an instance (Line~4) for benchmarking $\hat a$ (Line~5). 
 The acquired result is subsequently used to update the prediction model~$\mathcal{M}$ (Line~6). 
 When the stopping criterion is met (Line~3), we quit the benchmarking loop and predict the final score of $\hat a$ (Line~8). 
-Algorithm~\ref{algALBenchmark} returns the predicted score of $\hat a$ as well as the acquired runtime measurements (Line~9). 
+Algorithm~\ref{algALBenchmark} returns the predicted score of $\hat a$ as well as the acquired instances and runtime measurements (Line~9). 
 
-Section~\ref{sec:main:model} specifies the details of the underlying prediction model and describes how we may derive a solver ranking from that model.
-We discuss possible criteria for selecting instances in Section~\ref{sec:main:selection}.
+Section~\ref{sec:main:model} describes the underlying prediction model~$\mathcal{M}$ and specifies how we may derive a solver ranking from it.
+We discuss criteria for selecting instances in Section~\ref{sec:main:selection}.
 Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 
 % MI: This belongs to discussion at the end since this also has substantial disadvantages:
@@ -360,7 +360,7 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
 
   \BlankLine
 
-  $\mathcal{M} \leftarrow \operatorname{initModel}(\mathcal{A}, \mathcal{I}, r, \hat{a})$ \;
+  $\mathcal{M} \leftarrow \operatorname{initModel}(\mathcal{A}, \mathcal{I}, r, \hat{a})$ \tcp*{cf. Section~\ref{sec:main:model}}
   
   \BlankLine
   $\mathcal{R} \leftarrow \emptyset$ \;
@@ -567,7 +567,7 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
   \label{alg:eval}
 
   %\KwIn{A pool of instances $\mathcal{I}$, a set of solvers $\mathcal{S}$ with known runtimes $r\!: \mathcal{S} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and PAR-2 scores $par2\!: \mathcal{S} \rightarrow \mathbb{R}$ for each solver.}
-  \KwIn{Solvers $\mathcal{A}$, Instaces $\mathcal{I}$, Runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow [0, \tau]$}
+  \KwIn{Solvers $\mathcal{A}$, Instances $\mathcal{I}$, Runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow [0, \tau]$}
   \KwOut{Average Rank Accuracy $\bar{O}_{\operatorname{acc}}$, Average Fraction of Runtime $\bar{O}_{\operatorname{rt}}$}
   \BlankLine
 
@@ -585,6 +585,8 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
     	\If{$\bigl(s_k(a) - s_{\hat a}\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
    		    $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}|}$ \;
     	}
+    	%JB: why is "\hat a" subscript of s rather than argument?
+    	%JB: "par_2" needs to be defined in text
     }
 	
 	\BlankLine
