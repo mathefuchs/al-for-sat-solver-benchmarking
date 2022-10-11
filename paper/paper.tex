@@ -376,10 +376,10 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
     \BlankLine
     $\mathcal{R} \leftarrow \mathcal{R} \cup \bigl\{ (e, t) \bigr\}$
   }
-  $s \leftarrow \operatorname{predictScore}(\mathcal{M})$ \tcp*{cf. Section~\ref{sec:main:model}}
+  $s_{\hat a} \leftarrow \operatorname{predictScore}(\mathcal{M})$ \tcp*{cf. Section~\ref{sec:main:model}}
   
   \BlankLine
-  \Return $(s, \mathcal{R})$
+  \Return $(s_{\hat a}, \mathcal{R})$
 
   %$\operatorname{score}\!\left(\right) \leftarrow \operatorname{predictScores}\!\left(\mathcal{M}\right)$
   %\KwOut{Return tuple of scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ and the selected instances $\tilde{\mathcal{I}}$.}
@@ -631,30 +631,44 @@ Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$
 
   %\KwIn{A pool of instances $\mathcal{I}$, a set of solvers $\mathcal{S}$ with known runtimes $r\!: \mathcal{S} \times \mathcal{I} \rightarrow \left[0, \tau\right] \cup \left\lbrace \perp \right\rbrace$, and PAR-2 scores $par2\!: \mathcal{S} \rightarrow \mathbb{R}$ for each solver.}
   \KwIn{Solvers $\mathcal{A}$, Instaces $\mathcal{I}$, Runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow [0, \tau]$}
-  \KwOut{Average ranking accuracy $\bar{O}_{\operatorname{acc}}$, Average fraction of runtime $\bar{O}_{\operatorname{rt}}$}
+  \KwOut{Average Rank Accuracy $\bar{O}_{\operatorname{acc}}$, Average Fraction of Runtime $\bar{O}_{\operatorname{rt}}$}
   \BlankLine
 
-  $res \leftarrow \emptyset$
+  $O \leftarrow \emptyset$
+  \BlankLine
 
   \For{$\hat{a} \in \mathcal{A}$}{
-    $\mathcal{A}' \leftarrow \mathcal{S} \setminus \left\lbrace \hat{a} \right\rbrace$
+    $\mathcal{A}' \leftarrow \mathcal{A} \setminus \left\lbrace \hat{a} \right\rbrace$ \;
+    $(s_{\hat a}, \mathcal{R}) \leftarrow \operatorname{runALAlgorithm}(\mathcal{A}', \mathcal{I}, r, \hat{a})$ \tcp*{Refer to Algorithm~\ref{algALBenchmark}}
 
-    $\left( s, \tilde{\mathcal{I}} \right) \leftarrow \operatorname{runALAlgorithm}\!\left(\mathcal{I}, \mathcal{A}', r, \hat{a}\right)$ \tcp*{Refer to Algorithm~\ref{algALBenchmark}}
-
-    $O_{\operatorname{acc}} \leftarrow \frac{1}{|\mathcal{A}|} \sum\limits_{a \in \mathcal{A}} \left[\operatorname{sign}(s(a) - s(\hat{a})) = \operatorname{sign}(par2(a) - par2(\hat{a})) \right]$
-    
-    \tcp*{Iverson-bracket notation}
-    %JB: maybe we can simplify the expresson, since readers might be unfamiliar with that notation (I had to look it up)
-
-	$r' \leftarrow \sum\limits_{i \in \tilde{\mathcal{I}}} r(i, \hat{a})$\;
-	$r \leftarrow \sum\limits_{i \in \mathcal{I}} r(i, \hat{a})$\;
-    $O_{\operatorname{rt}} \leftarrow \frac{r'}{r}$
-
-    $res \leftarrow res \cup \left\lbrace \left( O_{\operatorname{acc}},\, O_{\operatorname{rt}} \right) \right\rbrace$
+	\BlankLine
+	\tcp{Determine Rank Accuracy}
+    $O_{\operatorname{acc}} \leftarrow 0$ \;    
+    \For{$a \in \mathcal{A}$}{
+    	\If{$\bigl(s_k(a) - s_{\hat a}\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
+   		    $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}|}$ \;
+    	}
+    }
+	
+	\BlankLine
+	\tcp{Determine Runtime Fraction}
+	$r \leftarrow \sum\limits_{e \in \mathcal{I}} r(\hat a, e)$\;
+	$O_{\operatorname{rt}} \leftarrow 0$\;
+    \For{$e \in \mathcal{I}$}{
+		\If{$\exists t, (e,t) \in \mathcal{R}$}{
+			$O_{\operatorname{rt}} \leftarrow O_{\operatorname{rt}} + \frac{t}{r}$\;
+		}
+	}
+	
+	\BlankLine
+    $O \leftarrow O \cup \bigl\{ ( O_{\operatorname{acc}},\, O_{\operatorname{rt}} ) \bigr\}$
   }
 
-  $\left( \bar{O}_{\operatorname{acc}},\, \bar{O}_{\operatorname{rt}} \right) \leftarrow \operatorname{mean}\!\left( res \right)$ \;
-  \Return $\left( \bar{O}_{\operatorname{acc}},\, \bar{O}_{\operatorname{rt}} \right)$
+  \BlankLine
+  $\bigl( \bar{O}_{\operatorname{acc}}, \bar{O}_{\operatorname{rt}} \bigr) \leftarrow \operatorname{average}(O)$ \;
+  
+  \BlankLine
+  \Return $\bigl( \bar{O}_{\operatorname{acc}}, \bar{O}_{\operatorname{rt}} \bigr)$
 \end{algorithm}
 
 \subsection{Data}
