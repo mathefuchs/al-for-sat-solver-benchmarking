@@ -397,7 +397,7 @@ Model $\mathcal{M}$ provides a prediction function $f : \mathcal{\hat A} \times 
 \subsubsection{Runtime Transformation.}
 
 We transform the runtimes into discrete runtime labels on a per-instance basis.
-For each instance $e \in \mathcal{I}$, we use a single-link hierarchical clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of the $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
+For each instance $e \in \mathcal{I}$, we use clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of the $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_k$.
 For instances with many timeouts, we have to manually fix the clustering results such that all timeouts $\tau$ are in cluster $C_k$.
 %TF: maybe a bit unclear. We do not manually fix anything. There is always one cluster with only time-outs if there are any.
 %JB: was wondering about that as well; how do we exactly create the timeout cluster? do we only cluster with k-1, removing timeout instances, or is the timeout cluster an ordinary cluster (which might also contain on-timeout instances)?
@@ -426,64 +426,6 @@ To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in t
 %
 I.e., we apply a PAR-2 scoring, which is commonly used in SAT competitions~\cite{FroleyksHIJS21}, on the discrete labels.
 The scoring function $s_k$ induces a ranking among solvers.
- 
-However, we need to ensure that discretized labels still discriminate solvers and align with the actual PAR-2 ranking.
-We analyzed the ranking induced by $s_3$ in preliminary experiments with the SAT Competition~2022 Anniversary Track~\cite{sat2022}.
-According to a Wilcoxon-signed-rank test with $\alpha = 0.05$, \SI{87.83}{\%} of solver pairs have significantly different scores after discretization, only a slight drop compared to \SI{89.95}{\%} before discretization.
-%While only time-out labels (solver times out or not on a particular instance) are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs.
-%\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
-Further, our ranking approach is capable of correctly deciding for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
-%Moreover, it decides all solvers correctly if the difference in the cluster-label-ranking scores between two solvers is at least \SI{0.11}{}.
-%Refer to Table~\ref{tab:discreteranking} for a comparison with the PAR-2 ranking.
-In particular, the Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{0.988}{}, which is very close to the optimal value of 1~\cite{de2016comparing}.
-All these results show that discretized runtimes are suitable for our framework.
-
-%\begin{table}[tbp]
-%  \centering
-%   \caption{
-%     PAR-2 ranking vs. discretized-runtime ranking for the SAT Competition~2022 Anniversary Track instances~\cite{sat2022} ($k = 3$; hierarchical clustering).
-%	  Differences are highlighted with a gray background.
-%	}
-%  \label{tab:discreteranking}
-%  \begin{tabular}{
-%    c
-%    >{\centering\arraybackslash}p{1.8cm}p{3.6cm}
-%    >{\centering\arraybackslash}p{1.8cm}p{3.6cm}
-%  }
-%    \hline
-%    Rank & \multicolumn{2}{c}{PAR-2 Ranking} & \multicolumn{2}{c}{Cluster-Label Ranking} \\
-%    \hline
-%1   & 2806.400 & Kissat\_MAB\_ESA           & 1.172 & Kissat\_MAB\_ESA \\
-%2   & 2810.959 & kissat-sc2022-bulky        & 1.183 & kissat-sc2022-bulky \\
-%3   & 2830.143 & ekissat-mab-gb-db          & 1.185 & ekissat-mab-gb-db \\
-%\cellcolor{gray!15} 4   & \cellcolor{gray!15} 2833.081 & \cellcolor{gray!15} Kissat\_MAB\_UCB           & \cellcolor{gray!15} 1.186 & \cellcolor{gray!15} kissat\_inc \\
-%\cellcolor{gray!15} 5   & \cellcolor{gray!15} 2833.397 & \cellcolor{gray!15} kissat\_inc                & \cellcolor{gray!15} 1.186 & \cellcolor{gray!15} Kissat\_MAB\_UCB \\
-%6   & 2841.734 & ekissat-mab-db-v1          & 1.192 & ekissat-mab-db-v1 \\
-%7   & 2842.666 & Kissat\_MAB\_MOSS          & 1.192 & Kissat\_MAB\_MOSS \\
-%8   & 2857.219 & Kissat\_MAB-HyWalk         & 1.195 & Kissat\_MAB-HyWalk \\
-%9   & 2866.960 & kissat-sc2022-light        & 1.120 & kissat-sc2022-light \\
-%10  & 2896.371 & kissat-els-v2              & 1.216 & kissat-els-v2 \\
-%11  & 2950.179 & hKis-unsat                 & 1.229 & hKis-unsat \\
-%12  & 2964.729 & Kissat\_adaptive\_restart  & 1.234 & Kissat\_adaptive\_restart \\
-%13  & 2974.990 & SeqFROST-NoExtend          & 1.247 & SeqFROST-NoExtend \\
-%14  & 3010.642 & Cadical\_ESA               & 1.248 & Cadical\_ESA \\
-%\cellcolor{gray!15} 15  & \cellcolor{gray!15} 3012.152 & \cellcolor{gray!15} kissat-els-v1              & \cellcolor{gray!15} 1.258 & \cellcolor{gray!15} CadicalReorder \\
-%\cellcolor{gray!15} 16  & \cellcolor{gray!15} 3028.922 & \cellcolor{gray!15} CadicalReorder             & \cellcolor{gray!15} 1.264 & \cellcolor{gray!15} kissat-els-v1 \\
-%\cellcolor{gray!15} 17  & \cellcolor{gray!15} 3042.540 & \cellcolor{gray!15} cadical\_rel\_Scavel       & \cellcolor{gray!15} 1.278 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V1 \\
-%\cellcolor{gray!15} 18  & \cellcolor{gray!15} 3082.293 & \cellcolor{gray!15} kissat\_relaxed            & \cellcolor{gray!15} 1.283 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V2 \\
-%\cellcolor{gray!15} 19  & \cellcolor{gray!15} 3089.304 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V1          & \cellcolor{gray!15} 1.298 & \cellcolor{gray!15} kissat\_relaxed \\
-%\cellcolor{gray!15} 20  & \cellcolor{gray!15} 3095.118 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V2          & \cellcolor{gray!15} 1.361 & \cellcolor{gray!15} cadical\_rel\_Scavel \\
-%21  & 3272.674 & glucose-reboot             & 1.379 & glucose-reboot \\
-%\cellcolor{gray!15} 22  & \cellcolor{gray!15} 3287.322 & \cellcolor{gray!15} LStech-Maple-HyWalk        & \cellcolor{gray!15} 1.414 & \cellcolor{gray!15} hCaD\_V1-psids \\
-%23  & 3288.798 & LSTech\_Maple              & 1.446 & LSTech\_Maple \\
-%\cellcolor{gray!15} 24  & \cellcolor{gray!15} 3399.281 & \cellcolor{gray!15} SLIME-SC-2022-beta         & \cellcolor{gray!15} 1.469 & \cellcolor{gray!15} LStech-Maple-HyWalk \\
-%\cellcolor{gray!15} 25  & \cellcolor{gray!15} 3410.345 & \cellcolor{gray!15} SLIME-SC-2022              & \cellcolor{gray!15} 1.470 & \cellcolor{gray!15} SLIME-SC-2022-beta \\
-%\cellcolor{gray!15} 26  & \cellcolor{gray!15} 3430.403 & \cellcolor{gray!15} hCaD\_V1-psids             & \cellcolor{gray!15} 1.523 & \cellcolor{gray!15} SLIME-SC-2022 \\
-%27  & 3504.244 & MapleLCMDistChrBt-DL-v3    & 1.542 & MapleLCMDistChrBt-DL-v3 \\
-%28  & 4750.808 & IsaSAT                     & 2.062 & IsaSAT \\
-%    \hline
-%  \end{tabular}
-%\end{table}
 
 
 \subsection{Instance Selection}
@@ -620,7 +562,7 @@ Algorithm~\ref{alg:eval} shows this.
 Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage.
 Also, the runtime function $r$ is restricted to $\mathcal{A} \times \mathcal{I}$.
 
-\begin{algorithm}[htbp]
+\begin{algorithm}[htb]
   \caption{Evaluation Framework}
   \label{alg:eval}
 
@@ -680,15 +622,15 @@ Instance families comprise instances derived from the same application domain, e
 
 For hyper-parameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance's family.
 All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them corresponds to less than one instance, are put into one meta-family for stratification.
-This smaller dataset allows for a more extensive exploration of hyper-parameter space.
+This \emph{tuning dataset} allows for a more extensive exploration of hyper-parameter space.
 
 \subsection{Hyper-parameters}
 \label{sec:exdesign:hyper}
 
 Given Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three phases, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}.
-Also, there are different choices for the runtime-label prediction model.
+Also, there are different choices for the runtime-label prediction model and runtime discretization.
 Note that we are not considering all previously listed approaches since a grid search of all combinations would be infeasible.
-Rather, we filter approaches based on preliminary experimental results (cf. Section~\ref{sec:eval:prediction}) and do the main end-to-end experiments only with a subset.
+Rather, we filter approaches based on preliminary experimental results and do the end-to-end experiments only with a subset.
 The end-to-end experiment configurations are given below.
 
 \subsubsection{Ranking.}
@@ -756,16 +698,132 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
   \end{itemize}
 \end{itemize}
 
-\subsubsection{Runtime-label prediction model.}
+\subsubsection{Prediction model.}
 
-As runtime-label prediction model, we only make use of one fixed model since an exhaustive grid search would be infeasible (cf.~Section~\ref{sec:eval:prediction}).
-Our model of choice is an ensemble, stacking a quadratic-discriminant analysis\footnote{With a regularization parameter of zero and a singular value threshold of zero} onto a random forest model\footnote{With \emph{entropy} splitting criterion and \emph{balanced} class weights} using a decision tree\footnote{With \emph{Gini} impurity splitting criterion; choosing the best split for each branching decision and maximum tree depth of 5 levels} to weight its members.
-If not stated explicitly, all other model parameters default to the presets of \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/stable/index.html}; Version 1.0.2}~\cite{scikit-learn}.
+For runtime-label prediction, we only use one model configuration in our experiments since an exhaustive grid search would be infeasible.
+In preliminary experiments, we compared a variety of model types from \emph{scikit-learn}~\cite{scikit-learn}.
+In particular, we conducted nested cross-validation, including hyper-parameter tuning, and used Matthews Correlation Coefficient~\cite{gorodkin2004comparing,matthews1975comparison} to assess the performance for predicting runtime labels.
+Our final choice is a stacking ensemble of a quadratic-discriminant analysis and a random forest, using a decision tree to combine its ensemble members.
 
-%the proposed runtime label ranking, (2) the PAR-2 subsample ranking, and (3) the runtime label ranking that uses the PAR-2 subsample ranking as a fallback when performance differences drop below a threshold.
-%Possible values are \SI{0.01}{}, \SI{0.05}{}, and \SI{0.1}{}.
-%Also, we experiment with different lengths of the prediction history that is used for stabilizing the ranking.
-%Possible values are 10, 20, 30, 40, and 50.
+%Our model of choice is an ensemble, stacking a quadratic-discriminant analysis\footnote{With a regularization parameter of zero and a singular value threshold of zero} onto a random forest model\footnote{With \emph{entropy} splitting criterion and \emph{balanced} class weights} using a decision tree\footnote{With \emph{Gini} impurity splitting criterion; choosing the best split for each branching decision and maximum tree depth of 5 levels} to weight its members.
+%If not stated explicitly, all other model parameters default to the presets of \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/stable/index.html}; Version 1.0.2}~\cite{scikit-learn}.
+%
+%
+%Therefore, we compare predictors first and select one runtime-prediction model for all further experiments.
+%We evaluate predictors with the \emph{Matthews Correlation Coefficient} (MCC) scores~\cite{gorodkin2004comparing,matthews1975comparison} of the classification task.
+%MCC scores are great in dealing with class imbalances in contrast to conventional metrics like accuracy.
+%
+%% \begin{table}
+%	%   \centering
+%	%   \caption{
+%		%   	Time-out prediction Matthews Correlation Coefficient performances.
+%		%   	Results are obtained using cross-validation.
+%		%   	We provide \SI{64}{\%} of ground-truth for training, use \SI{16}{\%} as a validation set, and \SI{20}{\%} as a test set (5-fold cross-validation).
+%		%   }
+%	%   \label{tab:mcc}
+%	%   \begin{tabular}{lc}
+%		%     Prediction Model & Avg. MCC (Std.) \\
+%		%     \hline
+%		%     Stacking ensemble (QDA, RF)           & 0.9527 (0.0292) \\
+%		%     Quadratic-discriminant analysis (QDA) & 0.9290 (0.0339) \\
+%		%     Random forest (RF)                    & 0.8530 (0.0479) \\
+%		%     AdaBoost with decision trees          & 0.8384 (0.0444) \\
+%		%     AdaBoost with logistic regression     & 0.8158 (0.0985) \\
+%		%     Decision tree                         & 0.8059 (0.0707) \\
+%		%     Logistic regression                   & 0.8052 (0.1018) \\
+%		%     kNN classifier                        & 0.7885 (0.1521) \\
+%		%     MLP classifier                        & 0.7760 (0.1408) \\
+%		%     Support-vector classifier             & 0.7757 (0.2149) \\
+%		%     Naive Bayes                           & 0.7306 (0.1394) \\
+%		%     \hline
+%		%   \end{tabular}
+%	% \end{table}
+%
+%% Stacking MCC
+%% 0.888221577313471
+%% 0.04753979056930393
+%
+%%To obtain the results in Table~\ref{tab:mcc},
+%We perform cross-validation among all solvers: we assume that all other solver runtimes are known and provide \SI{64}{\%} of ground-truth runtime labels of the target solver for training, use \SI{16}{\%} as a validation set for hyper-parameter tuning of the runtime predictor, and \SI{20}{\%} as a test set (5-fold cross-validation).
+%This is repeated for each solver once.
+%Note that we perform cross-validation on two levels, i.e., among the solvers and the target solver runtimes.
+%We compare the average performances on the test sets.
+%
+%ML classification models that we have tried include random forests, decision trees, quadratic-discriminant analysis, AdaBoost, logistic regression, $k$-nearest neighbor, multi-layer perceptrons, support vector machines, and naive Bayes.
+%A stacking ensemble consisting of quadratic-discriminant analysis and random forests performed best.
+%It produces an MCC score of \SI{0.8882}{} for predicting three-class runtime labels.
+%% \SI{0.9527}{} for time-out prediction
+%The results are significantly better than any other model that we have tried regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$.
+%%Since the differences in the MCC-performance distributions of the best and second-best approaches are statistically significant regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$, we only use the best approach for all further experiments as a prediction model.
+
+\subsubsection{Runtime discretization.}
+
+To define prediction targets, i.e., discretized runtime labels, we use hierarchical clustering with $k = 3$ and a log-single-link criterion, which produced the most \emph{useful} labels in preliminary experiments.
+We denote this adapted solver scoring function with $s_3$.
+Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
+%Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
+%JB: "similar experiment as above" - reference unclear; what do you want to say?
+%TF: Removed the sentence
+In our chosen hierarchical procedure, each non-time-out runtime starts in a separate interval.
+We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
+
+To obtain \emph{useful} labels, we need to ensure that discretized labels still discriminate solvers and align with the actual PAR-2 ranking.
+We analyzed the ranking induced by $s_3$ in preliminary experiments with the SAT Competition~2022 Anniversary Track~\cite{sat2022}.
+According to a Wilcoxon-signed-rank test with $\alpha = 0.05$, \SI{87.83}{\%} of solver pairs have significantly different scores after discretization, only a slight drop compared to \SI{89.95}{\%} before discretization.
+%While only time-out labels (solver times out or not on a particular instance) are sufficient to significantly distinguish about \SI{87.04}{\%} of solver pairs.
+%\footnote{Based on hierarchical clustering with a log-single-link criterion for $k = 3$.}
+Further, our ranking approach correctly decides for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
+%Moreover, it decides all solvers correctly if the difference in the cluster-label-ranking scores between two solvers is at least \SI{0.11}{}.
+%Refer to Table~\ref{tab:discreteranking} for a comparison with the PAR-2 ranking.
+In particular, the Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{0.988}{}, which is very close to the optimal value of 1~\cite{de2016comparing}.
+All these results show that discretized runtimes are suitable for our framework.
+
+%\begin{table}[tbp]
+%  \centering
+%   \caption{
+	%     PAR-2 ranking vs. discretized-runtime ranking for the SAT Competition~2022 Anniversary Track instances~\cite{sat2022} ($k = 3$; hierarchical clustering).
+	%	  Differences are highlighted with a gray background.
+	%	}
+%  \label{tab:discreteranking}
+%  \begin{tabular}{
+		%    c
+		%    >{\centering\arraybackslash}p{1.8cm}p{3.6cm}
+		%    >{\centering\arraybackslash}p{1.8cm}p{3.6cm}
+		%  }
+	%    \hline
+	%    Rank & \multicolumn{2}{c}{PAR-2 Ranking} & \multicolumn{2}{c}{Cluster-Label Ranking} \\
+	%    \hline
+	%1   & 2806.400 & Kissat\_MAB\_ESA           & 1.172 & Kissat\_MAB\_ESA \\
+	%2   & 2810.959 & kissat-sc2022-bulky        & 1.183 & kissat-sc2022-bulky \\
+	%3   & 2830.143 & ekissat-mab-gb-db          & 1.185 & ekissat-mab-gb-db \\
+	%\cellcolor{gray!15} 4   & \cellcolor{gray!15} 2833.081 & \cellcolor{gray!15} Kissat\_MAB\_UCB           & \cellcolor{gray!15} 1.186 & \cellcolor{gray!15} kissat\_inc \\
+	%\cellcolor{gray!15} 5   & \cellcolor{gray!15} 2833.397 & \cellcolor{gray!15} kissat\_inc                & \cellcolor{gray!15} 1.186 & \cellcolor{gray!15} Kissat\_MAB\_UCB \\
+	%6   & 2841.734 & ekissat-mab-db-v1          & 1.192 & ekissat-mab-db-v1 \\
+	%7   & 2842.666 & Kissat\_MAB\_MOSS          & 1.192 & Kissat\_MAB\_MOSS \\
+	%8   & 2857.219 & Kissat\_MAB-HyWalk         & 1.195 & Kissat\_MAB-HyWalk \\
+	%9   & 2866.960 & kissat-sc2022-light        & 1.120 & kissat-sc2022-light \\
+	%10  & 2896.371 & kissat-els-v2              & 1.216 & kissat-els-v2 \\
+	%11  & 2950.179 & hKis-unsat                 & 1.229 & hKis-unsat \\
+	%12  & 2964.729 & Kissat\_adaptive\_restart  & 1.234 & Kissat\_adaptive\_restart \\
+	%13  & 2974.990 & SeqFROST-NoExtend          & 1.247 & SeqFROST-NoExtend \\
+	%14  & 3010.642 & Cadical\_ESA               & 1.248 & Cadical\_ESA \\
+	%\cellcolor{gray!15} 15  & \cellcolor{gray!15} 3012.152 & \cellcolor{gray!15} kissat-els-v1              & \cellcolor{gray!15} 1.258 & \cellcolor{gray!15} CadicalReorder \\
+	%\cellcolor{gray!15} 16  & \cellcolor{gray!15} 3028.922 & \cellcolor{gray!15} CadicalReorder             & \cellcolor{gray!15} 1.264 & \cellcolor{gray!15} kissat-els-v1 \\
+	%\cellcolor{gray!15} 17  & \cellcolor{gray!15} 3042.540 & \cellcolor{gray!15} cadical\_rel\_Scavel       & \cellcolor{gray!15} 1.278 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V1 \\
+	%\cellcolor{gray!15} 18  & \cellcolor{gray!15} 3082.293 & \cellcolor{gray!15} kissat\_relaxed            & \cellcolor{gray!15} 1.283 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V2 \\
+	%\cellcolor{gray!15} 19  & \cellcolor{gray!15} 3089.304 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V1          & \cellcolor{gray!15} 1.298 & \cellcolor{gray!15} kissat\_relaxed \\
+	%\cellcolor{gray!15} 20  & \cellcolor{gray!15} 3095.118 & \cellcolor{gray!15} CaDiCaL\_DVDL\_V2          & \cellcolor{gray!15} 1.361 & \cellcolor{gray!15} cadical\_rel\_Scavel \\
+	%21  & 3272.674 & glucose-reboot             & 1.379 & glucose-reboot \\
+	%\cellcolor{gray!15} 22  & \cellcolor{gray!15} 3287.322 & \cellcolor{gray!15} LStech-Maple-HyWalk        & \cellcolor{gray!15} 1.414 & \cellcolor{gray!15} hCaD\_V1-psids \\
+	%23  & 3288.798 & LSTech\_Maple              & 1.446 & LSTech\_Maple \\
+	%\cellcolor{gray!15} 24  & \cellcolor{gray!15} 3399.281 & \cellcolor{gray!15} SLIME-SC-2022-beta         & \cellcolor{gray!15} 1.469 & \cellcolor{gray!15} LStech-Maple-HyWalk \\
+	%\cellcolor{gray!15} 25  & \cellcolor{gray!15} 3410.345 & \cellcolor{gray!15} SLIME-SC-2022              & \cellcolor{gray!15} 1.470 & \cellcolor{gray!15} SLIME-SC-2022-beta \\
+	%\cellcolor{gray!15} 26  & \cellcolor{gray!15} 3430.403 & \cellcolor{gray!15} hCaD\_V1-psids             & \cellcolor{gray!15} 1.523 & \cellcolor{gray!15} SLIME-SC-2022 \\
+	%27  & 3504.244 & MapleLCMDistChrBt-DL-v3    & 1.542 & MapleLCMDistChrBt-DL-v3 \\
+	%28  & 4750.808 & IsaSAT                     & 2.062 & IsaSAT \\
+	%    \hline
+	%  \end{tabular}
+%\end{table}
 
 \subsection{Implementation Details}
 
@@ -776,78 +834,12 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 \section{Evaluation}
 \label{sec:eval}
 
-Before evaluating our approach end-to-end as described in Section~\ref{sec:exdesign}, we discuss the choice of the machine-learning predictor and the runtime-discretization method.
-Thereafter, we look at the results of our active-learning approach.
-Finally, we also analyze the importance of different instance families to our framework.
+In this section, we evaluate our active-learning framework.
+First, we analyze and tune the different components of our framework on the tuning dataset.
+Next, we evaluate the best configuration with the full dataset.
+Finally, we analyze the importance of different instance families to our framework.
 
-\subsection{Runtime Prediction}
-\label{sec:eval:prediction}
-
-%JB: we should probably remove this section here and jump right into active learning;
-% - results of classifier comparison can shortly be described in Section 4 (new subsection) or 3.2 ("Solver Model", which currently mainly describes runtime discretization); in any case, classifier should be discussed earlier
-% - in current version, we already state in Section 3.2 that we use hierarchical clustering, so description of algorithm and some "performed well in preliminary experiments" could go there
-An exhaustive grid search of all active-learning approaches outlined in Section~\ref{sec:main} and different runtime-prediction models is infeasible.
-Therefore, we compare predictors first and select one runtime-prediction model for all further experiments.
-We evaluate predictors with the \emph{Matthews Correlation Coefficient} (MCC) scores~\cite{gorodkin2004comparing,matthews1975comparison} of the classification task.
-MCC scores are great in dealing with class imbalances in contrast to conventional metrics like accuracy.
-
-% \begin{table}
-%   \centering
-%   \caption{
-%   	Time-out prediction Matthews Correlation Coefficient performances.
-%   	Results are obtained using cross-validation.
-%   	We provide \SI{64}{\%} of ground-truth for training, use \SI{16}{\%} as a validation set, and \SI{20}{\%} as a test set (5-fold cross-validation).
-%   }
-%   \label{tab:mcc}
-%   \begin{tabular}{lc}
-%     Prediction Model & Avg. MCC (Std.) \\
-%     \hline
-%     Stacking ensemble (QDA, RF)           & 0.9527 (0.0292) \\
-%     Quadratic-discriminant analysis (QDA) & 0.9290 (0.0339) \\
-%     Random forest (RF)                    & 0.8530 (0.0479) \\
-%     AdaBoost with decision trees          & 0.8384 (0.0444) \\
-%     AdaBoost with logistic regression     & 0.8158 (0.0985) \\
-%     Decision tree                         & 0.8059 (0.0707) \\
-%     Logistic regression                   & 0.8052 (0.1018) \\
-%     kNN classifier                        & 0.7885 (0.1521) \\
-%     MLP classifier                        & 0.7760 (0.1408) \\
-%     Support-vector classifier             & 0.7757 (0.2149) \\
-%     Naive Bayes                           & 0.7306 (0.1394) \\
-%     \hline
-%   \end{tabular}
-% \end{table}
-
-% Stacking MCC
-% 0.888221577313471
-% 0.04753979056930393
-
-%To obtain the results in Table~\ref{tab:mcc},
-We perform cross-validation among all solvers: we assume that all other solver runtimes are known and provide \SI{64}{\%} of ground-truth runtime labels of the target solver for training, use \SI{16}{\%} as a validation set for hyper-parameter tuning of the runtime predictor, and \SI{20}{\%} as a test set (5-fold cross-validation).
-This is repeated for each solver once.
-Note that we perform cross-validation on two levels, i.e., among the solvers and the target solver runtimes.
-We compare the average performances on the test sets.
-
-ML classification models that we have tried include random forests, decision trees, quadratic-discriminant analysis, AdaBoost, logistic regression, $k$-nearest neighbor, multi-layer perceptrons, support vector machines, and naive Bayes.
-A stacking ensemble consisting of quadratic-discriminant analysis and random forests performed best.
-It produces an MCC score of \SI{0.8882}{} for predicting three-class runtime labels.
-% \SI{0.9527}{} for time-out prediction
-The results are significantly better than any other model that we have tried regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$.
-
-%Since the differences in the MCC-performance distributions of the best and second-best approaches are statistically significant regarding a Wilcoxon signed-rank test with $\alpha = \SI{5}{\%}$, we only use the best approach for all further experiments as a prediction model.
-
-For runtime discretization, we use hierarchical clustering with $k = 3$ and a log-single-link criterion for all further experiments.
-Each non-time-out runtime starts in a separate interval.
-We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
-As already mentioned in Section~\ref{sec:main:model}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
-Also, experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
-Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
-%Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
-%JB: "similar experiment as above" - reference unclear; what do you want to say?
-%TF: Removed the sentence
-
-\subsection{Active-Learning Results}
-
-\subsubsection{Tuning our algorithm.}
+\subsection{Hyper-Parameter Analysis}
 
 Our end-to-end experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:evalframe}.
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
@@ -986,7 +978,7 @@ By having many observations, it is easier to build a model.
 If we, on the other hand, desire to get a \emph{good} estimate of a solver's performance in a moderate amount of time (high $\delta$), approaches favor selecting fewer \emph{difficult} instances.
 In particular, the fraction of instances is smaller than the fraction of runtime.
 
-\subsubsection{Full dataset evaluation.}
+\subsection{Full-Dataset Evaluation}
 
 Having selected the most promising hyper-parame\-ters, we run our end-to-end active-learning experiments on the complete Anniversary Track dataset (5355 instances).
 The best-performing approach for $\delta = 0.85$ uses the predicted runtime-label ranking, uncertainty sampling, and a ranking stopping criterion.
