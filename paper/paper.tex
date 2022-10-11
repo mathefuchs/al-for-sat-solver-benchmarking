@@ -336,14 +336,14 @@ Rather than benchmarking a solver's overall performance, the goal is to recommen
 \label{sec:main}
 
 In this section, we present the details of our approach.
-Section~\ref{sec:main-framework} describes the general framework.
-Section~\ref{sec:main-model} specifies the details of the underlying prediction model and describes how we may derive a solver ranking from that model.
-We discuss possible criteria for sampling instances in Section~\ref{sec:main-sampling}.
-Section~\ref{sec:main-stopping} concludes with possible stopping conditions.
+Section~\ref{sec:main:framework} describes the general framework.
+Section~\ref{sec:main:model} specifies the details of the underlying prediction model and describes how we may derive a solver ranking from that model.
+We discuss possible criteria for sampling instances in Section~\ref{sec:main:sampling}.
+Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 
 
 \subsection{Incremental Benchmarking Framework}
-\label{sec:main-framework}
+\label{sec:main:framework}
 
 Our framework to score a new solver~$\hat{a}$ follows a three-step procedure, outlined in Algorithm~\ref{algALBenchmark}:
 While the stopping condition is not met (line~1), we select \emph{one} SAT instance from the pool of instances with the help of a prediction model~$\mathcal{M}$ (line~2) and evaluate the new solver~$\hat{a}$ on this instance (line~3).
@@ -368,17 +368,17 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
   %$\mathcal{M} \leftarrow \textrm{init model with $\mathcal{A}$, $\mathcal{I}$, $r$, and $\hat{a}$}$
   %$\tilde{\mathcal{I}} \leftarrow \emptyset$
 
-  \While(\tcp*[f]{cf. Section~\ref{sec:main-stopping}}){$\operatorname{not} \, \operatorname{stop}\!\left(\mathcal{M}\right)$}{
-    $s \leftarrow \operatorname{selectNextInstance}\!\left(\mathcal{M}\right)$ \tcp*{cf. Section~\ref{sec:main-sampling}}
+  \While(\tcp*[f]{cf. Section~\ref{sec:main:stopping}}){$\operatorname{not} \, \operatorname{stop}\!\left(\mathcal{M}\right)$}{
+    $s \leftarrow \operatorname{selectNextInstance}\!\left(\mathcal{M}\right)$ \tcp*{cf. Section~\ref{sec:main:sampling}}
 
     $t \leftarrow \operatorname{runExperiment}\!\left(\hat{a},\,  s\right)$  \tcp*{Runs $\hat{a}$ on $s$ with time-out $\tau$}
 
     %$\tilde{\mathcal{I}} \leftarrow \tilde{\mathcal{I}} \cup \left\lbrace s \right\rbrace$
 
-    $\operatorname{updateModel}\!\left(\mathcal{M},\, s,\, t\right)$ \tcp*{cf. Section~\ref{sec:main-model}}
+    $\operatorname{updateModel}\!\left(\mathcal{M},\, s,\, t\right)$ \tcp*{cf. Section~\ref{sec:main:model}}
   }
   
-  \Return $\operatorname{predictScore}\!\left(\mathcal{M}\right)$ \tcp*{cf. Section~\ref{sec:main-model}}
+  \Return $\operatorname{predictScore}\!\left(\mathcal{M}\right)$ \tcp*{cf. Section~\ref{sec:main:model}}
 
   %$\operatorname{score}\!\left(\right) \leftarrow \operatorname{predictScores}\!\left(\mathcal{M}\right)$
   %\KwOut{Return tuple of scoring function $\operatorname{score}\!: \mathcal{A} \cup \left\lbrace \hat{a} \right\rbrace \rightarrow \mathbb{R}$ and the selected instances $\tilde{\mathcal{I}}$.}
@@ -386,7 +386,7 @@ Since the potential runtime of experiments is by magnitudes larger than the mode
 
 
 \subsection{Solver Model}
-\label{sec:main-model}
+\label{sec:main:model}
 
 % MI: describe initialization and update of model
 
@@ -491,7 +491,7 @@ All these results show that discretized runtimes are suitable for our framework.
 
 
 \subsection{Instance Sampling}
-\label{sec:main-sampling}
+\label{sec:main:sampling}
 
 Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line 2).
 In this section, we introduce our sampling strategies, which make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
@@ -551,7 +551,7 @@ The term $\operatorname{\hat H}_n(e)$ is computed for every possible runtime lab
 
 
 \subsection{Stopping Criteria}
-\label{sec:main-stopping}
+\label{sec:main:stopping}
 
 %Similar to the instance-selection strategies, we can also divide stopping criteria into baseline and active-learning-based approaches.
 %Also, refer to~Algorithm~\ref{algALBenchmark}, line~3.
@@ -590,10 +590,10 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
 % hyper-parameter values that we experiment with
 
 \subsection{Optimization Goal}
-\label{sec:goal}
+\label{sec:exdesign:goal}
 
 As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-We create a prediction model $\mathcal{M}$ as described in Section~\ref{sec:main-model} that provides us with a scoring function $s_k$.
+We create a prediction model $\mathcal{M}$ as described in Section~\ref{sec:main:model} that provides us with a scoring function $s_k$.
 % MI: Let this be the evaluation result:
 %Also, it outputs the fraction of runtime that is needed to arrive at its conclusion.
 First and foremost, our goal is to provide the engineer of new SAT solvers with an accurate ranking.
@@ -616,7 +616,7 @@ whereby $\delta \in \left[0, 1\right]$ allows for linear weighting between the t
 Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on a $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
 
 \subsection{Evaluation Framework}
-\label{sec:evalframe}
+\label{sec:exdesign:evalframe}
 
 To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark} (a concrete choice for all the sub-routines), we perform cross-validation on our set of solvers.
 That means that each solver once plays the role of the new solver.
@@ -672,17 +672,17 @@ All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them corre
 This smaller dataset allows for a more extensive exploration of hyper-parameter space.
 
 \subsection{Hyper-parameters}
-\label{sec:hyper}
+\label{sec:exdesign:hyper}
 
 Given Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three phases, i.e., \emph{selection}, \emph{stopping}, and \emph{ranking}.
 Also, there are different choices for the runtime-label prediction model.
 Note that we are not considering all previously listed approaches since a grid search of all combinations would be infeasible.
-Rather, we filter approaches based on preliminary experimental results (cf. Section~\ref{sec:evalprel}) and do the main end-to-end experiments only with a subset.
+Rather, we filter approaches based on preliminary experimental results (cf. Section~\ref{sec:eval:prediction}) and do the main end-to-end experiments only with a subset.
 The end-to-end experiment configurations are given below.
 
 \subsubsection{Ranking.}
 
-Regarding \emph{ranking} (cf. Section~\ref{sec:main-model}), we experiment with the following approaches, including our used hyper-parameter values:
+Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with the following approaches, including our used hyper-parameter values:
 
 \begin{itemize}
   \item Observed PAR-2 ranking of already sampled instances
@@ -697,13 +697,13 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main-model}), we experiment with 
     Fallback threshold: if the difference of scores between two solvers drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker.
     %JB: as clarification: one these two solvers has to be the new solver, right? if yes, would write it explicitly
     %TF: Not necessarily
-    As discussed in Section~\ref{sec:main-model}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
+    As discussed in Section~\ref{sec:main:model}, ranking decisions are all correct if the difference in scores between two solvers exceeds a certain value.
   \end{itemize}
 \end{itemize}
 
 \subsubsection{Selection.}
 
-For \emph{selection} (cf. Section~\ref{sec:main-sampling}), we experiment with the following methods, including our used hyper-parameter values:
+For \emph{selection} (cf. Section~\ref{sec:main:sampling}), we experiment with the following methods, including our used hyper-parameter values:
 
 \begin{itemize}
   \item Random sampling 
@@ -727,7 +727,7 @@ For \emph{selection} (cf. Section~\ref{sec:main-sampling}), we experiment with t
 
 \subsubsection{Stopping.}
 
-For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experiment with the following criteria, including our used hyper-parameter values:
+For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experiment with the following criteria, including our used hyper-parameter values:
 
 \begin{itemize}
   \item Fixed subset size of \SI{10}{\%} or \SI{20}{\%} of instances
@@ -751,7 +751,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main-stopping}), we experime
 
 \subsubsection{Runtime-label prediction model.}
 
-As runtime-label prediction model, we only make use of one fixed model since an exhaustive grid search would be infeasible (cf.~Section~\ref{sec:evalprel}).
+As runtime-label prediction model, we only make use of one fixed model since an exhaustive grid search would be infeasible (cf.~Section~\ref{sec:eval:prediction}).
 Our model of choice is an ensemble, stacking a quadratic-discriminant analysis\footnote{With a regularization parameter of zero and a singular value threshold of zero} onto a random forest model\footnote{With \emph{entropy} splitting criterion and \emph{balanced} class weights} using a decision tree\footnote{With \emph{Gini} impurity splitting criterion; choosing the best split for each branching decision and maximum tree depth of 5 levels} to weight its members.
 If not stated explicitly, all other model parameters default to the presets of \emph{scikit-learn}\footnote{\url{https://scikit-learn.org/stable/index.html}; Version 1.0.2}~\cite{scikit-learn}.
 
@@ -778,7 +778,7 @@ Instance families comprise instances derived from the same application domain, e
 %JB: sounds like a good idea
 
 \subsection{Runtime Prediction}
-\label{sec:evalprel}
+\label{sec:eval:prediction}
 
 %JB: we should probably remove this section here and jump right into active learning;
 % - results of classifier comparison can shortly be described in Section 4 (new subsection) or 3.2 ("Solver Model", which currently mainly describes runtime discretization); in any case, classifier should be discussed earlier
@@ -836,7 +836,7 @@ The results are significantly better than any other model that we have tried reg
 For runtime discretization, we use hierarchical clustering with $k = 3$ and a log-single-link criterion for all further experiments.
 Each non-time-out runtime starts in a separate interval.
 We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
-As already mentioned in Section~\ref{sec:main-model}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
+As already mentioned in Section~\ref{sec:main:model}, this approach has good properties regarding the predictiveness of the PAR-2 score ranking and its discriminatory power.
 Also, experiments showed that our stacking ensemble performed particularly well for this kind of discretization method.
 Other clustering approaches that we have tried include hierarchical clustering with mean-, median- and complete-link criteria, as well as $k$-means and spectral clustering.
 %Predicting runtime labels in a similar experiment as above produced an MCC score of on average \SI{88.82}{\%} ($\sigma = \SI{4.75}{\%}$; in comparison to \SI{95.27}{\%} for predicting time-outs).
@@ -847,8 +847,8 @@ Other clustering approaches that we have tried include hierarchical clustering w
 
 \subsubsection{Tuning our algorithm.}
 
-Our end-to-end experiments follow the evaluation framework introduced in Section~\ref{sec:evalframe}.
-Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
+Our end-to-end experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:evalframe}.
+Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
 Evaluating a particular configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
 The plotted lines represent the best performing configurations (convex hull) per top-level hyper-parameter choice, i.e., per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
 %Colors indicate the different hyper-parameter instantiations.
@@ -905,7 +905,7 @@ If accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping crit
   \caption{
   	$O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams comparing different hyper-parameter instantiations of our active-learning framework.
   	The x-axis shows the ratio of total solver runtime on the sampled instances relative to all instances.
-  	The y-axis shows the ranking accuracy (cf. Section~\ref{sec:goal}).
+  	The y-axis shows the ranking accuracy (cf. Section~\ref{sec:exdesign:goal}).
   	%JB: we should use "ranking accuracy" in plots, since we explicitly defined this metric earlier
   	Each line entails the front of Pareto-optimal configurations for the respective hyper-parameter instantiation.
   }
