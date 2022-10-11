@@ -494,7 +494,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=0.313349in,y=1.921364in,,bottom,rotate=90.000000]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Accuracy PAR-2 Ranking}%
+\pgftext[x=0.313349in,y=1.921364in,,bottom,rotate=90.000000]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Ranking Accuracy}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfpathrectangle{\pgfqpoint{0.746177in}{0.679475in}}{\pgfqpoint{8.347374in}{2.483778in}}%
@@ -682,7 +682,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.735127in,y=1.421217in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Runtime-label prediction ranking}%
+\pgftext[x=4.735127in,y=1.421217in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Predicted runtime-label ranking}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%

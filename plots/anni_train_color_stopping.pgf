@@ -494,7 +494,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=0.313349in,y=1.921364in,,bottom,rotate=90.000000]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Accuracy PAR-2 Ranking}%
+\pgftext[x=0.313349in,y=1.921364in,,bottom,rotate=90.000000]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Ranking Accuracy}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfpathrectangle{\pgfqpoint{0.746177in}{0.679475in}}{\pgfqpoint{8.347374in}{2.483778in}}%
@@ -708,7 +708,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.735127in,y=1.767899in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Ranking convergence criterion}%
+\pgftext[x=4.735127in,y=1.767899in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Ranking stopping criterion}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -754,7 +754,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.735127in,y=1.421217in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Wilcoxon criterion}%
+\pgftext[x=4.735127in,y=1.421217in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Wilcoxon stopping criterion}%
 \end{pgfscope}%
 \begin{pgfscope}%
 \pgfsetrectcap%
@@ -800,7 +800,7 @@
 \definecolor{textcolor}{rgb}{0.000000,0.000000,0.000000}%
 \pgfsetstrokecolor{textcolor}%
 \pgfsetfillcolor{textcolor}%
-\pgftext[x=4.735127in,y=1.074535in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Fixed subset size}%
+\pgftext[x=4.735127in,y=1.074535in,left,base]{\color{textcolor}\rmfamily\fontsize{18.000000}{21.600000}\selectfont Subset-size stopping criterion}%
 \end{pgfscope}%
 \end{pgfpicture}%
 \makeatother%
