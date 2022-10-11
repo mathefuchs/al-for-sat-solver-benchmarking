@@ -394,9 +394,6 @@ Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $
 We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \lbrace \hat a \rbrace$ to denote all solvers including the new solver. 
 Model $\mathcal{M}$ provides a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
 
-To be applicable to a new solver $\hat{a}$, whose runtimes are unknown, we extend \emph{score} by replacing $\gamma(a, e)$ with the model's predictions $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$.
-%JB: "score" and "gamma" aren't defined yet, so there is nothing to extend; score isn't even defined here, only "s", while later sections still use "score"
-%JB: also, each model only predicts for one solver (there is no model covering multiple solvers), so I'm not sure whether introducing the solver as parameter makes sense
 
 \subsubsection{Runtime Transformation.}
 
