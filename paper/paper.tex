@@ -81,14 +81,14 @@ Note that our scenario assumes that we know the runtimes of all solvers, except 
 One could also imagine a collaborative filtering scenario, where runtimes are only partially known~\cite{misir2017data,misir2017alors}.
 
 Our approach satisfies several desirable criteria for benchmarking:
-It outputs a \emph{ranking} to compare the new solver against the existing set of solvers.
+Rather than outputting a binary classification, i.e, the new solver is worse than an existing solver or not, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
+In particular, our approach enables \emph{ranking} the new solver amidst a set of existing solvers.
 For this ranking, we do not even need to predict exact solver runtimes, which is trickier.
-We optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
+Further, we optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
 We use problem-instance and runtime \emph{features}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
 In particular, we take runtime information from already done experiments into account when choosing the next.
 By doing so, we can control the properties of the benchmarking approach such as its required runtime.
-Rather than solely outputting a binary classification, i.e, the new solver is worse than an existing solver, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
 In particular, we only subsample the benchmark once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
 Since a new solver idea is rarely best on the first try, it is desired to obtain a solver ranking fast.
@@ -110,6 +110,7 @@ Biased benchmarks can easily lead to fallacious interpretations~\cite{abs-2107-0
 Also, benchmark selection has many movable parts, e.g., performance measures, aggregation, and handling of missing values.
 Questionable research practices might modify these elements a-posteriori to fit expectations, leading to biased results~\cite{NiesslHWCB22}.
 In the following, we discuss related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
+We compare the most relevant approaches in Table~\ref{tab:requirements}.
 
 \subsubsection{Static Benchmark Selection.}
 
@@ -165,7 +166,7 @@ Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to
 Given a pair of SAT solvers, they iteratively select a subset of instances until the desired confidence level is reached to decide which of the two solvers is better.
 The selection of instances is dependent on the choice of the solvers to distinguish.
 They calculate a scoring metric for all unselected instances, run the experiment with the highest score, and update the confidence.
-Their approach ticks off most of our desired features.
+Their approach ticks off most of our desired features in Table~\ref{tab:requirements}.
 However, the approach only compares solvers binarily rather than providing a \emph{scoring}.
 Thus, it is not clear how similar two given solvers are or on which instances they behave similarly.
 Moreover, a major shortcoming is the lacking \emph{scalability} with the number of solvers.
@@ -239,7 +240,7 @@ Model $\mathcal{M}$ provides a prediction function $f : \mathcal{\hat A} \times 
 
 First, we initialize the model $\mathcal{M}$ in Line~1.
 This creates the machine-learning prediction model and also transforms runtimes as discussed in the subsequent section.
-We do not need any further steps here, since we have not obtained any labeled samples yet, so cannot train anything.
+We do not need any further steps here, since we have not obtained any labeled samples yet, so we cannot train the model yet.
 The model update (Line~7) uses all acquired runtimes to train a new runtime-prediction function $f$ using common supervised machine-learning methodology.
 It has also access to global instance features that assign each instance a vector in $\mathbb{R}^n$.
 Note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of Algorithm~\ref{algALBenchmark} by magnitudes.
@@ -248,8 +249,8 @@ Finally, we determine the solver scores that are predicted in Line~8 by using th
 \subsubsection{Runtime Transformation.}
 
 We transform the runtimes into discrete runtime labels on a per-instance basis.
-For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$, excluding timeouts $\tau$.
-Those are always in cluster $C_{k}$.
+For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
+Timeouts $\tau$ always form a separate cluster $C_{k}$.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
 %
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
@@ -279,7 +280,7 @@ The scoring function $s_k$ induces a ranking among solvers.
 \subsection{Instance Selection}
 \label{sec:main:selection}
 
-Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line~2).
+Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line~4).
 In this section, we introduce our sampling strategies, which make use of the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 We implement an uncertainty and an information-gain sampling strategy.
 These methods require the model's predictions to also include probabilities for the $k$ possible runtime labels.
@@ -310,7 +311,7 @@ By maximizing information gain, we select instances that identify solvers with s
 \subsection{Stopping Criteria}
 \label{sec:main:stopping}
 
-In this section, we present two dynamic stopping criteria, the Wilcoxon and the ranking-stopping criterion (cf. Algorithm~\ref{algALBenchmark}, Line~1).
+In this section, we present two dynamic stopping criteria, the Wilcoxon and the ranking stopping criterion (cf. Algorithm~\ref{algALBenchmark}, Line~3).
 
 \subsubsection{Wilcoxon Stopping Criterion.}
 
@@ -331,7 +332,7 @@ To improve the stability of this criterion, we use an exponential moving average
 
 \subsubsection{Ranking Stopping Criterion.}
 
-The ranking-stopping criterion is less sophisticated in comparison.
+The ranking stopping criterion is less sophisticated in comparison.
 It stops the active-learning process if the ranking induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged within the last $l$ iterations.
 Note that the concrete values of $s_k(\hat a)$ might still change.
 We are solemnly interested in the induced ranking in this case.
@@ -364,7 +365,7 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
   \tcp{Determine Rank Accuracy}
     $O_{\operatorname{acc}} \leftarrow 0$ \;    
     \For{$a \in \mathcal{A}$}{
-      \If{$\bigl(s_k(a) - s_k(\hat a)\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
+      \If{$\bigl(s_k(a) - s_{\hat a}\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
            $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}|}$ \;
       }
     }
@@ -393,9 +394,9 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
 As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
 We create a prediction model $\mathcal{M}$ as described in Section~\ref{sec:main:model} that provides us with a scoring function $s_k$.
 
-To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark} (a concrete choice for all the sub-routines), we perform cross-validation on our set of solvers.
+To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark}, i.e., a concrete choice for all the sub-routines, we perform cross-validation on our set of solvers.
 Algorithm~\ref{alg:eval} shows this.
-That means that each solver once plays the role of the new solver (Line~2).
+That means that each solver plays the role of the new solver once (Line~2).
 Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage (Line~3).
 After running our active-learning framework for a solver $\hat{a}$ in Line~4, we compute the value of both our optimization goals:
 First and foremost, we want to provide the engineer of new SAT solvers with an accurate ranking.
@@ -449,9 +450,9 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with 
   \begin{itemize}
     \item
     History size: consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability.
-    The latest $x$ predictions vote on the winner on a per-instance level.
+    The latest $x$ predictions for each instance vote on the instance's winning label.
     \item
-    Fallback threshold: if the difference of scores between two solvers (including the new solver $\hat{a}$) drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker.
+    Fallback threshold: if the difference of scores between the new solver $\hat{a}$ and another solver drops below \SI{0.01}, \SI{0.05}, or \SI{0.1}, use the partially observed PAR-2 ranking as a tie-breaker.
   \end{itemize}
 \end{itemize}
 
@@ -634,16 +635,16 @@ If we, on the other hand, desire to get a \emph{good} estimate of a solver's per
 In particular, the fraction of instances is smaller than the fraction of runtime.
 
 Furthermore, Figure~\ref{fig:annitrainoptgoalacc} reveals which values make the most sense for $\delta$.
-The range $\delta \in \left[0.2, 0.8\right]$, thereby, corresponds to the points between a runtime fraction of \SI{0.03} and \SI{0.22}.
+The range $\delta \in \left[0.2, 0.8\right]$, thereby, corresponds to the points with a runtime fraction between \SI{0.03} and \SI{0.22}.
 We consider this region to be most promising, analogous to the \emph{elbow} method in cluster analysis~\cite{kodinariya2013review}.
 
 \subsection{Full-Dataset Evaluation}
 
 Having selected the most promising hyper-parameters, we run our end-to-end active-learning experiments on the complete Anniversary Track dataset (5355 instances).
 The aforementioned range $\delta \in \left[0.2, 0.8\right]$ is covered by only two configurations.
-The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime-label ranking, information-gain sampling, and ranking-stopping criterion.
+The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime-label ranking, information-gain sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
-The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking-stopping criterion.
+The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 These trade-offs provide a better way of prototyping and evaluating new SAT solvers rather than evaluating them on manually picked instances based on domain knowledge.
 
