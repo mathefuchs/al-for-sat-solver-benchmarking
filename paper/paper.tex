@@ -234,14 +234,14 @@ Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given. 
+Let benchmark instances $\mathcal{I}$, SAT solvers $\mathcal{A}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given.
+Model initialization (Line~1) then creates the machine-learning prediction model as well as transforms runtimes as discussed in the subsequent section.
+No model training is needed at this point since we do not have any labeled data yet.
 We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \lbrace \hat a \rbrace$ to denote all solvers including the new solver. 
 Model $\mathcal{M}$ provides a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
-
-First, we initialize the model $\mathcal{M}$ in Line~1.
-This creates the machine-learning prediction model and also transforms runtimes as discussed in the subsequent section.
-We do not need any further steps here, since we have not obtained any labeled samples yet, so we cannot train the model yet.
 The model update (Line~7) uses all acquired runtimes to train a new runtime-prediction function $f$ using common supervised machine-learning methodology.
+Training features are problem-instance features and known runtimes $r$.
+After applying necessary transformations, as described in the subsequent section, we fit the machine-learning model using the transformed observations $\mathcal{R}$ as ground-truth labels.
 It has also access to global instance features that assign each instance a vector in $\mathbb{R}^n$.
 Note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of Algorithm~\ref{algALBenchmark} by magnitudes.
 Finally, we determine the solver scores that are predicted in Line~8 by using the runtime-prediction function $f$ and the approach described in the following two sections.
@@ -332,7 +332,7 @@ To improve the stability of this criterion, we use an exponential moving average
 
 \subsubsection{Ranking Stopping Criterion.}
 
-The ranking stopping criterion is less sophisticated in comparison.
+The ranking-stopping criterion is less sophisticated in comparison.
 It stops the active-learning process if the ranking induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged within the last $l$ iterations.
 Note that the concrete values of $s_k(\hat a)$ might still change.
 We are solemnly interested in the induced ranking in this case.
@@ -437,8 +437,8 @@ This \emph{tuning dataset} allows for a more extensive exploration of hyper-para
 Given Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three phases, i.e., \emph{ranking}, \emph{selection}, and \emph{stopping}.
 Also, there are different choices for the runtime-label prediction model and runtime discretization.
 Note that we are not considering all previously listed approaches since a grid search of all combinations would be infeasible.
-Rather, we filter approaches based on preliminary experimental results and do the end-to-end experiments only with a subset.
-The end-to-end experiment configurations are given below.
+Rather, we filter approaches based on preliminary experimental results and do the experiments only with a subset.
+The experiment configurations are given below.
 
 \subsubsection{Ranking.}
 
@@ -466,14 +466,14 @@ A drawback of this is the lack of parallelization.
   \item Random sampling 
   \item Uncertainty sampling
   \begin{itemize}
-    \item Fallback threshold: use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
-    \item Runtime scaling: prefer instances with the greatest uncertainty per average runtime (over all solvers; \texttt{True} or \texttt{False}).
+    \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
+    \item Runtime scaling: Whether to normalize uncertainty scores of instances by the average runtime of solvers on it or use the absolute values.
   \end{itemize}
 
   \item Information-gain sampling
   \begin{itemize}
-    \item Fallback threshold: use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
-    \item Runtime scaling: prefer instances with the greatest information gain per average runtime (\texttt{True} or \texttt{False}).
+    \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
+    \item Runtime scaling: Whether to normalize information-gain scores of instances by the average runtime of solvers on it or use the absolute values.
   \end{itemize}
 \end{itemize}
 
@@ -485,15 +485,15 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
   \item Subset-size stopping criterion, using \SI{10}{\%} or \SI{20}{\%} of instances
   \item Ranking stopping criterion
   \begin{itemize}
-    \item Minimum amount: sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
-    \item Convergence duration: stop if the predicted ranking stays the same for a number of sampled instances equal to \SI{1}{\%} or \SI{2}{\%} of all instances.
+    \item Minimum amount: Sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
+    \item Convergence duration: Stop if the predicted ranking stays the same for a number of sampled instances equal to \SI{1}{\%} or \SI{2}{\%} of all instances.
   \end{itemize}
 
   \item Wilcoxon stopping criterion
   \begin{itemize}
-    \item Minimum amount: sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
+    \item Minimum amount: Sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
     \item Average of $p$-values to drop below: \SI{5}{\%}.
-    \item Exponential-moving average: incorporate previous significance values by using an EMA with $\beta = 0.1$ or $\beta = 0.7$.
+    \item Exponential-moving average: Incorporate previous significance values by using an EMA with $\beta = 0.1$ or $\beta = 0.7$.
   \end{itemize}
 \end{itemize}
 
@@ -575,7 +575,7 @@ Finally, we analyze the importance of different instance families to our framewo
   \label{fig:e2eallsolvers}
 \end{figure}
 
-Our end-to-end experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:eval}.
+Our experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:eval}.
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
 Evaluating a particular configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
 In particular, we do not show intermediate results of the active-learning procedure but only the final results after stopping.
@@ -597,7 +597,7 @@ Random sampling performs quite well but is outperformed by uncertainty sampling 
 
 Regarding the stopping criterion (Fig.~\ref{fig:annitraincolorstopping}), the ranking stopping criterion performs the most consistently well.
 If accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
-The subset-size stopping criterion performs reasonably well but does not improve beyond a certain accuracy.
+The subset-size stopping criterion performs reasonably well but does not improve beyond a certain accuracy because of sampling a fixed subset of instances.
 
 \begin{figure}[tb!]
   \centering
@@ -640,7 +640,7 @@ We consider this region to be most promising, analogous to the \emph{elbow} meth
 
 \subsection{Full-Dataset Evaluation}
 
-Having selected the most promising hyper-parameters, we run our end-to-end active-learning experiments on the complete Anniversary Track dataset (5355 instances).
+Having selected the most promising hyper-parameters, we run our active-learning experiments on the complete Anniversary Track dataset (5355 instances).
 The aforementioned range $\delta \in \left[0.2, 0.8\right]$ is covered by only two configurations.
 The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime-label ranking, information-gain sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
