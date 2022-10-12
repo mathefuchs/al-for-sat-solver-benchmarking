@@ -843,6 +843,45 @@ Finally, we analyze the importance of different instance families to our framewo
 
 \subsection{Hyper-Parameter Analysis}
 
+\begin{figure}[tbp!]
+	\centering
+	\begin{subfigure}{1.0\textwidth}
+		\resizebox{\textwidth}{!}{
+			\graphicspath{{../plots/}}
+			\input{../plots/anni_train_color_ranking.pgf}
+		}
+		\caption{Ranking approaches}
+		\label{fig:annitraincolorranking}
+	\end{subfigure}
+	\\
+	\vspace{0.2cm}
+	\begin{subfigure}{1.0\textwidth}
+		\resizebox{\textwidth}{!}{
+			\graphicspath{{../plots/}}
+			\input{../plots/anni_train_color_selection.pgf}
+		}
+		\caption{Selection approaches}
+		\label{fig:annitraincolorselection}
+	\end{subfigure}
+	\\
+	\vspace{0.2cm}
+	\begin{subfigure}{1.0\textwidth}
+		\resizebox{\textwidth}{!}{
+			\graphicspath{{../plots/}}
+			\input{../plots/anni_train_color_stopping.pgf}
+		}
+		\caption{Stopping criteria}
+		\label{fig:annitraincolorstopping}
+	\end{subfigure}
+	\caption{
+		$O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams comparing different hyper-parameter instantiations of our active-learning framework.
+		The x-axis shows the ratio of total solver runtime on the sampled instances relative to all instances.
+		The y-axis shows the ranking accuracy (cf. Section~\ref{sec:exdesign:goal}).
+		Each line entails the front of Pareto-optimal configurations for the respective hyper-parameter instantiation.
+	}
+	\label{fig:e2eallsolvers}
+\end{figure}
+
 Our end-to-end experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:evalframe}.
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the smaller hyper-parameter-tuning dataset.
 Evaluating a particular configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
@@ -863,46 +902,6 @@ Random sampling performs quite well but is outperformed by uncertainty sampling 
 Regarding the stopping criterion (Fig.~\ref{fig:annitraincolorstopping}), the ranking stopping criterion performs the most consistently well.
 If accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
 The subset-size stopping criterion performs reasonably well but does not improve beyond a certain accuracy.
-
-\begin{figure}[tbp!]
-  \centering
-  \begin{subfigure}{1.0\textwidth}
-    \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_color_ranking.pgf}
-    }
-    \caption{Ranking approaches}
-    \label{fig:annitraincolorranking}
-  \end{subfigure}
-  \\
-  \vspace{0.2cm}
-  \begin{subfigure}{1.0\textwidth}
-    \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_color_selection.pgf}
-    }
-    \caption{Selection approaches}
-    \label{fig:annitraincolorselection}
-  \end{subfigure}
-  \\
-  \vspace{0.2cm}
-  \begin{subfigure}{1.0\textwidth}
-    \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_color_stopping.pgf}
-    }
-    \caption{Stopping criteria}
-    \label{fig:annitraincolorstopping}
-  \end{subfigure}
-
-  \caption{
-  	$O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams comparing different hyper-parameter instantiations of our active-learning framework.
-  	The x-axis shows the ratio of total solver runtime on the sampled instances relative to all instances.
-  	The y-axis shows the ranking accuracy (cf. Section~\ref{sec:exdesign:goal}).
-  	Each line entails the front of Pareto-optimal configurations for the respective hyper-parameter instantiation.
-  }
-  \label{fig:e2eallsolvers}
-\end{figure}
 
 % One of the main observations is that uncertainty sampling (blue points) consistently outperformed random sampling (red points) for almost any value of $\delta$ within Eq.~\ref{eq:opt}.
 % Moreover, our ranking stopping criterion (dot-shaped points) is particularly suited to achieve a good ranking accuracy fast.
@@ -994,6 +993,21 @@ Because of that, the runtime-prediction model helps determine on what problem in
 %JB: conclusion not straightforward from prior text; even if overall estimated score (which is an average over many instances) is good, estimate on individual instances might be quite erroneous
 
 \subsection{Instance-Family Importance}
+
+\begin{figure}[tb!]
+	\centering
+	\resizebox{0.85\textwidth}{!}{
+		\graphicspath{{../plots/}}
+		\input{../plots/anni_final_families.pgf}
+	}
+	\caption{
+		Scatter plot showing the \emph{importance} of different instance families to our framework.
+		The x-axis shows the frequency of instance families in the full Anniversary Track dataset.
+		The y-axis shows the average frequency of instance families in the samples selected by active learning.
+		The dashed line represents families that occur with the same frequency in both, dataset and samples.
+	}
+	\label{fig:annifinalfamilies}
+\end{figure}
 
 Selection decisions of our approach also reveal the importance of different instance families to our framework.
 Figure~\ref{fig:annifinalfamilies} shows the occurrence of instance families within the dataset and the benchmarks created by active learning.
@@ -1104,21 +1118,6 @@ A possible explanation is that these instances are very similar, such that a sma
 %     \end{tabular}
 %   \end{subtable}
 % \end{table}
-
-\begin{figure}[tb!]
-	\centering
-	\resizebox{0.85\textwidth}{!}{
-		\graphicspath{{../plots/}}
-		\input{../plots/anni_final_families.pgf}
-	}
-	\caption{
-		Scatter plot showing the \emph{importance} of different instance families to our framework.
-		The x-axis shows the frequency of instance families in the full Anniversary Track dataset.
-		The y-axis shows the average frequency of instance families in the samples selected by active learning.
-		The dashed line represents families that occur with the same frequency in both, dataset and samples.
-	}
-	\label{fig:annifinalfamilies}
-\end{figure}
 
 \section{Conclusion}
 
