@@ -28,17 +28,16 @@
 \title{Active Learning for SAT Solver Benchmarking}
 
 \author{
-  Tobias Fuchs\orcidID{0000-0001-9727-2878} (\Letter) \and \\
-  Jakob Bach\orcidID{0000-0003-0301-2798} \and \\
-  Markus Iser\orcidID{0000-0003-2904-232X}
+  Authors anonymized for review
+  \vspace{0.4cm}
 }
 
 \institute{
-  Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany \\
-  \email{info@tobiasfuchs.de, jakob.bach@kit.edu, markus.iser@kit.edu}
+  Institute anonymized for review
+  \vspace{0.4cm}
 }
 
-\authorrunning{T. Fuchs et al.} % according to sample paper of template: first names are abbreviated; if there are more than two authors, 'et al.' is used.
+\authorrunning{Authors anonymized for review} % according to sample paper of template: first names are abbreviated; if there are more than two authors, 'et al.' is used.
 
 \maketitle
 
@@ -98,9 +97,7 @@ We evaluate our approach with the SAT Competition~2022 Anniversary Track benchma
 We perform cross-validation by treating each solver as new once and predicting these solvers' PAR-2 rank.
 On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime that would be needed to evaluate these solvers on the complete set of instances.
 
-% TODO: insert URLs
-All our source code\footnote{temporary, anonymized version for review: \url{xxx}} and and data\footnote{temporary, anonymized version for review: \url{xxx}} are available on GitHub.
-
+All our source code\footnote{temporary reference, anonymized version for review: \url{https://github.com/dgnr7vexskfoc3a67jdtf96kd9opz/al-for-sat-solver-benchmarking}} and and data\footnote{temporary reference, anonymized version for review: \url{https://github.com/dgnr7vexskfoc3a67jdtf96kd9opz/al-for-sat-solver-benchmarking-data}} are available on GitHub.
 
 \section{Related Work}
 
@@ -202,7 +199,7 @@ Section~\ref{sec:main:model} describes the underlying prediction model~$\mathcal
 We discuss criteria for selecting instances in Section~\ref{sec:main:selection}.
 Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 
-\begin{algorithm}
+\begin{algorithm}[t]
   \caption{Incremental Benchmarking Framework}
   \label{algALBenchmark}
 
@@ -519,10 +516,8 @@ All these results show that discretized runtimes are suitable for our framework.
 
 \subsection{Implementation Details}
 
-% TODO: insert URLs
-For reproducibility, our source code and data are available on GitHub\footnote{temporary, anonymized version for review: \url{xxx}}.
+For reproducibility, our source code and data are available on GitHub (cf. footnotes in Section~\ref{sec:intro}).
 Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions and \emph{gbd-tools}~\cite{IserS18} for SAT-instance retrieval.
-
 
 \section{Evaluation}
 \label{sec:eval}
