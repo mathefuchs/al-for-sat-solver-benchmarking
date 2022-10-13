@@ -417,14 +417,14 @@ Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\
 
 \subsection{Data}
 
-In our experiments, we work with a dataset based on the SAT~Competition~2022 Anniversary Track~\cite{sat2022}, retrieved from the GBD metadata database~\cite{IserS18}.
-The dataset consists of 5355 instances with respective runtime data of 28 solvers.
-We use 56 instance features from the \emph{base} database to characterize instances.
-They are inspired by the SATzilla~2012 features~\cite{features} and comprise instance-size features and graph-representation features, among others.
+In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022}.
+The dataset consists of 5355 instances with respective runtime data of 28 sequential SAT solvers.
+We also use a database of 56 instance features\footnote{\url{https://gbd.iti.kit.edu/getdatabase/base_db}} which are provided in the GBD Benchmark Database~(GBD) by Iser~et~al~\cite{IserS18}.
+They comprise instance size features and node distribution statistics for several graph representations of SAT instances among others and are largely inspired by the SATzilla~2012 features~\cite{features}.
 All features are numeric and free of missing values.
 We drop 10 out of 56 features because of zero variance.
 Overall, prediction models have access to 46 instances features and 27 runtime features, i.e., excluding the current new solver~ $\hat{a}$.
-Additionally, we retrieve instance-family information to evaluate the composition of our sampled benchmarks.
+Additionally, we retrieve instance-family information\footnote{\url{https://gbd.iti.kit.edu/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
 Instance families comprise instances derived from the same application domain, e.g., planning, cryptography, etc., and are a valuable tool for analyzing solver performance and portfolios.
 
 For hyper-parameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance's family.
