@@ -129,6 +129,10 @@ The approach does, however, not optimize for benchmark \emph{runtime} and select
 
 \begin{table}[tbp]
   \centering
+  \caption{Comparison of features of our benchmark-selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
+  }
+  \label{tab:requirements}
+  ~\\[1em]
   \begin{tabular}{
     m{0.32\textwidth}
     >{\centering\arraybackslash}m{0.16\textwidth}
@@ -145,10 +149,6 @@ The approach does, however, not optimize for benchmark \emph{runtime} and select
     Scalability & \cmark & \cmark & \xmark & \cmark \\
     \hline
   \end{tabular}
-  ~\\[1em]
-  \caption{Comparison of features of our benchmark-selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
-  }
-  \label{tab:requirements}
 \end{table}
 
 \subsubsection{Algorithm Configuration.}
@@ -644,7 +644,7 @@ It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy (
 The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 
-\begin{table}[h]
+\begin{table}[t]
   \centering
   \caption{
       Performance comparison of the best-performing active-learning approaches (\emph{AL}), random sampling of the same runtime fraction with 1000 repetitions (\emph{Random}) and statically selecting the instances that are most frequently sampled by active-learning approaches (\emph{Most Freq.})
@@ -692,27 +692,22 @@ It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy (
 
 Table~\ref{tab:fulldataset} shows how both active-learning approaches compare against static baselines.
 The first column shows the two aforementioned AL configurations.
-The random baseline samples instances until roughly the same fraction of runtime is in the benchmark set.
+We compare it against a random baseline and a static benchmark set consisting of the most frequently sampled instances by active learning.
+The random baseline (\emph{random}) samples instances until roughly the same fraction of runtime is in the benchmark set.
 We repeat this 1000 times and report average results.
-Our approaches perform slightly better in both cases.
+The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}) uses the average sampling frequencies over all solvers using all Pareto-optimal active-learning approaches.
+
+Our AL approaches perform slightly better compared to random sampling.
 However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
-Finally, we create a static benchmark set with the most frequently selected instances by active learning.
-This benchmark performs poorly, though, in comparison to active learning and random sampling.
-While active-learning results are less strong on the full dataset than on the smaller tuning dataset, it still shows the benefit of making benchmark selection dependent on the solvers to distinguish.
+Note that the performance difference between random and non-random sampling changes for different fractions of sampled runtime (cf. Figure~\ref{fig:annitraincolorselection}).
+The static benchmark using the most frequently AL-sampled instances performs poorly, though, in comparison to active learning and random sampling.
+This is somewhat expected since it does not reflect the right balance of instance families:
+Families whose instances are uniform-randomly selected by AL appear less often in this benchmark than families where some instances are sampled more often than others.
+While the active-learning results are less strong on the full dataset than on the smaller tuning dataset, it still shows the benefit of making benchmark selection dependent on the solvers to distinguish.
 
 \subsection{Instance-Family Importance}
 
-Selection decisions of our approach also reveal the importance of different instance families to our framework.
-Figure~\ref{fig:annifinalfamilies} shows the occurrence of instance families within the dataset and the benchmarks created by active learning.
-We use the best-performing configurations for all $\delta \in \left[0, 1\right]$ and examine the selection decisions by the active-learning approach on the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}.
-While most families appear with the same fraction in the dataset and the sampled benchmarks, a few outliers need further discussion.
-Problem instances of the families \emph{fpga}, \emph{quasigroup-completion}, and \emph{planning} are especially helpful to our framework in distinguishing solvers.
-Instances of these families are selected over-proportionally in comparison to the full dataset.
-In contrast, instances of the largest family, i.e., \emph{hardware-verification}, roughly appear with the same fraction in the dataset and the sampled benchmarks.
-Finally, instances of the family \emph{cryptography} are less important in distinguishing solvers than their vast weight in the dataset suggests.
-A possible explanation is that these instances are very similar, such that a small fraction of them is sufficient to estimate a solver's performance on all of them.
-
-\begin{figure}[htb!]
+\begin{figure}[tb]
   \centering
   \resizebox{0.85\textwidth}{!}{
     \graphicspath{{../plots/}}
@@ -726,6 +721,16 @@ A possible explanation is that these instances are very similar, such that a sma
   }
   \label{fig:annifinalfamilies}
 \end{figure}
+
+Selection decisions of our approach also reveal the importance of different instance families to our framework.
+Figure~\ref{fig:annifinalfamilies} shows the occurrence of instance families within the dataset and the benchmarks created by active learning.
+We use the best-performing configurations for all $\delta \in \left[0, 1\right]$ and examine the selection decisions by the active-learning approach on the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}.
+While most families appear with the same fraction in the dataset and the sampled benchmarks, a few outliers need further discussion.
+Problem instances of the families \emph{fpga}, \emph{quasigroup-completion}, and \emph{planning} are especially helpful to our framework in distinguishing solvers.
+Instances of these families are selected over-proportionally in comparison to the full dataset.
+In contrast, instances of the largest family, i.e., \emph{hardware-verification}, roughly appear with the same fraction in the dataset and the sampled benchmarks.
+Finally, instances of the family \emph{cryptography} are less important in distinguishing solvers than their vast weight in the dataset suggests.
+A possible explanation is that these instances are very similar, such that a small fraction of them is sufficient to estimate a solver's performance on all of them.
 
 \section{Conclusion}
 
