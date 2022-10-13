@@ -643,7 +643,63 @@ The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the pre
 It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
-These trade-offs provide a better way of prototyping and evaluating new SAT solvers rather than evaluating them on manually picked instances based on domain knowledge.
+
+\vspace{-0.5cm}
+\begin{table}[h]
+  \centering
+  \caption{
+      Performance comparison of the best-performing active-learning approaches (\emph{AL}), random sampling of the same runtime fraction with 1000 repetitions (\emph{Random}) and statically selecting the instances that are most frequently sampled by active-learning approaches (\emph{Most Freq.})
+    }
+  \label{tab:fulldataset}
+
+  \begin{subfigure}{\textwidth}
+    \centering
+    \caption{Best-performing AL approach for $\delta \in \left[0.2, 0.7\right]$}
+    \begin{tabular}{
+      >{\arraybackslash}p{0.4\textwidth}
+      S[table-format=2.2,table-column-width=0.15\textwidth]
+      S[table-format=2.2,table-column-width=0.15\textwidth]
+      S[table-format=2.2,table-column-width=0.15\textwidth]
+    }
+      \hline
+        & {AL} & {Random} & {Most Freq.} \\
+      \hline
+      Sampled Runtime Fraction (\%) & 5.41 & 5.43 & 5.44 \\
+      Sampled Instance Fraction (\%) & 26.53 & 5.43 & 27.75 \\
+      Ranking Accuracy (\%) & 90.48 & 88.54 & 81.08 \\
+      \hline
+    \end{tabular}
+  \end{subfigure}
+  \\
+  \begin{subfigure}{\textwidth}
+    \centering
+    \caption{Best-performing AL approach for $\delta \in (0.7, 0.8]$}
+    \begin{tabular}{
+      >{\arraybackslash}p{0.4\textwidth}
+      S[table-format=2.2,table-column-width=0.15\textwidth]
+      S[table-format=2.2,table-column-width=0.15\textwidth]
+      S[table-format=2.2,table-column-width=0.15\textwidth]
+    }
+      \hline
+        & {AL} & {Random} & {Most Freq.} \\
+      \hline
+      Sampled Runtime Fraction (\%) & 10.35 & 10.37 & 10.37 \\
+      Sampled Instance Fraction (\%) & 5.24 & 10.37 & 36.96 \\
+      Ranking Accuracy (\%) & 92.33 & 91.61 & 84.52 \\
+      \hline
+    \end{tabular}
+  \end{subfigure}
+\end{table}
+
+Table~\ref{tab:fulldataset} shows how both active-learning approaches compare against static baselines.
+The first column shows the two aforementioned AL configurations.
+The random baseline samples instances until roughly the same fraction of runtime is in the benchmark set.
+We repeat this 1000 times and report average results.
+Our approaches perform slightly better in both cases.
+However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
+Finally, we create a static benchmark set with the most frequently selected instances by active learning.
+This benchmark performs poorly, though, in comparison to active learning and random sampling.
+While active-learning results are less strong on the full dataset than on the smaller tuning dataset, it still shows the benefit of making benchmark selection dependent on the solvers to distinguish.
 
 \subsection{Instance-Family Importance}
 

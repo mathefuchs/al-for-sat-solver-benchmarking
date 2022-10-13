@@ -172,7 +172,21 @@ all_experiments.append(Experiment.custom(
 ))
 
 # all_experiments.append(Experiment.custom(
+#     "anni_final", False, 1000,
+#     RandomSampling(1),
+#     FixedSubsetSize(0.054083, True),
+#     PartialObservationBasedRanking(),
+# ))
+
+# all_experiments.append(Experiment.custom(
 #     "anni_final", False, 1,
+#     MostFrequent(),
+#     FixedSubsetSize(0.054083, True),
+#     PartialObservationBasedRanking(),
+# ))
+
+# all_experiments.append(Experiment.custom(
+#     "anni_final", False, 1000,
 #     RandomSampling(1),
 #     FixedSubsetSize(0.103498, True),
 #     PartialObservationBasedRanking(),
