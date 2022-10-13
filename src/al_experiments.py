@@ -421,7 +421,7 @@ if __name__ == "__main__":
         if DEBUG:
             solver_results = [
                 run_e2e_experiment(i, experiment, target_solver)
-                for i, target_solver in enumerate([column_list[0]])
+                for i, target_solver in enumerate(column_list)
             ]
         else:
             solver_results = Parallel(n_jobs=-1)(

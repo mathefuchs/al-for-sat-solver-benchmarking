@@ -46,14 +46,16 @@ class StoppingPredicate(ABC):
 class FixedSubsetSize(StoppingPredicate):
     """ Stop after a fixed amount of instances is in the subset. """
 
-    def __init__(self, subset_size: float) -> None:
+    def __init__(self, subset_size: float, use_fraction_runtime: bool = False) -> None:
         """ Initializes this stopping predicate.
 
         Args:
             subset_size (float): The desired subset size.
+            use_fraction_runtime (bool): Whether to sample the given amount of runtime.
         """
 
         self.subset_size = subset_size
+        self.use_fraction_runtime = use_fraction_runtime
 
     def get_params(self) -> str:
         return f"fixed_{self.subset_size:.2f}"
@@ -83,7 +85,18 @@ class FixedSubsetSize(StoppingPredicate):
             bool: Whether to stop adding more instances.
         """
 
-        return np.count_nonzero(y_sampled) / y_sampled.shape[0] >= self.subset_size
+        if not self.use_fraction_runtime:
+            return np.count_nonzero(y_sampled) / y_sampled.shape[0] >= self.subset_size
+        else:
+            # Data leakage, only for evaluation
+            amt = (
+                np.sum(runtimes_df.loc[
+                    y_sampled == 1,
+                    target_solver
+                ].replace(np.inf, 5000))
+                / np.sum(runtimes_df.loc[:, target_solver].replace(np.inf, 5000))
+            )
+            return amt >= self.subset_size
 
 
 class RankingConverged(StoppingPredicate):
@@ -136,7 +149,7 @@ class RankingConverged(StoppingPredicate):
             return True
 
 
-class WilcoxonSignificance(StoppingPredicate):  # TODO
+class WilcoxonSignificance(StoppingPredicate):
     """ Stop after we are confident enough to distinguish solvers. """
 
     def __init__(

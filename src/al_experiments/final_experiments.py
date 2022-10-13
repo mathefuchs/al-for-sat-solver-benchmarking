@@ -4,6 +4,7 @@ from al_experiments.experiment import Experiment
 from al_experiments.selection import (
     RandomSampling,
     SelectionFunctor,
+    MostFrequent,
     ModelUncertaintySampling,
     ModelBasedInformationGainSampling,
 )
@@ -169,3 +170,17 @@ all_experiments.append(Experiment.custom(
     WilcoxonSignificance(0.08, 0.05, 0.1),
     PartialObservationBasedRanking(),
 ))
+
+# all_experiments.append(Experiment.custom(
+#     "anni_final", False, 1,
+#     RandomSampling(1),
+#     FixedSubsetSize(0.103498, True),
+#     PartialObservationBasedRanking(),
+# ))
+
+# all_experiments.append(Experiment.custom(
+#     "anni_final", False, 1,
+#     MostFrequent(),
+#     FixedSubsetSize(0.103498, True),
+#     PartialObservationBasedRanking(),
+# ))

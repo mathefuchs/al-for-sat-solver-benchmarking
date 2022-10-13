@@ -82,6 +82,48 @@ class RandomSampling(SelectionFunctor):
             y_sampled[sampled_index] = 1
 
 
+class MostFrequent(SelectionFunctor):
+    """ Select most frequently selected instances. """
+
+    def __init__(self) -> None:
+        super().__init__(0.0)
+
+    def get_params(self) -> str:
+        return f"most_freq"
+
+    def __call__(
+        self, y_sampled: np.ndarray, runtimes_df: pd.DataFrame,
+        clustering: pd.DataFrame, cluster_boundaries: pd.DataFrame,
+        timeout_clf: StackingClassifier, label_clf: StackingClassifier,
+        x: np.ndarray, y: np.ndarray, target_solver: str, experiment
+    ) -> None:
+        """ Selects another instance in 'y_sampled'.
+
+        Args:
+            y_sampled (np.ndarray): The already sampled instances.
+            runtimes_df (pd.DataFrame): The runtimes.
+            clustering (pd.DataFrame): The labels of known solvers.
+            cluster_boundaries (pd.DataFrame): The cluster boundaries.
+            timeout_clf (StackingClassifier): The time-out predictor.
+            label_clf (StackingClassifier): The non-time-out label predictor.
+            x (np.ndarray): The input features.
+            y (np.ndarray): The target labels.
+            target_solver (str): The target solver.
+            experiment (Experiment): The experiment configuration.
+        """
+
+        if np.count_nonzero(y_sampled) == y_sampled.shape[0]:
+            return
+
+        most_freq_hashes = pd.read_csv(
+            "../al-for-sat-solver-benchmarking-data/pickled-data/active_learning_instance_sampling_frequencies.csv",
+            index_col="hash"
+        ).index
+        hash_to_select = most_freq_hashes[np.count_nonzero(y_sampled)]
+        pos_to_select = np.where(runtimes_df.index == hash_to_select)[0][0]
+        y_sampled[pos_to_select] = 1
+
+
 class FastRuntimeSampling(SelectionFunctor):
     """ Select-fast-instances-first sampling. """
 
