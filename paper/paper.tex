@@ -644,7 +644,6 @@ It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy (
 The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 
-\vspace{-0.5cm}
 \begin{table}[h]
   \centering
   \caption{
@@ -703,7 +702,17 @@ While active-learning results are less strong on the full dataset than on the sm
 
 \subsection{Instance-Family Importance}
 
-\begin{figure}[tb!]
+Selection decisions of our approach also reveal the importance of different instance families to our framework.
+Figure~\ref{fig:annifinalfamilies} shows the occurrence of instance families within the dataset and the benchmarks created by active learning.
+We use the best-performing configurations for all $\delta \in \left[0, 1\right]$ and examine the selection decisions by the active-learning approach on the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}.
+While most families appear with the same fraction in the dataset and the sampled benchmarks, a few outliers need further discussion.
+Problem instances of the families \emph{fpga}, \emph{quasigroup-completion}, and \emph{planning} are especially helpful to our framework in distinguishing solvers.
+Instances of these families are selected over-proportionally in comparison to the full dataset.
+In contrast, instances of the largest family, i.e., \emph{hardware-verification}, roughly appear with the same fraction in the dataset and the sampled benchmarks.
+Finally, instances of the family \emph{cryptography} are less important in distinguishing solvers than their vast weight in the dataset suggests.
+A possible explanation is that these instances are very similar, such that a small fraction of them is sufficient to estimate a solver's performance on all of them.
+
+\begin{figure}[htb!]
   \centering
   \resizebox{0.85\textwidth}{!}{
     \graphicspath{{../plots/}}
@@ -717,16 +726,6 @@ While active-learning results are less strong on the full dataset than on the sm
   }
   \label{fig:annifinalfamilies}
 \end{figure}
-
-Selection decisions of our approach also reveal the importance of different instance families to our framework.
-Figure~\ref{fig:annifinalfamilies} shows the occurrence of instance families within the dataset and the benchmarks created by active learning.
-We use the best-performing configurations for all $\delta \in \left[0, 1\right]$ and examine the selection decisions by the active-learning approach on the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}.
-While most families appear with the same fraction in the dataset and the sampled benchmarks, a few outliers need further discussion.
-Problem instances of the families \emph{fpga}, \emph{quasigroup-completion}, and \emph{planning} are especially helpful to our framework in distinguishing solvers.
-Instances of these families are selected over-proportionally in comparison to the full dataset.
-In contrast, instances of the largest family, i.e., \emph{hardware-verification}, roughly appear with the same fraction in the dataset and the sampled benchmarks.
-Finally, instances of the family \emph{cryptography} are less important in distinguishing solvers than their vast weight in the dataset suggests.
-A possible explanation is that these instances are very similar, such that a small fraction of them is sufficient to estimate a solver's performance on all of them.
 
 \section{Conclusion}
 
