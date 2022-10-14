@@ -28,29 +28,29 @@
 \title{Active Learning for SAT Solver Benchmarking}
 
 \author{
-  Authors anonymized for review
+  Author(s) anonymized for review
   \vspace{0.4cm}
 }
 
 \institute{
-  Institute anonymized for review
+  Institute(s) anonymized for review
   \vspace{0.4cm}
 }
 
-\authorrunning{Authors anonymized for review} % according to sample paper of template: first names are abbreviated; if there are more than two authors, 'et al.' is used.
+\authorrunning{Author(s) anonymized for review} % according to sample paper of template: first names are abbreviated; if there are more than two authors, 'et al.' is used.
 
 \maketitle
 
 \begin{abstract}
   Benchmarking is one of the most important phases when developing algorithms.
-  This also applies to solutions to the SAT (propositional satisfiability) problem.
-  Benchmark selection chooses representative instances from a pool of instances that reliably discriminate SAT solvers based on their runtime.
+  This also applies to solvers for the SAT (propositional satisfiability) problem.
+  Benchmark selection chooses representative problem instances that reliably discriminate solvers based on their runtime.
   In this paper, we present a dynamic benchmark selection approach based on active learning.
-  Our approach predicts the rank of a new solver among its competitors with minimum running time and maximum rank prediction accuracy.
-  We evaluated this approach using the Anniversary Track dataset from the 2022 SAT Competition.
+  Our approach predicts the rank of a new solver among its competitors with minimum runtime and maximum rank prediction accuracy.
+  We evaluated this approach on the Anniversary Track dataset from the 2022 SAT Competition.
   Our selection approach can predict the rank of a new solver after about \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of about \SI{92}{\%}. 
-  In this paper, we also discuss the importance of instance families in the selection process. 
-  Overall, our tool provides a reliable way for SAT solver engineers to efficiently determine the performance of a new SAT solver.
+  We also discuss the importance of instance families in the selection process. 
+  Overall, our tool provides a reliable way for solver engineers to efficiently determine the performance of a new solver.
 
   \keywords{Propositional satisfiability \and Benchmarking \and Active learning}
 \end{abstract}
@@ -64,7 +64,7 @@ This is also true for the propositional satisfiability problem (SAT), the archet
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
 Competitive SAT solvers are the result of extensive experimentation with a variety of ideas and considerations~\cite{FroleyksHIJS21,sat2022}.
 While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
-Instead, the primary goal of traditional approaches is to select a representative set of instances for ranking solvers with a scoring scheme~\cite{Gelder11,HoosKSS13}.
+Instead, traditional approaches focus on selecting a representative set of instances for ranking solvers with a scoring scheme~\cite{Gelder11,HoosKSS13}.
 SAT~Competitions typically use the \mbox{PAR-2} score, i.e., the average runtime with a penalty of $2 \tau$ for timeouts with time-limit~$\tau$~\cite{FroleyksHIJS21}.
 
 In this paper, we present a novel benchmark selection approach based on active learning.
@@ -72,11 +72,11 @@ Our approach can predict the rank of a new solver with high accuracy in only a f
 The problem we solve is specified in Definition~\ref{def:new-solver-problem}.
 
 \begin{definition}[New-Solver Problem]
-  Given solvers~$\mathcal{A}$, instances~$\mathcal{I}$, runtimes~$r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ with time-limit $\tau$, and a new solver $\hat{a} \notin \mathcal{A}$, incrementally select benchmark instances in $\mathcal{I}$ to maximize the confidence in predicting the rank of $\hat{a}$ while minimizing the total benchmark runtime.
+  Given solvers~$\mathcal{A}$, instances~$\mathcal{I}$, runtimes~$r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ with time-limit $\tau$, and a new solver $\hat{a} \notin \mathcal{A}$, incrementally select benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of $\hat{a}$ while minimizing the total benchmark runtime.
   \label{def:new-solver-problem}
 \end{definition}
 
-Note that our scenario assumes that we know the runtimes of all solvers, except the new one, on all instances.
+Note that our scenario assumes knowing the runtimes of all solvers, except the new one, on all instances.
 One could also imagine a collaborative filtering scenario, where runtimes are only partially known~\cite{misir2017data,misir2017alors}.
 
 Our approach satisfies several desirable criteria for benchmarking:
@@ -93,11 +93,11 @@ In particular, we only subsample the benchmark once instead of comparing pairwis
 Since a new solver idea is rarely best on the first try, it is desired to rank it fast.
 In this way, one can discard the new solver idea if it performs poorly across the board or may tweak it further if it shows promising results at least in some cases.
 
-We evaluate our approach with the SAT Competition~2022 Anniversary Track benchmark~\cite{sat2022}, consisting of 5355~instances and complete runtimes of 28~solvers.
+We evaluate our approach with the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}, consisting of 5355~instances and complete runtimes of 28~solvers.
 We perform cross-validation by treating each solver as new once and predicting these solvers' PAR-2 rank.
 On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime that would be needed to evaluate these solvers on the complete set of instances.
 
-All our source code\footnote{temporary reference, anonymized version for review: \url{https://github.com/dgnr7vexskfoc3a67jdtf96kd9opz/al-for-sat-solver-benchmarking}} and and data\footnote{temporary reference, anonymized version for review: \url{https://github.com/dgnr7vexskfoc3a67jdtf96kd9opz/al-for-sat-solver-benchmarking-data}} are available on GitHub.
+All our source code\footnote{temporary link, anonymized version for review: \url{https://github.com/dgnr7vexskfoc3a67jdtf96kd9opz/al-for-sat-solver-benchmarking}} and and data\footnote{temporary link, anonymized version for review: \url{https://github.com/dgnr7vexskfoc3a67jdtf96kd9opz/al-for-sat-solver-benchmarking-data}} are available on GitHub.
 
 \section{Related Work}
 
@@ -120,7 +120,7 @@ Manthey and Möhle find that competition benchmarks might contain redundant inst
 M{\i}s{\i}r presents a feature-based approach to reduce benchmarks by matrix factorization and clustering~\cite{misir2021benchmark}.
 
 Hoos et al.~\cite{HoosKSS13} discuss which properties are most desirable when selecting SAT benchmark instances.
-Selection criteria are instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoidance of duplicate instances.
+The selection criteria are instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoidance of duplicate instances.
 To filter too similar instances, they use a distance-based approach with the SATzilla features~\cite{XuHHL08,features}.
 The approach does, however, not optimize for benchmark \emph{runtime} and selects instances \emph{randomly}, apart from constraints on the instance hardness and feature distance.
 
@@ -152,7 +152,7 @@ The approach does, however, not optimize for benchmark \emph{runtime} and select
 
 Further related work can be found within the field of algorithm configuration~\cite{HoosHL21,Stutzle0P22}, e.g., the configuration system SMAC~\cite{HutterHL11}.
 Thereby, the goal is to tune SAT solvers for a given sub-domain of problem instances.
-Although this task is different from our goal, e.g., we do not need to navigate configuration space, there are similarities to our approach as well.
+Although this task is different from our goal, e.g., we do not need to navigate the configuration space, there are similarities to our approach as well.
 For example, SMAC also employs an iterative, model-based selection procedure, though for configurations rather than instances.
 An algorithm configurator, however, cannot be used to \emph{rank/score} a new solver since algorithm configuration solemnly seeks to find the best-performing configuration.
 Also, while using a model-based selection strategy to sample configurations, instance selection is made \emph{randomly}, i.e., without building a model over instances.
@@ -179,8 +179,8 @@ In contrast to traditional passive machine-learning methods with given instance 
 AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,GarzonMG22,2019gaal} and \emph{pool-bas\-ed} approaches \cite{GolbandiKL11,HarpaleY08,KorenBV09}.
 While synthesis-based methods generate instances for labeling, pool-based methods rely on a fixed set of unlabeled instances from which to sample.
 
-Recent synthesis-based methods within the field of SAT solving show how to generate problem instances with desired properties.
-This goal is, however, orthogonal to ours~\cite{0001AEMN22,GarzonMG22}.
+Recent synthesis-based methods within the field of SAT solving show how to generate problem instances with desired properties~\cite{0001AEMN22,GarzonMG22}.
+This goal is, however, orthogonal to ours.
 While those approaches want to generate instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark.
 Volpato and Guangyan use pool-based AL to learn an instance-specific algorithm selector~\cite{volpato2019active}.
 Rather than benchmarking a solver's overall performance, their goal is to recommend the best solver out of a set of solvers for each SAT instance.
@@ -188,8 +188,8 @@ Rather than benchmarking a solver's overall performance, their goal is to recomm
 \section{Active Learning for SAT Solver Benchmarking}
 \label{sec:main}
 
-The outline of our benchmarking framework is depicted in Algorithm~\ref{algALBenchmark}. 
-Given a set of known solvers $\mathcal{A}$, instances $\mathcal{I}$ and runtimes $r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a$ (Line~1).
+Algorithm~\ref{algALBenchmark} outlines our benchmarking framework. 
+Given a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$ and runtimes~$r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a$ (Line~1).
 The prediction model~$\mathcal{M}$ is used to repeatedly select an instance (Line~4) for benchmarking $\hat a$ (Line~5). 
 The acquired result is subsequently used to update the prediction model~$\mathcal{M}$ (Line~7). 
 When the stopping criterion is met (Line~3), we quit the benchmarking loop and predict the final score of $\hat a$ (Line~8). 
@@ -238,8 +238,8 @@ Model initialization (Line~1) creates the prediction model and transforms runtim
 No model training is needed at this point since we do not have any labeled data yet.
 Later, model $\mathcal{M}$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
 In particular, the model update (Line~7) uses all acquired runtimes to train $f$ with a standard supervised machine-learning methodology.
-Training features are instance features and known runtimes $r$.
-After applying the necessary transformations described in the subsequent section, we fit the prediction model using the transformed observations $\mathcal{R}$ as ground-truth labels.
+Model training uses instance features and known runtimes $r$.
+The transformed runtime observations~$\mathcal{R}$ serve as ground-truth labels.
 Note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of Algorithm~\ref{algALBenchmark} by magnitudes.
 Finally, we predict the score of the new solver $\hat a$ in Line~8 with the prediction function~$f$.
 
@@ -253,7 +253,7 @@ The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}}
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
 Given an instance $e \in \mathcal{I}$, a solver $a \in A$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
-In preliminary experiments, we achieved higher accuracy in predicting such discrete-runtime labels than in predicting raw runtimes.
+In preliminary experiments, we achieved higher accuracy for predicting such discrete-runtime labels than for predicting raw runtimes.
 Research on portfolio solvers has also shown that discretization works well in practice~\cite{CollauttiMMO13,NgokoCT19}.
 
 \subsubsection{Ranking Solvers.}
@@ -280,12 +280,12 @@ The scoring function $s_k$ induces a ranking among solvers.
 Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line~4).
 In this section, we introduce our sampling strategies, which use the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 We implement an uncertainty and an information-gain sampling strategy.
-These methods require the model's predictions to include probabilities for the $k$ discrete runtime labels induced by the clustering described in the preceding section.
+These methods require the model's predictions to include probabilities for the $k$ discrete runtime labels.
 Let \mbox{$f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$} denote this modified prediction function.
 
 \subsubsection{Uncertainty Sampling.}
 
-The uncertainty sampling strategy simply selects the instance closest to the model's decision boundary.
+The uncertainty sampling strategy selects the instance closest to the model's decision boundary.
 The set $\tilde{\mathcal{I}} \subseteq \mathcal{I}$ denotes the instances that have already been sampled.
 %
 \begin{equation*}
@@ -331,14 +331,14 @@ To improve the stability of this criterion, we use an exponential moving average
 
 The ranking stopping criterion is less sophisticated in comparison.
 It stops the active-learning process if the ranking induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged within the last $l$ iterations.
-Note that the concrete values of the predicted score $s_{\hat a}$ might still change.
+However, the concrete values of the predicted score $s_{\hat a}$ might still change.
 We are solemnly interested in the induced ranking in this case.
 
 
 \section{Experimental Design}
 \label{sec:exdesign}
 
-Given all the previously presented instantiations for Algorithm~\ref{algALBenchmark}, this section briefly outlines our experimental design, including our evaluation framework, used data sets, hyper-parameter choices, and implementation details.
+Given all the previously presented instantiations for Algorithm~\ref{algALBenchmark}, this section outlines our experimental design, including our evaluation framework, used data sets, hyper-parameter choices, and implementation details.
 
 \subsection{Evaluation Framework}
 \label{sec:exdesign:eval}
@@ -389,11 +389,11 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
 \end{algorithm}
 
 As already stated in the introductory section, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-We create a prediction model $\mathcal{M}$ as described in Section~\ref{sec:main:model} that provides us with a scoring function $s_k$.
+As described in Section~\ref{sec:main:model}, a prediction model $\mathcal{M}$ provides us with an estimated scoring~$s_{\hat a}$ for the new solver~$\hat{a}$.
 
 To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark}, i.e., a concrete choice for all the sub-routines, we perform cross-validation on our set of solvers.
 Algorithm~\ref{alg:eval} shows this.
-That means that each solver plays the role of the new solver once (Line~2).
+That means that each solver plays the role of the new solver~$\hat{a}$ once (Line~2).
 Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage (Line~3).
 After running our active-learning framework for a solver $\hat{a}$ in Line~4, we compute the value of both our optimization goals:
 First and foremost, we want to provide the engineer of new SAT solvers with an accurate ranking.
@@ -410,7 +410,7 @@ Overall, we want to find an approach that maximizes
 \end{equation} 
 %
 whereby $\delta \in \left[0, 1\right]$ allows for linear weighting between the two optimization goals $O_{\operatorname{acc}}$ and $O_{\operatorname{rt}}$.
-Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on a $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
+Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on an $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
 
 \subsection{Data}
 
@@ -424,9 +424,9 @@ Overall, prediction models have access to 46 instances features and 27 runtime f
 Additionally, we retrieve instance-family information\footnote{\url{https://gbd.iti.kit.edu/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
 Instance families comprise instances derived from the same application domain, e.g., planning, cryptography, etc., and are a valuable tool for analyzing solver performance and portfolios.
 
-For hyper-parameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance's family.
+For hyper-parameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instances' family.
 All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them corresponds to less than one instance, are put into one meta-family for stratification.
-This \emph{tuning dataset} allows for a more extensive exploration of hyper-parameter space.
+This \emph{tuning dataset} allows for a more extensive exploration of the hyper-parameter space.
 
 \subsection{Hyper-parameters}
 \label{sec:exdesign:hyper}
@@ -455,7 +455,7 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with 
 
 For \emph{selection} (cf. Section~\ref{sec:main:selection}), we experiment with the following methods, including our used hyper-parameter values.
 Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches, which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
-A drawback of this is the lack of parallel execution of runtime experiment.
+A drawback of this is the lack of parallel execution of runtime experiments.
 
 \begin{itemize}
   \item Random sampling 
@@ -583,7 +583,7 @@ Regarding the selection approaches (Fig.~\ref{fig:annitraincolorselection}), unc
 However, information-gain sampling is beneficial if runtime is strongly favored (small $\delta$; runtime fraction less than \SI{5}{\%}).
 This result aligns with our expectations:
 Information-gain sampling selects instances that maximize the expected reduction in entropy.
-This means we sample instances revealing similarities between solvers rather than differences, which helps to build a confident model fast.
+This means we sample instances revealing similarities between solvers rather than differences, which helps to build a confident model quickly.
 However, the method lacks the possibility of selecting helpful instances for distinguishing solvers later.
 Random sampling performs reasonably well but is outperformed by uncertainty sampling in all cases, showing the benefit of actively selecting instances based on a prediction model.
 
@@ -633,7 +633,7 @@ We consider this region to be most promising, analogous to the \emph{elbow} meth
 \subsection{Full-Dataset Evaluation}
 
 Having selected the most promising hyper-parameters, we run our active-learning experiments on the complete Anniversary Track dataset (5355 instances).
-The aforementioned range $\delta \in \left[0.2, 0.8\right]$ is covered by only two configurations.
+The aforementioned range $\delta \in \left[0.2, 0.8\right]$ only results in two distinct configurations.
 The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime-label ranking, information-gain sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
@@ -694,7 +694,7 @@ The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}
 
 Our two AL approaches both perform better than random sampling.
 However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
-Note that the performance difference between random and non-random sampling changes for different fractions of sampled runtime (cf. Figure~\ref{fig:annitraincolorselection}).
+This performance difference between random and non-random sampling also changes for different fractions of sampled runtime (cf. Figure~\ref{fig:annitraincolorselection}).
 The static benchmark using the most frequently AL-sampled instances performs poorly, though, compared to active learning and random sampling.
 This outcome is somewhat expected since the static benchmark does not reflect the right balance of instance families:
 Families whose instances are uniform-randomly selected by AL, e.g., for different solvers, appear less often in this benchmark than families where some instances are sampled more often than others.
@@ -712,7 +712,7 @@ While the active-learning results are less strong on the full dataset than on th
     Scatter plot showing the \emph{importance} of different instance families to our framework.
     The x-axis shows the frequency of instance families in the full Anniversary Track dataset.
     The y-axis shows the average frequency of instance families in the samples selected by active learning.
-    The dashed line represents families that occur with the same frequency in both, the dataset and samples.
+    The dashed line represents families that occur with the same frequency in the dataset and samples.
   }
   \label{fig:annifinalfamilies}
 \end{figure}
@@ -731,10 +731,9 @@ A possible explanation is that these instances are very similar, such that a sma
 
 In this work, we have discussed possible solutions to the \emph{New-Solver Problem}:
 Given a new solver, we want to find its ranking amidst its competitors.
-Our approach provides accurate ranking predictions while needing significantly less runtime than a full evaluation on a given benchmark set.
-In particular, we can determine a new solver's PAR-2 ranking with about \SI{92}{\%} accuracy while only needing \SI{10}{\%} of the full-evaluation time.
-Our framework produces good results working with discrete runtime labels rather than regressing actual runtimes.
-We have evaluated several ranking algorithms, instance-selection approaches, and stopping criteria within our sequential active-learning process.
+Our approach provides accurate ranking predictions while needing significantly less runtime than a complete evaluation on all instances of a given benchmark set.
+On data from the SAT~Competition~2022 Anniversary Track, we can determine a new solver's PAR-2 ranking with about \SI{92}{\%} accuracy while only needing \SI{10}{\%} of the full-evaluation time.
+We have evaluated several ranking algorithms, instance-selection approaches, and stopping criteria within our sequential active-learning framework.
 We also took a brief look at which instance families are the most prevalent in selection decisions.
 
 \subsection{Future Work}
@@ -745,12 +744,10 @@ Furthermore, it is possible to formulate runtime discretization as an optimizati
 A major shortcoming of our current approach is the lack of parallelization, selecting instances one at a time.
 Benchmarking on a computing cluster with $n$ cores benefits from having batches of $n$ instances.
 However, bigger batch sizes $n$ impede \emph{active learning}.
-Also, it is unclear how to synchronize the model update and instance selection without wasting too much runtime.
+Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
 
 On a more general note, one can apply our evaluation framework to arbitrary $\mathcal{NP}$-complete problems, as all discussed active-learning methods are problem-agnostic.
-Especially the runtime-prediction model would need some tweaking for this purpose, though.
-Those problems share most of the relevant properties of SAT solving, i.e., there are established instance features, a complete benchmark run takes quite some time, and solver development traditionally requires expert knowledge to hand-select instances.
-
+These problems share most of the relevant properties of SAT solving, i.e., there are established instance features, a complete benchmark run takes a considerable amount of time, and solver benchmarking traditionally requires expert knowledge to hand-select instances.
 
 %
 % ---- Bibliography ----
