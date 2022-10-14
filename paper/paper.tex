@@ -642,7 +642,7 @@ It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy (
 \begin{table}[t]
   \centering
   \caption{
-      Performance comparison of the best-performing active-learning approaches (\emph{AL}), random sampling of the same runtime fraction with 1000 repetitions (\emph{Random}) and statically selecting the instances that are most frequently sampled by active-learning approaches (\emph{Most Freq.})
+      Performance comparison of the best-performing active-learning approaches (\emph{AL}), random sampling of the same runtime fraction with 1000 repetitions (\emph{Random}), and statically selecting the instances most frequently sampled by active-learning approaches (\emph{Most Freq.})
     }
   \label{tab:fulldataset}
 
@@ -687,18 +687,18 @@ It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy (
 
 Table~\ref{tab:fulldataset} shows how both active-learning approaches compare against static baselines.
 The first column shows the two aforementioned AL configurations.
-We compare it against a random baseline and a static benchmark set consisting of the most frequently sampled instances by active learning.
-The random baseline (\emph{random}) samples instances until roughly the same fraction of runtime is in the benchmark set.
-We repeat this 1000 times and report average results.
-The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}) uses the average sampling frequencies over all solvers using all Pareto-optimal active-learning approaches.
+We compare them against a random baseline and a static benchmark set consisting of the instances most frequently sampled by active learning.
+The random baseline (\emph{Random}) samples instances until it reaches roughly the same fraction of runtime as the AL benchmark sets.
+We repeat this procedure 1000 times and report average results.
+The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}) uses the average sampling frequencies of instances over all solvers and all Pareto-optimal active-learning approaches.
 
-Our AL approaches perform slightly better compared to random sampling.
+Our two AL approaches both perform better than random sampling.
 However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
 Note that the performance difference between random and non-random sampling changes for different fractions of sampled runtime (cf. Figure~\ref{fig:annitraincolorselection}).
-The static benchmark using the most frequently AL-sampled instances performs poorly, though, in comparison to active learning and random sampling.
-This is somewhat expected since it does not reflect the right balance of instance families:
-Families whose instances are uniform-randomly selected by AL appear less often in this benchmark than families where some instances are sampled more often than others.
-While the active-learning results are less strong on the full dataset than on the smaller tuning dataset, it still shows the benefit of making benchmark selection dependent on the solvers to distinguish.
+The static benchmark using the most frequently AL-sampled instances performs poorly, though, compared to active learning and random sampling.
+This outcome is somewhat expected since the static benchmark does not reflect the right balance of instance families:
+Families whose instances are uniform-randomly selected by AL, e.g., for different solvers, appear less often in this benchmark than families where some instances are sampled more often than others.
+While the active-learning results are less strong on the full dataset than on the smaller tuning dataset, they still show the benefit of making benchmark selection dependent on the solvers to distinguish.
 
 \subsection{Instance-Family Importance}
 
