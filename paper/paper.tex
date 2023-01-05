@@ -63,6 +63,7 @@ One of the main phases of algorithm engineering is benchmarking.
 This is also true for the propositional satisfiability problem (SAT), the archetypal $\mathcal{NP}$-complete problem.
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
 Competitive SAT solvers are the result of extensive experimentation with a variety of ideas and considerations~\cite{FroleyksHIJS21,sat2022}.
+%JB: TODO: clarify that simply running a solver on all benchmarks is not a good approach in this scenario, i.e., motivate our approach better -> see arguments in rebuttal (comment of Reviewer 3)
 While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
 Instead, traditional approaches focus on selecting a representative set of instances for ranking solvers with a scoring scheme~\cite{Gelder11,HoosKSS13}.
 SAT~Competitions typically use the \mbox{PAR-2} score, i.e., the average runtime with a penalty of $2 \tau$ for timeouts with time-limit~$\tau$~\cite{FroleyksHIJS21}.
@@ -108,6 +109,7 @@ Also, benchmark selection has many movable parts, e.g., performance measures, ag
 Questionable research practices might modify these elements a-posteriori to fit expectations, biasing results~\cite{NiesslHWCB22}.
 In the following, we discuss related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
 Table~\ref{tab:requirements} compares the most relevant approaches.
+%JB: TODO: clarify that competitors in table have different goals and thus our approach is not a general improvement on them, but targets a different problem (comment of Reviewer 2)
 
 \subsubsection{Static Benchmark Selection.}
 
@@ -172,6 +174,8 @@ Comparing only pairs of solvers, evaluating a new solver requires sampling a sep
 In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one benchmark.
 
 \subsubsection{Active Learning.}
+%JB: TODO: explain AL for non-ML audience (comment of Reviewer 2)
+%JB: TODO: (re-)add figure for AL cycle or explain the latter better (comment of Reviewer 2); could also be placed in next section
 
 The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning (AL) within recommender systems, in particular, the \emph{new-user problem}~\cite{RubensESK15}.
 On the one hand, we want to maximize the utility an instance provides to our model, i.e., rank prediction accuracy, and on the other hand, minimize the cost, i.e., runtime, that is associated with its acquisition.
@@ -234,6 +238,7 @@ Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 
 Let SAT solvers $\mathcal{A}$, benchmark instances $\mathcal{I}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given.
 We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \lbrace \hat a \rbrace$ to denote all solvers, including the new solver. 
+%JB: we should harmonize use of \mathcal for A; sometimes \mathcal is used (e.g., two sentences ago), sometimes not (e.g., in previous sentence)
 Model initialization (Line~1) creates the prediction model and transforms runtimes, as discussed in the subsequent section.
 No model training is needed at this point since we do not have any labeled data yet.
 Later, model $\mathcal{M}$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
@@ -252,6 +257,7 @@ The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}}
 %
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
+%JB: this function cannot be applied to new solvers, as the latter are not in $A$ (only in $\hat A$); instead of "a", could also use actual runtime as first input to \gamma, but that might lead to less straigthforward notation later in text (e.g., when defining ranking and stopping criteria)
 Given an instance $e \in \mathcal{I}$, a solver $a \in A$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
 In preliminary experiments, we achieved higher accuracy for predicting such discrete-runtime labels than for predicting raw runtimes.
 Research on portfolio solvers has also shown that discretization works well in practice~\cite{CollauttiMMO13,NgokoCT19}.
@@ -272,6 +278,8 @@ To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in t
 %
 I.e., we apply PAR-2 scoring, which is commonly used in SAT competitions~\cite{FroleyksHIJS21}, on the discrete labels.
 The scoring function $s_k$ induces a ranking among solvers.
+%JB: slight inconsistency that we use number of clusters "k" as subscript (and the solver "a" as argument) here and at some other places, while we also use "\hat a" (i.e., the new solver) as subscript (and not as argument) in further places
+%JB: at the moment, s_k(a) could not be applied to new solver anyway, since it depends on \gamma, and \gamma does not work for new solvers (see comment above)
 
 
 \subsection{Instance Selection}
@@ -418,6 +426,7 @@ In our experiments, we work with the dataset of the SAT~Competition~2022 Anniver
 The dataset consists of 5355 instances with respective runtime data of 28 sequential SAT solvers.
 We also use a database of 56 instance features\footnote{\url{https://gbd.iti.kit.edu/getdatabase/base_db}} provided in the GBD Benchmark Database~(GBD) by Iser~et~al.~\cite{IserS18}.
 They comprise instance size features and node distribution statistics for several graph representations of SAT instances, among others, and are primarily inspired by the SATzilla~2012 features~\cite{features}.
+%JB: TODO: explain features in more detail or clarify where to find this information (comment of Reviewer 2)
 All features are numeric and free of missing values.
 We drop 10 out of 56 features because of zero variance.
 Overall, prediction models have access to 46 instances features and 27 runtime features, i.e., excluding the current new solver~ $\hat{a}$.
@@ -498,6 +507,7 @@ We only use one model configuration for runtime-label prediction in our experime
 In preliminary experiments, we compared various model types from \emph{scikit-learn}~\cite{scikit-learn}.
 In particular, we conducted nested cross-validation, including hyper-parameter tuning, and used Matthews Correlation Coefficient~\cite{gorodkin2004comparing,matthews1975comparison} to assess the performance for predicting runtime labels.
 Our final choice is a stacking ensemble of a quadratic-discriminant analysis and a random forest, using a decision tree to combine its ensemble members.
+%JB: TODO: explain "stacking ensemble" (comment of Reviewer 2)
 
 \subsubsection{Runtime discretization.}
 
@@ -565,6 +575,7 @@ Finally, we analyze the importance of different instance families to our framewo
     The y-axis shows the ranking accuracy (cf. Section~\ref{sec:exdesign:eval}).
     Each line entails the front of Pareto-optimal configurations for the respective hyper-parameter instantiation.
   }
+  %JB: TODO: make figures grayscale friendly (comment of Reviewer 2) by showing line types in legend (instead of only filled circles)
   \label{fig:e2eallsolvers}
 \end{figure}
 
@@ -573,6 +584,7 @@ Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Sectio
 Evaluating a particular configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
 We do not show intermediate results of the active-learning procedure but only the final results after stopping.
 The plotted lines represent the best performing configurations (convex hull) per top-level hyper-parameter choice, i.e., per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
+%JB: TODO: clarify how the hyperparameter analysis is conducted here, i.e., Pareto front / maximum over all other (not displayed) hyperparameters (comment of Reviewer 2)
 
 Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the $s_3$-induced runtime-label ranking consistently outperforms the partially observed PAR-2 ranking for each possible value of the trade-off parameter~$\delta$.
 This outcome is expected since selection decisions are not random.
@@ -693,6 +705,7 @@ We repeat this procedure 1000 times and report average results.
 The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}) uses the average sampling frequencies of instances over all solvers and all Pareto-optimal active-learning approaches.
 
 Our two AL approaches both perform better than random sampling.
+%JB: TODO: explain table better, particularly implications of our approach only slightly beating random sampling (comment of Reviewer 2)
 However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
 This performance difference between random and non-random sampling also changes for different fractions of sampled runtime (cf. Figure~\ref{fig:annitraincolorselection}).
 The static benchmark using the most frequently AL-sampled instances performs poorly, though, compared to active learning and random sampling.
@@ -747,6 +760,7 @@ However, bigger batch sizes $n$ impede \emph{active learning}.
 Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
 
 On a more general note, one can apply our evaluation framework to arbitrary $\mathcal{NP}$-complete problems, as all discussed active-learning methods are problem-agnostic.
+%JB: TODO: clarify that our approach works for any computation-intensive problem, not only NP-complete (comment of Reviewer 3)
 These problems share most of the relevant properties of SAT solving, i.e., there are established instance features, a complete benchmark run takes a considerable amount of time, and solver benchmarking traditionally requires expert knowledge to hand-select instances.
 
 %
