@@ -396,15 +396,14 @@ def run_e2e_experiment(
 if __name__ == "__main__":
     # Notify experiment start
     push_notification("Starting experiments.")
-    rand_int = random.randint(1, 100)
 
     for i_exp, experiment in enumerate(all_experiments):
         # Skip if present
         time.sleep(random.random() * 5)
-        if os.path.exists(f"{experiment.results_location}_{rand_int:03}.csv"):
+        if os.path.exists(f"{experiment.results_location}.csv"):
             continue
         else:
-            with open(f"{experiment.results_location}_{rand_int:03}.csv", "w") as lock_file:
+            with open(f"{experiment.results_location}.csv", "w") as lock_file:
                 lock_file.write("lock")
 
         # Retrieve column list
@@ -442,7 +441,7 @@ if __name__ == "__main__":
             ],
             index="solver",
         )
-        res_df.to_csv(f"{experiment.results_location}_{rand_int:03}.csv")
+        res_df.to_csv(f"{experiment.results_location}.csv")
 
         # Store sampled instances
         for i, (_, y_sampled) in enumerate(solver_results):
