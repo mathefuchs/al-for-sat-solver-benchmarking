@@ -85,7 +85,7 @@ To re-generate all results, delete all files within the folder `al-for-sat-solve
 Do not delete the folder itself.
 Then, you can simply run the final experiment with:
 
-| Linux + Macos                    | Windows (powershell)             |
+| Linux + MacOS                    | Windows (powershell)             |
 |----------------------------------|----------------------------------|
 | `sh run.sh` or `sh run_debug.sh` | `.\run.ps1` or `.\run_debug.ps1` |
 
