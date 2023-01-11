@@ -37,7 +37,7 @@ First, you need to install the correct Python version yourself.
 Let's assume the Python executable is located at <path/to/python>.
 Next, you install `virtualenv` with
 
-| Linux + Macos                               | Windows (powershell)                        |
+| Linux + MacOS (bash-like)                   | Windows (powershell)                        |
 |---------------------------------------------|---------------------------------------------|
 | `python -m pip install virtualenv==20.17.1` | `python -m pip install virtualenv==20.17.1` |
 
@@ -85,7 +85,7 @@ To re-generate all results, delete all files within the folder `al-for-sat-solve
 Do not delete the folder itself.
 Then, you can simply run the final experiment with:
 
-| Linux + MacOS                    | Windows (powershell)             |
+| Linux + MacOS (bash-like)        | Windows (powershell)             |
 |----------------------------------|----------------------------------|
 | `sh run.sh` or `sh run_debug.sh` | `.\run.ps1` or `.\run_debug.ps1` |
 
