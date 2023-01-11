@@ -85,9 +85,9 @@ To re-generate all results, delete all files within the folder `al-for-sat-solve
 Do not delete the folder itself.
 Then, you can simply run the final experiment with:
 
-| Linux + Macos                         | Windows (powershell)                  |
-|---------------------------------------|---------------------------------------|
-| `sh run.sh` or <br> `sh run_debug.sh` | `.\run.ps1` or <br> `.\run_debug.ps1` |
+| Linux + Macos                    | Windows (powershell)             |
+|----------------------------------|----------------------------------|
+| `sh run.sh` or `sh run_debug.sh` | `.\run.ps1` or `.\run_debug.ps1` |
 
 To obtain plots from the data, use the Jupyter notebook `anni_results.ipynb`.
 Running the final experiment takes about a week on a system with 32 cores (Setup: `AMD EPYC 7551 32-Core Processor`).
