@@ -16,7 +16,7 @@ This document provides:
 ## Repository Structure
 
 * The folder `paper` contains the LaTeX source of the paper.
-* The folder `plots` contains the pgf-plots used within the publication. All plots therein are generated with the `anni_results.ipynb` Jupyter notebook.
+* The folder `plots` contains the pgf-plots used within the publication. All plots therein are generated with the Jupyter notebook `anni_results.ipynb`.
 * The folder `src` contains the code of the experiments.
 * Additionally, there are the following files in the root directory:
   * The notebook `anni_results.ipynb` analyzes the results produced by the code under `src` and generates all plots within `plots`.
@@ -34,7 +34,6 @@ Our code is implemented in Python (version 3.9.12; other versions, including low
 
 We used `virtualenv` (version 20.17.1; other versions might also work) to create an environment for our experiments.
 First, you need to install the correct Python version yourself.
-Let's assume the Python executable is located at <path/to/python>.
 Next, you install `virtualenv` with
 
 | Linux + MacOS (bash-like)                   | Windows (powershell)                        |
@@ -43,7 +42,7 @@ Next, you install `virtualenv` with
 
 To create a virtual environment for this project, you have to clone this repository first.
 Thereafter, change the working directory to this repository's root folder.
-Run the following commands to create the virtual environment and install all necessary dependencies.
+Run the following commands to create the virtual environment and install all necessary dependencies:
 
 <table>
 <tr>
@@ -94,15 +93,15 @@ Running the final experiment takes about a week on a system with 32 cores (Setup
 
 ## Tweaking and Extending the Code
 
-A good starting point are the files [final_experiments.py](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/final_experiments.py) and [experiment.py](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/experiment.py) if you want to modify or extend the code.
+A good starting point are the files [`final_experiments.py`](src/al_experiments/final_experiments.py) and [`experiment.py`](src/al_experiments/experiment.py) if you want to modify or extend the code.
 The former lists all experiments that are executed within the experimental run triggered by the script `run.(sh|ps1)`.
 The latter defines the building blocks needed for an experiment.
-To add your experiment, create a new instance of [Experiment](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/experiment.py#L467) with the factory method [Experiment.custom()](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/experiment.py#L467).
+To add your experiment, create a new instance of [`Experiment`](src/al_experiments/experiment.py#L21) with the factory method [`Experiment.custom()`](src/al_experiments/experiment.py#L467).
 The necessary parameters are:
 
 * `instance_filter`: The name of the dataset. Must be a file within `al-for-sat-solver-benchmarking-data/pickled-data/` and of similar structure as `al-for-sat-solver-benchmarking-data/pickled-data/anni_final_df.pkl`.
-* `only_hashes`: Set this to `false` as this is only for advanced use-cases.
+* `only_hashes`: Set this to `false` as this is only for advanced use cases.
 * `repetitions`: Specify how often you want to repeat the same experiment. Useful if some component of the experiment includes randomness.
-* `selection`: The selection strategy. Must be a subclass of [SelectionFunctor](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/selection.py#L10). Refer to other, already implemented, subclasses to get started, e.g., [RandomSampling](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/selection.py#L45).
-* `stopping`: The stopping criterion. Must be a subclass of [StoppingPredicate](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/stopping.py#L10). Refer to other, already implemented, subclasses to get started, e.g., [FixedSubsetSize](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/stopping.py#L46).
-* `ranking`: The ranking strategy. Must be a subclass of [RankingFunctor](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/ranking.py#L10). Refer to other, already implemented, subclasses to get started, e.g., [PartialObservationBasedRanking](https://github.com/mathefuchs/al-for-sat-solver-benchmarking/blob/main/src/al_experiments/ranking.py#L51).
+* `selection`: The selection strategy. Must be a subclass of [`SelectionFunctor`](src/al_experiments/selection.py#L10). Refer to other, already implemented, subclasses to get started, e.g., [`RandomSampling`](src/al_experiments/selection.py#L45).
+* `stopping`: The stopping criterion. Must be a subclass of [`StoppingPredicate`](src/al_experiments/stopping.py#L10). Refer to other, already implemented, subclasses to get started, e.g., [`FixedSubsetSize`](src/al_experiments/stopping.py#L46).
+* `ranking`: The ranking strategy. Must be a subclass of [`RankingFunctor`](src/al_experiments/ranking.py#L10). Refer to other, already implemented, subclasses to get started, e.g., [`PartialObservationBasedRanking`](src/al_experiments/ranking.py#L51).
