@@ -239,8 +239,7 @@ Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 \label{sec:main:model}
 
 Let SAT solvers $\mathcal{A}$, benchmark instances $\mathcal{I}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given.
-We denote the new solver to be ranked by $\hat a \not\in A$ and define $\hat A := A \cup \lbrace \hat a \rbrace$ to denote all solvers, including the new solver. 
-%JB: we should harmonize use of \mathcal for A; sometimes \mathcal is used (e.g., two sentences ago), sometimes not (e.g., in previous sentence)
+We denote the new solver to be ranked by $\hat a \not\in \mathcal{A}$ and define $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$ to denote all solvers, including the new solver.
 Model initialization (Line~1) creates the prediction model and transforms runtimes, as discussed in the subsequent section.
 No model training is needed at this point since we do not have any labeled data yet.
 Later, model $\mathcal{M}$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
@@ -253,20 +252,20 @@ Finally, we predict the score of the new solver $\hat a$ in Line~8 with the pred
 \subsubsection{Runtime Transformation.}
 
 We transform the runtimes into discrete runtime labels on a per-instance basis.
-For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in A \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
+For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
 Timeouts $\tau$ always form a separate cluster $C_{k}$.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
 %
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
-%JB: this function cannot be applied to new solvers, as the latter are not in $A$ (only in $\hat A$); instead of "a", could also use actual runtime as first input to \gamma, but that might lead to less straigthforward notation later in text (e.g., when defining ranking and stopping criteria)
-Given an instance $e \in \mathcal{I}$, a solver $a \in A$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
+%JB: this function cannot be applied to new solvers, as the latter are not in $\mathcal{A}$ (only in $\mathcal{\hat A}$); instead of "a", could also use actual runtime as first input to \gamma, but that might lead to less straigthforward notation later in text (e.g., when defining ranking and stopping criteria)
+Given an instance $e \in \mathcal{I}$, a solver $a \in \mathcal{A}$ belongs to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
 In preliminary experiments, we achieved higher accuracy for predicting such discrete-runtime labels than for predicting raw runtimes.
 Research on portfolio solvers has also shown that discretization works well in practice~\cite{CollauttiMMO13,NgokoCT19}.
 
 \subsubsection{Ranking Solvers.}
 
-To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : A \rightarrow [1, 2 \cdot k]$ as follows:
+To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : \mathcal{A} \rightarrow [1, 2 \cdot k]$ as follows:
 %
 \begin{align}
   s_k(a) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
