@@ -11,6 +11,7 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage[table]{xcolor}
+\usepackage{orcidlink} % ORCID icon and link; has to be loaded after "xcolor" here, else "option clash"; class "llncs" also has command "\orcidID" (which only displays full ID), but camera-ready instructions state you should add icon and link yourself
 \usepackage{tikz} % has to be loaded after "xcolor" here, else "option clash"
 
 \newcommand{\cmark}{\ding{51}} % symbols for table comparing benchmarking approaches
@@ -28,10 +29,9 @@
 \title{Active Learning for SAT Solver Benchmarking}
 
 \author{
-  Tobias Fuchs\orcidID{0000-0001-9727-2878} (\Letter) \and \\
-  Jakob Bach\orcidID{0000-0003-0301-2798} \and \\
-  Markus Iser\orcidID{0000-0003-2904-232X}
-  %JB: according to camera-ready mail, we might need to include ORCID logo and link ourselves; there is a package called "orcidlink" for that purpose
+  Tobias Fuchs~\orcidlink{0000-0001-9727-2878} (\Letter) \and
+  Jakob Bach~\orcidlink{0000-0003-0301-2798} \and
+  Markus Iser~\orcidlink{0000-0003-2904-232X}
 }
 
 \institute{
