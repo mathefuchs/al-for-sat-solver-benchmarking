@@ -760,8 +760,7 @@ Benchmarking on a computing cluster with $n$ cores benefits from having batches 
 However, bigger batch sizes $n$ impede \emph{active learning}.
 Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
 
-On a more general note, one can apply our evaluation framework to arbitrary $\mathcal{NP}$-complete problems, as all discussed active-learning methods are problem-agnostic.
-%JB: TODO: clarify that our approach works for any computation-intensive problem, not only NP-complete (comment of Reviewer 3)
+On a more general note, one can apply our evaluation framework to arbitrary computation-intensive problems, e.g., other $\mathcal{NP}$-complete problems than SAT, as all discussed active-learning methods are problem-agnostic.
 These problems share most of the relevant properties of SAT solving, i.e., there are established instance features, a complete benchmark run takes a considerable amount of time, and solver benchmarking traditionally requires expert knowledge to hand-select instances.
 
 %
