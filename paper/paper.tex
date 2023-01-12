@@ -65,8 +65,9 @@ One of the main phases of algorithm engineering is benchmarking.
 This is also true for the propositional satisfiability problem (SAT), the archetypal $\mathcal{NP}$-complete problem.
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
 Competitive SAT solvers are the result of extensive experimentation with a variety of ideas and considerations~\cite{FroleyksHIJS21,sat2022}.
-%JB: TODO: clarify that simply running a solver on all benchmarks is not a good approach in this scenario, i.e., motivate our approach better -> see arguments in rebuttal (comment of Reviewer 3)
-While the field of SAT solver benchmarking is well established, traditional benchmark selection approaches do not optimize for benchmark runtime.
+While benchmarking a single SAT solver is not too expensive, trying out a multitude of different approaches and configurations steadily increases the evaluation cost.
+The field of SAT solver benchmarking is well established.
+However, traditional benchmark selection approaches do not optimize for benchmark runtime.
 Instead, traditional approaches focus on selecting a representative set of instances for ranking solvers with a scoring scheme~\cite{Gelder11,HoosKSS13}.
 SAT~Competitions typically use the \mbox{PAR-2} score, i.e., the average runtime with a penalty of $2 \tau$ for timeouts with time-limit~$\tau$~\cite{FroleyksHIJS21}.
 
@@ -111,7 +112,8 @@ Also, benchmark selection has many movable parts, e.g., performance measures, ag
 Questionable research practices might modify these elements a-posteriori to fit expectations, biasing results~\cite{NiesslHWCB22}.
 In the following, we discuss related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
 Table~\ref{tab:requirements} compares the most relevant approaches.
-%JB: TODO: clarify that competitors in table have different goals and thus our approach is not a general improvement on them, but targets a different problem (comment of Reviewer 2)
+Note that our approach is \emph{not} a general improvement over all the shown approaches.
+Rather, they all have slightly different goals, which do not fully align with Definition~\ref{def:new-solver-problem}.
 
 \subsubsection{Static Benchmark Selection.}
 
@@ -176,15 +178,133 @@ Comparing only pairs of solvers, evaluating a new solver requires sampling a sep
 In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one benchmark.
 
 \subsubsection{Active Learning.}
-%JB: TODO: explain AL for non-ML audience (comment of Reviewer 2)
-%JB: TODO: (re-)add figure for AL cycle or explain the latter better (comment of Reviewer 2); could also be placed in next section
 
-The posed \emph{New-Solver Problem} has stark similarities to the well-studied field of active learning (AL) within recommender systems, in particular, the \emph{new-user problem}~\cite{RubensESK15}.
-On the one hand, we want to maximize the utility an instance provides to our model, i.e., rank prediction accuracy, and on the other hand, minimize the cost, i.e., runtime, that is associated with its acquisition.
-In contrast to traditional passive machine-learning methods with given instance labels, active learning allows for selecting instances for which to acquire labels.
+In contrast to traditional passive machine-learning methods with given instance labels (cf. Figure~\ref{fig:passive}), active learning (AL) starts with no or little labeled data.
+Then, it repeatedly selects interesting instances for which to acquire labels based on a gradually improving model of the agent (cf. Figure~\ref{fig:activepool}).
+Figure~\ref{fig:learning} illustrates the difference between both types of learning.
+AL methods are especially useful if acquiring labels is computationally expensive.
+Without active-learning methods, it would not be obvious which instances to label and which not to.
+On the one hand, we want to maximize the utility an instance provides to our model, i.e., rank prediction accuracy, and on the other hand, minimize the cost, i.e., predicted runtime, that is associated with its acquisition.
+In that way, we obtain an accurate picture of the agent without the need of labeling every data point.
+Rubens et.~al.~\cite{RubensESK15} provide a survey of recent active-learning advances.
+
+\begin{figure}[tbp!]
+  \centering
+  \begin{tabular}[c]{ccc}
+  \begin{subfigure}[b]{0.26\textwidth}
+  \centering
+  \resizebox{!}{2.85cm}{
+  \begin{tikzpicture}
+  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
+  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
+  \node[right] at (-5.9,3.6) {Agent (Solver)};
+  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
+  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
+  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
+  \node[right] at (-5.9,2.4) {Training Data};
+  \node (v1) at (-2.8,3.4) {};
+  \node (v2) at (-2.8,2.8) {};
+  \draw[->]  (v1) edge (v2);
+  \node[right] at (-2.8,3.1) {$x, y$};
+  \node (v3) at (-2.8,2) {};
+  \node (v4) at (-2.8,1.4) {};
+  \draw[->]  (v3) edge (v4);
+  \draw  (-3.1,1.4) rectangle (-2.5,1);
+  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
+  \node[right] at (-5.9,1.2) {Learning Alg.};
+  \node (v5) at (-2.8,1) {};
+  \node (v6) at (-2.8,0.4) {};
+  \draw[->]  (v5) edge (v6);
+  \node[right] at (-5.9,0.25) {Approx. Function};
+  \node at (-2.8,0.25) {$f$};
+  \end{tikzpicture}
+  }
+  \caption{Passive.}
+  \label{fig:passive}
+  \end{subfigure}
+  &
+  \begin{subfigure}[b]{0.36\textwidth}
+  \centering
+  \resizebox{!}{2.85cm}{
+  \begin{tikzpicture}
+  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
+  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
+  \node[right] at (-5.9,3.6) {Agent (Solver)};
+  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
+  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
+  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
+  \node[right] at (-5.9,2.4) {Training Data};
+  \node (v1) at (-2.8,3.4) {};
+  \node (v2) at (-2.8,2.8) {};
+  \draw[->]  (v1) edge (v2);
+  \node[right] at (-2.8,3.1) {$x, y$};
+  \node (v3) at (-2.8,2) {};
+  \node (v4) at (-2.8,1.4) {};
+  \draw[->]  (v3) edge (v4);
+  \draw  (-3.1,1.4) rectangle (-2.5,1);
+  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
+  \node[right] at (-5.9,1.2) {Learning Alg.};
+  \node (v5) at (-2.8,1) {};
+  \node (v6) at (-2.8,0.4) {};
+  \draw[->]  (v5) edge (v6);
+  \node[right] at (-5.9,0.25) {Approx. Function};
+  \node at (-2.8,0.25) {$f$};
+  \node[right] at (-1.2,2.4) {Pool};
+  \draw[->, densely dashed] (-2.4,1.2) arc (-90:0:0.8);
+  \draw[->, densely dashed] (-1.6,2.8) arc (0:90:0.8);
+  \node[right] at (-1.6,3.135) {$x, ?$};
+  \draw  (-1.6,2.4) ellipse (0.4 and 0.3);
+  \draw[fill=black]  (-1.725,2.5) ellipse (0.07 and 0.07);
+  \draw[fill=black]  (-1.625,2.25) ellipse (0.07 and 0.07);
+  \draw[fill=black]  (-1.425,2.4) ellipse (0.07 and 0.07);
+  \end{tikzpicture}
+  }
+  \caption{Active Pool-based.}
+  \label{fig:activepool}
+  \end{subfigure}
+  &
+  \begin{subfigure}[b]{0.36\textwidth}
+  \centering
+  \resizebox{!}{2.85cm}{
+  \begin{tikzpicture}
+  \draw[fill=black]  (-2.8,3.7) ellipse (0.1 and 0.1);
+  \draw[fill=black]  (-2.6,3.4) arc (0:180:0.2);
+  \node[right] at (-5.9,3.6) {Agent (Solver)};
+  \draw[fill=white]  (-3.3,2.8) rectangle (-2.5,2.2);
+  \draw[fill=white]  (-3.2,2.7) rectangle (-2.4,2.1);
+  \draw[fill=white]  (-3.1,2.6) rectangle (-2.3,2);
+  \node[right] at (-5.9,2.4) {Training Data};
+  \node (v1) at (-2.8,3.4) {};
+  \node (v2) at (-2.8,2.8) {};
+  \draw[->]  (v1) edge (v2);
+  \node[right] at (-2.8,3.1) {$x, y$};
+  \node (v3) at (-2.8,2) {};
+  \node (v4) at (-2.8,1.4) {};
+  \draw[->]  (v3) edge (v4);
+  \draw  (-3.1,1.4) rectangle (-2.5,1);
+  \draw  (-2.4,3.2) rectangle (-2.4,3.2);
+  \node[right] at (-5.9,1.2) {Learning Alg.};
+  \node (v5) at (-2.8,1) {};
+  \node (v6) at (-2.8,0.4) {};
+  \draw[->]  (v5) edge (v6);
+  \node[right] at (-5.9,0.25) {Approx. Function};
+  \node at (-2.8,0.25) {$f$};
+  \node[right, label={[align=left]Gen.\\Model}] at (-0.75,1.88) {};
+  \node[right] at (-1.3,3.135) {$x, ?$};
+  \draw[->, densely dashed] (-2.4,1.2) arc (-90:90:1.2);
+  \end{tikzpicture}
+  }
+  \caption{Active Synthesis-based.}
+  \label{fig:activesynth}
+  \end{subfigure}
+  \end{tabular}
+  
+  \caption{Types of Learning (depiction inspired by Rubens~et.al.~\cite{RubensESK15}).}
+  \label{fig:learning}
+\end{figure}
+
 AL algorithms can be categorized into \emph{synthesis-bas\-ed} \cite{0001AEMN22,GarzonMG22,2019gaal} and \emph{pool-bas\-ed} approaches \cite{GolbandiKL11,HarpaleY08,KorenBV09}.
 While synthesis-based methods generate instances for labeling, pool-based methods rely on a fixed set of unlabeled instances from which to sample.
-
 Recent synthesis-based methods within the field of SAT solving show how to generate problem instances with desired properties~\cite{0001AEMN22,GarzonMG22}.
 This goal is, however, orthogonal to ours.
 While those approaches want to generate instances on which a solver is good or bad, we want to predict whether a solver is good or bad on an existing benchmark.
@@ -427,10 +547,10 @@ In our experiments, we work with the dataset of the SAT~Competition~2022 Anniver
 The dataset consists of 5355 instances with respective runtime data of 28 sequential SAT solvers.
 We also use a database of 56 instance features\footnote{\url{https://gbd.iti.kit.edu/getdatabase/base_db}} provided in the GBD Benchmark Database~(GBD) by Iser~et~al.~\cite{IserS18}.
 They comprise instance size features and node distribution statistics for several graph representations of SAT instances, among others, and are primarily inspired by the SATzilla~2012 features~\cite{features}.
-%JB: TODO: explain features in more detail or clarify where to find this information (comment of Reviewer 2)
+A technical report by Xu et.~.al.~\cite{features} describes them in depth.
 All features are numeric and free of missing values.
 We drop 10 out of 56 features because of zero variance.
-Overall, prediction models have access to 46 instances features and 27 runtime features, i.e., excluding the current new solver~ $\hat{a}$.
+Overall, prediction models have access to 46 instance features and 27 runtime features, i.e., excluding the current new solver~$\hat{a}$.
 Additionally, we retrieve instance-family information\footnote{\url{https://gbd.iti.kit.edu/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
 Instance families comprise instances derived from the same application domain, e.g., planning, cryptography, etc., and are a valuable tool for analyzing solver performance and portfolios.
 
@@ -507,8 +627,9 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
 We only use one model configuration for runtime-label prediction in our experiments since an exhaustive grid search would be infeasible.
 In preliminary experiments, we compared various model types from \emph{scikit-learn}~\cite{scikit-learn}.
 In particular, we conducted nested cross-validation, including hyper-parameter tuning, and used Matthews Correlation Coefficient~\cite{gorodkin2004comparing,matthews1975comparison} to assess the performance for predicting runtime labels.
-Our final choice is a stacking ensemble of a quadratic-discriminant analysis and a random forest, using a decision tree to combine its ensemble members.
-%JB: TODO: explain "stacking ensemble" (comment of Reviewer 2)
+Our final choice is a stacking ensemble of a quadratic-discriminant analysis and a random forest.
+A stacking ensemble uses a meta-model to decide which ensemble member makes the prediction on which instance.
+To do so, it uses a simple decision tree.
 
 \subsubsection{Runtime discretization.}
 
@@ -583,8 +704,8 @@ Our experiments follow the evaluation framework introduced in Section~\ref{sec:e
 Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the hyper-parameter-tuning dataset.
 Evaluating a particular configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
 We do not show intermediate results of the active-learning procedure but only the final results after stopping.
-The plotted lines represent the best performing configurations (convex hull) per top-level hyper-parameter choice, i.e., per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
-%JB: TODO: clarify how the hyperparameter analysis is conducted here, i.e., Pareto front / maximum over all other (not displayed) hyperparameters (comment of Reviewer 2)
+The plotted lines represent the best-performing configurations (convex hull) per top-level hyper-parameter choice, i.e., per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
+So to speak, it is the maximum over the final results for each hyper-parameter choice that shares the plotted attributes.
 
 Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the $s_3$-induced runtime-label ranking consistently outperforms the partially observed PAR-2 ranking for each possible value of the trade-off parameter~$\delta$.
 This outcome is expected since selection decisions are not random.
@@ -705,13 +826,15 @@ We repeat this procedure 1000 times and report average results.
 The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}) uses the average sampling frequencies of instances over all solvers and all Pareto-optimal active-learning approaches.
 
 Our two AL approaches both perform better than random sampling.
-%JB: TODO: explain table better, particularly implications of our approach only slightly beating random sampling (comment of Reviewer 2)
 However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
 This performance difference between random and non-random sampling also changes for different fractions of sampled runtime (cf. Figure~\ref{fig:annitraincolorselection}).
-The static benchmark using the most frequently AL-sampled instances performs poorly, though, compared to active learning and random sampling.
+A clear advantage of our approach is, though, that it indicates when to stop adding further instances.
+Otherwise, it would not be clear why the shown runtime fractions would yield the best trade-off at all.
+While the active-learning results are less strong on the full dataset than on the smaller tuning dataset, they still show the benefit of making benchmark selection dependent on the solvers to distinguish.
+
+A static benchmark using the most frequently AL-sampled instances performs poorly, though, compared to active learning and random sampling.
 This outcome is somewhat expected since the static benchmark does not reflect the right balance of instance families:
 Families whose instances are uniform-randomly selected by AL, e.g., for different solvers, appear less often in this benchmark than families where some instances are sampled more often than others.
-While the active-learning results are less strong on the full dataset than on the smaller tuning dataset, they still show the benefit of making benchmark selection dependent on the solvers to distinguish.
 
 \subsection{Instance-Family Importance}
 
