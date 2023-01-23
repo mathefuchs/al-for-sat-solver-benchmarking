@@ -760,9 +760,9 @@ We consider this region to be most promising, analogous to the \emph{elbow} meth
 Having selected the most promising hyper-parameters, we run our active-learning experiments on the complete Anniversary Track dataset (5355 instances).
 The aforementioned range $\delta \in \left[0.2, 0.8\right]$ only results in two distinct configurations.
 The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime-label ranking, information-gain sampling, and ranking stopping criterion.
-It can predict a new solver's PAR-2 ranking with about \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
+It can predict a new solver's PAR-2 ranking with \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$) in only \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
-It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$), while only needing \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
+It can predict a new solver's PAR-2 ranking with \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$) in only \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 
 \begin{table}[t]
   \centering
@@ -810,16 +810,14 @@ It can predict a new solver's PAR-2 ranking with about \SI{92.33}{\%} accuracy (
   \end{subfigure}
 \end{table}
 
-Table~\ref{tab:fulldataset} shows how both active-learning approaches compare against static baselines.
-The first column shows the two aforementioned AL configurations.
-We compare them against a random baseline and a static benchmark set consisting of the instances most frequently sampled by active learning.
-The random baseline (\emph{Random}) samples instances until it reaches roughly the same fraction of runtime as the AL benchmark sets.
-We repeat this procedure 1000 times and report average results.
-The benchmark set of the most frequently AL-sampled instances (\emph{Most Freq.}) uses the average sampling frequencies of instances over all solvers and all Pareto-optimal active-learning approaches.
+Table~\ref{tab:fulldataset} shows how both active-learning approaches (column \emph{AL}) compare against two static baselines:
+\emph{Random} samples instances until it reaches roughly the same fraction of runtime as the AL benchmark sets.
+We repeat sampling 1000 times and report average results.
+\emph{Most Freq.} uses the instances most frequently sampled by active learning.
+In particular, we consider the average sampling frequencies over all solvers and Pareto-optimal active-learning approaches.
 
-Our two AL approaches both perform better than random sampling.
-However, differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$.
-This performance difference between random and non-random sampling also changes for different fractions of sampled runtime (cf. Fig.~\ref{fig:annitraincolorselection}).
+Both our AL approaches perform better than random sampling.
+However, the performance differences are not significant regarding a Wilcoxon signed-rank test with $\alpha = 0.05$ and also depend on the fraction of sampled runtime (cf. Fig.~\ref{fig:annitraincolorselection}).
 A clear advantage of our approach is, though, that it indicates when to stop adding further instances, depending on the trade-off parameter~$\delta$.
 While the active-learning results are less strong on the full dataset than on the smaller tuning dataset, they still show the benefit of making benchmark selection dependent on the solvers to distinguish.
 
@@ -872,6 +870,10 @@ Further, a major shortcoming of our current approach is the lack of parallelizat
 Benchmarking on a computing cluster with $n$ cores benefits from having batches of $n$ instances.
 However, bigger batch sizes $n$ impede \emph{active learning}.
 Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
+
+\subsubsection*{Acknowledgments.}
+
+This work was supported by the Ministry of Science, Research and the Arts Baden-Württemberg, project \emph{Algorithm Engineering for the Scalability Challenge (AESC)}.
 
 %
 % ---- Bibliography ----
