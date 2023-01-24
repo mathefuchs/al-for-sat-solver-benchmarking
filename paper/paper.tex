@@ -123,7 +123,7 @@ Manthey and Möhle find that competition benchmarks might contain redundant inst
 M{\i}s{\i}r presents a feature-based approach to reduce benchmarks by matrix factorization and clustering~\cite{misir2021benchmark}.
 
 Hoos et al.~\cite{HoosKSS13} discuss which properties are most desirable when selecting SAT benchmark instances.
-The selection criteria are instance \emph{variety} to avoid over-fitting, adapted instance \emph{hardness} (not too easy but also not too hard), and avoiding \emph{duplicate} instances.
+The selection criteria are instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and avoiding duplicate instances.
 To filter too similar instances, they use a distance-based approach with the SATzilla features~\cite{XuHHL08,features}.
 The approach does, however, not optimize for benchmark \emph{runtime} and selects instances \emph{randomly}, apart from constraints on the instance hardness and feature distance.
 
@@ -396,7 +396,7 @@ The scoring function $s_k$ induces a ranking among solvers.
 \label{sec:main:selection}
 
 Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line~4).
-In this section, we two instance sampling strategies, one that minimizes uncertainty and one that maximizes information-gain.
+In this section, we introduce two instance sampling strategies, one that minimizes uncertainty and one that maximizes information-gain.
 Both strategies use the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 These methods require the model's predictions to include probabilities for the $k$ discrete runtime labels.
 Let \mbox{$f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$} denote this modified prediction function.
@@ -695,7 +695,7 @@ We do not show intermediate results of the active-learning procedure but only th
 The plotted lines represent the best-performing configurations per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
 In particular, we show the Pareto front, i.e., of all configurations that share a particular value of the plotted hyper-parameter, we take the maximum ranking accuracy over all remaining hyper-parameters \emph{not} displayed in the corresponding plot.
 
-Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the predicted $s_3$-induced runtime-label ranking consistently outperforms the partially observed PAR-2 ranking for each possible value of the trade-off parameter~$\delta$.
+Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the predicted $s_3$-induced run\-time-label rank\-ing consistently outperforms the partially observed PAR-2 ranking for each possible value of the trade-off parameter~$\delta$.
 This outcome is expected since selection decisions are not random.
 For example, we might sample more instances of one family if it benefits discrimination of solvers.
 While the partially observed PAR-2 score is skewed, the prediction model can account for this.
