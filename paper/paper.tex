@@ -311,7 +311,7 @@ Rather than benchmarking a solver's overall performance, their goal is to recomm
 \label{sec:main}
 
 Algorithm~\ref{algALBenchmark} outlines our benchmarking framework. 
-Given a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$ and runtimes~$r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a$ (Line~1).
+Given a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$ and runtimes~$r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a \not\in \mathcal{A}$ (Line~1).
 The prediction model~$\mathcal{M}$ is used to repeatedly select an instance (Line~4) for benchmarking $\hat a$ (Line~5). 
 The acquired result is subsequently used to update the prediction model~$\mathcal{M}$ (Line~7). 
 When the stopping criterion is met (Line~3), we quit the benchmarking loop and predict the final score of $\hat a$ (Line~8). 
@@ -354,14 +354,10 @@ Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-Let SAT solvers $\mathcal{A}$, benchmark instances $\mathcal{I}$, and runtimes $r : \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ be given.
-We denote the new solver to be ranked by $\hat a \not\in \mathcal{A}$ and define $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$ to denote all solvers, including the new one.
-Model initialization (Line~1) creates the prediction model and transforms runtimes, as discussed later.
-No model training is needed at this point since we do not have any labeled data yet.
-Later, model $\mathcal{M}$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ that powers the decisions within our framework.
-In particular, the model update (Line~7) uses all acquired runtimes to train $f$ with a standard supervised machine-learning methodology.
-Model training uses instance features and known runtimes~$r$.
-The transformed runtime observations~$\mathcal{R}$ serve as ground-truth labels.
+The model $M$ maintains runtime transformations which we describe in the subsequent section. 
+Additionally, $M$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ for all solvers $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$.
+The prediction function $f$ powers instance selection as described in Section~\ref{sec:main:selection}.
+During model update (Algorithm~\ref{algALBenchmark},~Line~7), $f$ is trained to predict the known and acquired transformed runtimes based on instance features described in Section~\ref{sec:exdesign:data}.
 Note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of model training by magnitudes.
 Finally, we predict the score of the new solver $\hat a$ with the prediction function~$f$ (Line~8).
 
@@ -534,6 +530,7 @@ whereby $\delta \in \left[0, 1\right]$ allows for linear weighting between the t
 Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on an $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
 
 \subsection{Data}
+\label{sec:exdesign:data}
 
 In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022}.
 The dataset consists of 5355 instances with respective runtime data of 28 sequential SAT solvers.
