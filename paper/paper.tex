@@ -106,7 +106,7 @@ Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-so
 Benchmarking is not only of high interest in many fields but also an active research area on its own.
 Recent studies show that benchmark selection is challenging for multiple reasons.
 Biased benchmarks can easily lead to fallacious interpretations~\cite{abs-2107-07002}.
-Benchmarking also has many interchangeable parts, such as the performance measures used, including how measurement points are aggregated and how missing values are handled.
+Benchmarking also has many interchangeable parts, such as the performance measures used, how measurement points are aggregated, and how missing values are handled.
 Questionable research practices could alter these elements a-posteriori to meet expectations, thereby skewing the results~\cite{NiesslHWCB22}.
 In the following, we discuss related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
 Table~\ref{tab:requirements} compares the most relevant approaches, which all pursue slightly different goals.
@@ -354,17 +354,18 @@ Section~\ref{sec:main:stopping} concludes with possible stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-The model $M$ maintains runtime transformations which we describe in the subsequent section. 
-Additionally, $M$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ for all solvers $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$.
-The prediction function $f$ powers instance selection as described in Section~\ref{sec:main:selection}.
-During model update (Algorithm~\ref{algALBenchmark},~Line~7), $f$ is trained to predict the known and acquired transformed runtimes based on instance features described in Section~\ref{sec:exdesign:data}.
-Note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of model training by magnitudes.
+The model $M$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ for all solvers $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$.
+This prediction function powers instance selection as described in Section~\ref{sec:main:selection}.
+During model updates (Algorithm~\ref{algALBenchmark},~Line~7), $f$ is trained to predict a transformed version of the acquired runtimes~$\mathcal{R}$.
+We describe the runtime transformation in the subsequent section.
+The features described in Section~\ref{sec:exdesign:data} serve as the input to the model.
+Further, note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of model training by magnitudes.
 Finally, we predict the score of the new solver $\hat a$ with the prediction function~$f$ (Line~8).
 
 \subsubsection{Runtime Transformation.}
 
-We transform the runtimes into discrete runtime labels on a per-instance basis.
-For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
+For the prediction model~$M$, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
+For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for the instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
 Timeouts $\tau$ always form a separate cluster $C_{k}$.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
 %
@@ -396,7 +397,7 @@ The scoring function $s_k$ induces a ranking among solvers.
 \label{sec:main:selection}
 
 Selecting an instance based on the model is a core functionality of our framework (cf. Algorithm~\ref{algALBenchmark}, Line~4).
-In this section, we introduce two instance sampling strategies, one that minimizes uncertainty and one that maximizes information-gain.
+In this section, we introduce two instance sampling strategies, one that minimizes uncertainty and one that maximizes information gain.
 Both strategies use the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
 These methods require the model's predictions to include probabilities for the $k$ discrete runtime labels.
 Let \mbox{$f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$} denote this modified prediction function.
@@ -515,7 +516,7 @@ Algorithm~\ref{alg:eval} shows this.
 That means each solver plays the role of the new solver~$\hat{a}$ once (Line~2).
 Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage (Line~3).
 After running our active-learning framework for solver~$\hat{a}$ (Line~4), we compute the value of both our optimization goals, i.e., ranking accuracy and runtime.
-We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly by the ranking function $\operatorname{par_2}$ (Lines~5-8).
+We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly regarding the ground-truth scoring~$\operatorname{par_2}$ (Lines~5-8).
 The \emph{fraction of runtime} that the algorithm needs to arrive at its conclusion is denoted by $O_{\operatorname{rt}} \in \left[0, 1\right]$ (lower is better).
 This metric puts the runtime summed over the sampled instances in relation to the runtime summed over all instances in the dataset (Lines~9-13).
 Finally, we compute averages of the output metrics in Line~15 after we have collected all cross-validation results in Line~14.
@@ -542,6 +543,7 @@ Overall, prediction models have access to 46 instance features and 27 runtime fe
 
 Additionally, we retrieve instance-family information\footnote{\url{https://benchmark-database.de/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
 Instance families comprise instances from the same application domain, e.g., planning, cryptography, etc., and are a valuable tool for analyzing solver performance.
+
 For hyper-parameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instances' family.
 All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them corresponds to less than one instance, are put into one meta-family for stratification.
 This \emph{tuning dataset} allows for a more extensive exploration of the hyper-parameter space.
@@ -708,7 +710,7 @@ This means we sample instances revealing similarities between solvers rather tha
 However, the method cannot select helpful instances for distinguishing solvers later.
 Random sampling performs reasonably well but is outperformed by uncertainty sampling in all cases, showing the benefit of actively selecting instances based on a prediction model.
 
-Regarding the stopping criteria (Fig.~\ref{fig:annitraincolorstopping}), the ranking stopping criterion performs well most consistently.
+Regarding the stopping criteria (Fig.~\ref{fig:annitraincolorstopping}), the ranking stopping criterion performs most consistently well.
 If accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
 The subset-size stopping criterion performs reasonably well but does not improve beyond a certain accuracy because of sampling a fixed subset of instances.
 
