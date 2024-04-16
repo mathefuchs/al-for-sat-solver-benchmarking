@@ -1,7 +1,8 @@
-\documentclass[runningheads]{llncs}
+\documentclass{sn-jnl}
 
 \usepackage[ruled,vlined,linesnumbered,norelsize]{algorithm2e}
-\usepackage{amsmath,amssymb}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{amsthm}
 \usepackage[T1]{fontenc} % font encoding; recommended by LNCS template
 \usepackage{graphicx}
 \usepackage{hyperref}
@@ -11,6 +12,7 @@
 \usepackage{subcaption}
 \usepackage{tabularx}
 \usepackage{booktabs}
+\usepackage{multirow}
 \usepackage[table]{xcolor}
 \usepackage{orcidlink} % ORCID icon and link; has to be loaded after "xcolor" here, else "option clash"; class "llncs" also has command "\orcidID" (which only displays full ID), but camera-ready instructions state you should add icon and link yourself
 \usepackage{tikz} % has to be loaded after "xcolor" here, else "option clash"
@@ -25,26 +27,35 @@
 
 \renewcommand\UrlFont{\color{blue}\rmfamily} % link coloring according to LNCS template
 
+%% as per the requirement new theorem styles can be included as shown below
+\theoremstyle{thmstyleone}%
+\newtheorem{theorem}{Theorem}%  meant for continuous numbers
+%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
+%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
+\newtheorem{proposition}[theorem]{Proposition}% 
+%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
+
+\theoremstyle{thmstyletwo}%
+\newtheorem{example}{Example}%
+\newtheorem{remark}{Remark}%
+
+\theoremstyle{thmstylethree}%
+\newtheorem{definition}{Definition}%
+
+\raggedbottom
+
+
 \begin{document}
 
-\title{Active Learning for SAT Solver Benchmarking}
+\title[Active Learning for SAT Solver Benchmarking]{Active Learning for SAT Solver Benchmarking}
 
-\author{
-  Tobias Fuchs~\orcidlink{0000-0001-9727-2878} (\Letter) \and
-  Jakob Bach~\orcidlink{0000-0003-0301-2798} \and
-  Markus Iser~\orcidlink{0000-0003-2904-232X}
-}
+\author{\fnm{Tobias} \sur{Fuchs}}\email{tobias.fuchs@kit.edu}
+\author{\fnm{Jakob} \sur{Bach}}\email{jakob.bach@kit.edu}
+\author{\fnm{Markus} \sur{Iser}}\email{markus.iser@kit.edu}
 
-\institute{
-  Karlsruhe Institute of Technology (KIT), Karlsruhe, Germany \\
-  \email{info@tobiasfuchs.de, jakob.bach@kit.edu, markus.iser@kit.edu}
-}
+\affil{\orgname{Karlsruhe Institute of Technology}, \orgaddress{\city{Karlsruhe}, \country{Germany}}}
 
-\authorrunning{T. Fuchs et al.} % according to sample paper of template: first names are abbreviated; if there are more than two authors, 'et al.' is used.
-
-\maketitle
-
-\begin{abstract}
+\abstract{
   Benchmarking is a crucial phase when developing algorithms.
   This also applies to solvers for the SAT (propositional satisfiability) problem.
   Benchmark selection is about choosing representative problem instances that reliably discriminate solvers based on their runtime.
@@ -54,10 +65,11 @@
   Our selection approach can predict the rank of a new solver after about \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of about \SI{92}{\%}. 
   We also discuss the importance of instance families in the selection process. 
   Overall, our tool provides a reliable way for solver engineers to determine a new solver's performance efficiently.
+}
 
-  \keywords{Propositional satisfiability \and Benchmarking \and Active learning}
-\end{abstract}
+\keywords{Propositional satisfiability, Benchmarking, Active learning}
 
+\maketitle
 
 \section{Introduction}
 \label{sec:intro}
@@ -133,13 +145,12 @@ The approach does, however, not optimize for benchmark \emph{runtime} and select
   \caption{Comparison of features of our benchmark-selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
   }
   \label{tab:requirements}
-  ~\\[1em]
   \begin{tabular}{
-    m{0.32\textwidth}
-    >{\centering\arraybackslash}m{0.16\textwidth}
-    >{\centering\arraybackslash}m{0.16\textwidth}
-    >{\centering\arraybackslash}m{0.16\textwidth}
-    >{\centering\arraybackslash}m{0.16\textwidth}
+    m{0.2752\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
   }
     \toprule
     Feature & Hoos~\cite{HoosKSS13} & SMAC~\cite{HutterHL11} & Matricon~\cite{MatriconAFSH21} & Our approach \\
@@ -188,7 +199,7 @@ Thus, we strive for an accurate prediction model without having to label every d
 \begin{figure}[tbp!]
   \centering
   \begin{tabular}[c]{ccc}
-  \begin{subfigure}[b]{0.25\textwidth}
+  \begin{subfigure}[b]{0.236\textwidth}
   \centering
   \resizebox{!}{2.75cm}{
   \begin{tikzpicture}
@@ -220,7 +231,7 @@ Thus, we strive for an accurate prediction model without having to label every d
   \label{fig:passive}
   \end{subfigure}
   &
-  \begin{subfigure}[b]{0.35\textwidth}
+  \begin{subfigure}[b]{0.33\textwidth}
   \centering
   \resizebox{!}{2.75cm}{
   \begin{tikzpicture}
@@ -260,7 +271,7 @@ Thus, we strive for an accurate prediction model without having to label every d
   \label{fig:activepool}
   \end{subfigure}
   &
-  \begin{subfigure}[b]{0.35\textwidth}
+  \begin{subfigure}[b]{0.33\textwidth}
   \centering
   \resizebox{!}{2.75cm}{
   \begin{tikzpicture}
@@ -618,12 +629,11 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
 \begin{table}[htbp]
   \centering
   \caption{Regression performance of models trained on 46 instance and 27 runtime features. We report the RMSE and MAE metrics on the test sets.}
-  ~\\[1em]
   \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.37\textwidth}
+    >{\raggedleft\arraybackslash}m{0.33855\textwidth}
     >{\centering\arraybackslash}m{0.01\textwidth}
-    >{\centering\arraybackslash}m{0.28\textwidth}
-    >{\centering\arraybackslash}m{0.28\textwidth}
+    >{\centering\arraybackslash}m{0.2562\textwidth}
+    >{\centering\arraybackslash}m{0.2562\textwidth}
   }
     \toprule
     {Regression Models} & & {Avg. RMSE ($\pm$ std)} & {Avg. MAE ($\pm$ std)} \\
@@ -640,10 +650,10 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
   \caption{MCC performance of models predicting timeouts. The models are trained 28 times with each solver as a target once.}
   ~\\[1em]
   \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.37\textwidth}
+    >{\raggedleft\arraybackslash}m{0.33855\textwidth}
     >{\centering\arraybackslash}m{0.01\textwidth}
-    >{\centering\arraybackslash}m{0.28\textwidth}
-    >{\centering\arraybackslash}m{0.28\textwidth}
+    >{\centering\arraybackslash}m{0.2562\textwidth}
+    >{\centering\arraybackslash}m{0.2562\textwidth}
   }
     \toprule
     {Timeout Prediction Models} & & {46 Instance Features Avg. MCC ($\pm$ std)} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} \\
@@ -666,60 +676,32 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
 \begin{table}[htbp]
   \centering
   \caption{MCC performance of the best models predicting the $C_k$ clusterings.}
-  \begin{subtable}{\textwidth}
-    \centering
-    \caption{Predicting $C_3$ clusters.}
-    \begin{tabular}{
-      >{\raggedleft\arraybackslash}m{0.37\textwidth}
-      >{\centering\arraybackslash}m{0.01\textwidth}
-      >{\centering\arraybackslash}m{0.28\textwidth}
-      >{\centering\arraybackslash}m{0.28\textwidth}
-    }
-      \toprule
-      {$C_3$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
-      \midrule
-      Stacking (QDA\,+\,RF)                 & & 0.7464 ($\pm$ 0.0497) & 0.8380 ($\pm$ 0.0634) \\[0.4ex]
-      Quadratic-DA (QDA)                    & & 0.6903 ($\pm$ 0.0607) & 0.7738 ($\pm$ 0.0459) \\[0.4ex]
-      Random-Forest-Classifier (RF)         & & 0.7116 ($\pm$ 0.0385) & 0.7841 ($\pm$ 0.0469) \\
-      \bottomrule
-    \end{tabular}
-  \end{subtable}
-  \begin{subtable}{\textwidth}
-    \centering
-    \caption{Predicting $C_4$ clusters.}
-    \begin{tabular}{
-      >{\raggedleft\arraybackslash}m{0.37\textwidth}
-      >{\centering\arraybackslash}m{0.01\textwidth}
-      >{\centering\arraybackslash}m{0.28\textwidth}
-      >{\centering\arraybackslash}m{0.28\textwidth}
-    }
-      \toprule
-      {$C_4$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
-      \midrule
-      Stacking (QDA\,+\,RF)                 & & 0.6562 ($\pm$ 0.0538) & 0.7366 ($\pm$ 0.0377) \\[0.4ex]
-      Quadratic-DA (QDA)                    & & 0.6007 ($\pm$ 0.0765) & 0.6872 ($\pm$ 0.0469) \\[0.4ex]
-      Random-Forest-Classifier (RF)         & & 0.6033 ($\pm$ 0.0455) & 0.6828 ($\pm$ 0.0527) \\
-      \bottomrule
-    \end{tabular}
-  \end{subtable}
-  \begin{subtable}{\textwidth}
-    \centering
-    \caption{Predicting $C_5$ clusters.}
-    \begin{tabular}{
-      >{\raggedleft\arraybackslash}m{0.37\textwidth}
-      >{\centering\arraybackslash}m{0.01\textwidth}
-      >{\centering\arraybackslash}m{0.28\textwidth}
-      >{\centering\arraybackslash}m{0.28\textwidth}
-    }
-      \toprule
-      {$C_5$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
-      \midrule
-      Stacking (QDA\,+\,RF)                 & & 0.5835 ($\pm$ 0.0615) & 0.6396 ($\pm$ 0.0553) \\[0.4ex]
-      Quadratic-DA (QDA)                    & & 0.5508 ($\pm$ 0.0669) & 0.5881 ($\pm$ 0.0912) \\[0.4ex]
-      Random-Forest-Classifier (RF)         & & 0.5420 ($\pm$ 0.0459) & 0.5895 ($\pm$ 0.0475) \\
-      \bottomrule
-    \end{tabular}
-  \end{subtable}
+  \begin{tabular}{
+    >{\raggedleft\arraybackslash}m{0.33855\textwidth}
+    >{\centering\arraybackslash}m{0.01\textwidth}
+    >{\centering\arraybackslash}m{0.2562\textwidth}
+    >{\centering\arraybackslash}m{0.2562\textwidth}
+  }
+    \toprule
+    {$C_3$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    \midrule
+    Stacking (QDA\,+\,RF)                 & & 0.7464 ($\pm$ 0.0497) & 0.8380 ($\pm$ 0.0634) \\[0.4ex]
+    Quadratic-DA (QDA)                    & & 0.6903 ($\pm$ 0.0607) & 0.7738 ($\pm$ 0.0459) \\[0.4ex]
+    Random-Forest-Classifier (RF)         & & 0.7116 ($\pm$ 0.0385) & 0.7841 ($\pm$ 0.0469) \\[0.4ex]
+    \midrule
+    {$C_4$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    \midrule
+    Stacking (QDA\,+\,RF)                 & & 0.6562 ($\pm$ 0.0538) & 0.7366 ($\pm$ 0.0377) \\[0.4ex]
+    Quadratic-DA (QDA)                    & & 0.6007 ($\pm$ 0.0765) & 0.6872 ($\pm$ 0.0469) \\[0.4ex]
+    Random-Forest-Classifier (RF)         & & 0.6033 ($\pm$ 0.0455) & 0.6828 ($\pm$ 0.0527) \\[0.4ex]
+    \midrule
+    {$C_5$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    \midrule
+    Stacking (QDA\,+\,RF)                 & & 0.5835 ($\pm$ 0.0615) & 0.6396 ($\pm$ 0.0553) \\[0.4ex]
+    Quadratic-DA (QDA)                    & & 0.5508 ($\pm$ 0.0669) & 0.5881 ($\pm$ 0.0912) \\[0.4ex]
+    Random-Forest-Classifier (RF)         & & 0.5420 ($\pm$ 0.0459) & 0.5895 ($\pm$ 0.0475) \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 % TODO tf: Confusion matrices
@@ -748,17 +730,17 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
   \label{tab:ranking}
   ~\\[1em]
   \begin{tabular}{
-    >{\centering\arraybackslash}m{0.07\textwidth}
-    >{\centering\arraybackslash}m{0.12\textwidth}
-    >{\centering\arraybackslash}m{0.07\textwidth}
-    >{\centering\arraybackslash}m{0.12\textwidth}
+    >{\centering\arraybackslash}m{0.09\textwidth}
+    >{\centering\arraybackslash}m{0.15\textwidth}
+    >{\centering\arraybackslash}m{0.09\textwidth}
+    >{\centering\arraybackslash}m{0.15\textwidth}
     >{\raggedright\arraybackslash}m{0.01\textwidth}
-    >{\raggedright\arraybackslash}m{0.32\textwidth}
+    >{\raggedright\arraybackslash}m{0.314\textwidth}
   }
     \toprule
-    \multicolumn{2}{c}{PAR-2} & \multicolumn{2}{c}{$s_3$} \\
+    \multicolumn{2}{c}{PAR-2} & \multicolumn{2}{c}{$s_3$} & & \multirow[c]{2}{*}{\vspace{-0.15cm}\hspace{-0.02cm}Solver} \\
     \cmidrule(r){1-2}\cmidrule(r){3-4}
-    Rank &   Score & Rank &  Score & & Solver \\
+    Rank &   Score & Rank &  Score & & \\
     \midrule
        1 & 2808.13 &    1 & 1.1717 & & kissat-mab-esa \\
        2 & 2812.93 &    2 & 1.1832 & & kissat-sc2022-bulky \\
@@ -977,50 +959,32 @@ It can predict a new solver's PAR-2 ranking with \SI{90.48}{\%} accuracy ($O_{\o
 The best-performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime-label ranking, uncertainty sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with \SI{92.33}{\%} accuracy ($O_{\operatorname{acc}}$) in only \SI{10.35}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
 
-\begin{table}[t]
+\begin{table}[tp]
   \centering
   \caption{
-      Performance comparison (on the full dataset) of the best-performing active-learning approaches (\emph{AL}), random sampling of the same runtime fraction with 1000 repetitions (\emph{Random}), and statically selecting the instances most frequently sampled by active-learning approaches (\emph{Most Freq.})
-    }
+    Performance comparison (on the full dataset) of the best-performing AL approach (\emph{AL}), random sampling of the same runtime fraction with 1000 repetitions (\emph{Random}), and statically selecting the instances most frequently sampled by active-learning approaches (\emph{Most Frequent})
+  }
   \label{tab:fulldataset}
-
-  \begin{subfigure}{\textwidth}
-    \centering
-    \caption{Best-performing AL approach for $\delta \in \left[0.2, 0.7\right]$}
-    \begin{tabular}{
-      >{\arraybackslash}p{0.4\textwidth}
-      S[table-format=2.2,table-column-width=0.15\textwidth]
-      S[table-format=2.2,table-column-width=0.15\textwidth]
-      S[table-format=2.2,table-column-width=0.15\textwidth]
-    }
-      \toprule
-        & {AL} & {Random} & {Most Freq.} \\
-      \midrule
-      Sampled Runtime Fraction (\%) & 5.41 & 5.43 & 5.44 \\
-      Sampled Instance Fraction (\%) & 26.53 & 5.43 & 27.75 \\
-      Ranking Accuracy (\%) & 90.48 & 88.54 & 81.08 \\
-      \bottomrule
-    \end{tabular}
-  \end{subfigure}
-  \\
-  \begin{subfigure}{\textwidth}
-    \centering
-    \caption{Best-performing AL approach for $\delta \in (0.7, 0.8]$}
-    \begin{tabular}{
-      >{\arraybackslash}p{0.4\textwidth}
-      S[table-format=2.2,table-column-width=0.15\textwidth]
-      S[table-format=2.2,table-column-width=0.15\textwidth]
-      S[table-format=2.2,table-column-width=0.15\textwidth]
-    }
-      \toprule
-        & {AL} & {Random} & {Most Freq.} \\
-      \midrule
-      Sampled Runtime Fraction (\%) & 10.35 & 10.37 & 10.37 \\
-      Sampled Instance Fraction (\%) & 5.24 & 10.37 & 36.96 \\
-      Ranking Accuracy (\%) & 92.33 & 91.61 & 84.52 \\
-      \bottomrule
-    \end{tabular}
-  \end{subfigure}
+  \begin{tabular}{
+    >{\arraybackslash}p{0.4\textwidth}
+    S[table-format=2.2,table-column-width=0.15\textwidth]
+    S[table-format=2.2,table-column-width=0.15\textwidth]
+    S[table-format=2.2,table-column-width=0.15\textwidth]
+  }
+    \toprule
+    {For $\delta \in \left[0.2, 0.7\right]$} & {AL} & {Random} & {Most Frequent} \\
+    \midrule
+    Sampled Runtime Fraction (\%) & 5.41 & 5.43 & 5.44 \\
+    Sampled Instance Fraction (\%) & 26.53 & 5.43 & 27.75 \\
+    Ranking Accuracy (\%) & 90.48 & 88.54 & 81.08 \\
+    \midrule
+    {For $\delta \in (0.7, 0.8]$}  & {AL} & {Random} & {Most Frequent} \\
+    \midrule
+    Sampled Runtime Fraction (\%) & 10.35 & 10.37 & 10.37 \\
+    Sampled Instance Fraction (\%) & 5.24 & 10.37 & 36.96 \\
+    Ranking Accuracy (\%) & 92.33 & 91.61 & 84.52 \\
+    \bottomrule
+  \end{tabular}
 \end{table}
 
 Table~\ref{tab:fulldataset} shows how both active-learning approaches (column \emph{AL}) compare against two static baselines:
