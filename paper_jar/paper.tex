@@ -30,7 +30,6 @@
 \begin{document}
 
 \title[Active Learning for SAT Solver Benchmarking]{Active Learning for SAT Solver Benchmarking} % short and long title
-%JB: not sure if we should use a new title or not; in past special issues of journal, both options (re-use conference-version title or choose new title) were used
 
 \author*{\fnm{Tobias} \sur{Fuchs}}\email{tobias.fuchs@kit.edu}
 \author{\fnm{Jakob} \sur{Bach}}\email{jakob.bach@kit.edu}
@@ -56,8 +55,6 @@
 
 \section{Introduction}
 \label{sec:intro}
-
-% TODO: somewhere in introduction, refer to conference version ("fuchs2023active") and state what has changed in journal version
 % TODO: if appropriate, extend with motivation/results regarding runtime discretization and prediction models
 
 One of the main phases of algorithm engineering is benchmarking.
@@ -97,8 +94,12 @@ In particular, we only subsample the benchmark once instead of comparing pairwis
 We evaluate our approach with the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}, consisting of 5355~instances and runtimes of 28~solvers.
 We perform cross-validation by treating each solver once as the new solver and learning to predict the PAR-2 rank of that solver.
 On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
-
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
+
+This article is an extended version of a conference paper with the same name~\cite{fuchs2023active}.
+% TODO: not sure if we should choose a new title or not; in past special issues of journal, both options (re-use conference-version title or choose new title) were used
+In particular, we significantly extended the analysis of runtime-prediction approaches (cf.~Section~\ref{sec:exdesign:disc-pred}) and added an evaluation of how often problem instances were selected in benchmarks (cf.~Section~\ref{sec:eval:inst-freq}).
+% TODO: before submission, we should check which other changes we made and list them here accordingly
 
 \section{Related Work}
 
@@ -612,6 +613,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
 \end{itemize}
 
 \subsection{Runtime Discretization and Prediction}
+\label{sec:exdesign:disc-pred}
 
 % TODO tf: Why not regression? Bad performance
 \begin{table}[htbp]
@@ -1018,6 +1020,8 @@ Finally, instances of the family \emph{cryptography} are less important in disti
 A possible explanation is that these instances are very similar, such that a small fraction of them is sufficient to estimate a solver's performance on all of them.
 
 \subsection{Instance Frequency in Selected Benchmarks}
+\label{sec:eval:inst-freq}
+
 % TODO tf: Frequency of instances
 \begin{figure}
   \centering
