@@ -4,7 +4,8 @@ This repository contains the code and text of the paper
 
 > Fuchs, Bach, Iser. "Active Learning for SAT Solver Benchmarking"
 
-[published](https://doi.org/10.1007/978-3-031-30823-9_21) at the conference [TACAS 2023](https://etaps.org/2023/tacas).
+[published](https://doi.org/10.1007/978-3-031-30823-9_21) at the conference [TACAS 2023](https://etaps.org/2023/tacas)
+as well as an extended (currently unpublished) version at the [Journal of Automated Reasoning](https://link.springer.com/journal/10817).
 You can find the corresponding complete experimental data (inputs as well as results) within [this data repository](https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data).
 
 This document provides:
@@ -15,7 +16,8 @@ This document provides:
 
 ## Repository Structure
 
-* The folder `paper` contains the LaTeX source of the paper.
+* The folder `paper_jar` contains the LaTeX source of the journal version of the paper.
+* The folder `paper_tacas` contains the LaTeX source of the conference version of the paper.
 * The folder `plots` contains the pgf-plots used within the publication. All plots therein are generated with the Jupyter notebook `anni_results.ipynb`.
 * The folder `src` contains the code of the experiments.
 * Additionally, there are the following files in the root directory:
