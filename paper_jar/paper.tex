@@ -1,20 +1,18 @@
-\documentclass{sn-jnl}
+\documentclass[sn-basic, Numbered]{sn-jnl} % may use "lineno" for line numbers
+% template from https://www.springernature.com/gp/authors/campaigns/latex-author-support
 
 \usepackage[ruled,vlined,linesnumbered,norelsize]{algorithm2e}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{amsthm}
-\usepackage[T1]{fontenc} % font encoding; recommended by LNCS template
+\usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage[misc]{ifsym} % letter symbol to mark corresponding author
+\usepackage{multirow}
 \usepackage{pifont}
 \usepackage{siunitx}
 \usepackage{subcaption}
 \usepackage{tabularx}
-\usepackage{booktabs}
-\usepackage{multirow}
 \usepackage[table]{xcolor}
-\usepackage{orcidlink} % ORCID icon and link; has to be loaded after "xcolor" here, else "option clash"; class "llncs" also has command "\orcidID" (which only displays full ID), but camera-ready instructions state you should add icon and link yourself
 \usepackage{tikz} % has to be loaded after "xcolor" here, else "option clash"
 
 \newcommand{\cmark}{\ding{51}} % symbols for table comparing benchmarking approaches
@@ -25,35 +23,20 @@
 \SetKwSty{texttt}
 \SetCommentSty{emph}
 
-\renewcommand\UrlFont{\color{blue}\rmfamily} % link coloring according to LNCS template
-
-%% as per the requirement new theorem styles can be included as shown below
-\theoremstyle{thmstyleone}%
-\newtheorem{theorem}{Theorem}%  meant for continuous numbers
-%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
-%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
-\newtheorem{proposition}[theorem]{Proposition}% 
-%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
-
-\theoremstyle{thmstyletwo}%
-\newtheorem{example}{Example}%
-\newtheorem{remark}{Remark}%
-
-\theoremstyle{thmstylethree}%
-\newtheorem{definition}{Definition}%
+\newtheorem{definition}{Definition} % only kind of theorems we use are definitions (well, one)
 
 \raggedbottom
 
-
 \begin{document}
 
-\title[Active Learning for SAT Solver Benchmarking]{Active Learning for SAT Solver Benchmarking}
+\title[Active Learning for SAT Solver Benchmarking]{Active Learning for SAT Solver Benchmarking} % short and long title
+%JB: not sure if we should use a new title or not; in past special issues of journal, both options (re-use conference-version title or choose new title) were used
 
-\author{\fnm{Tobias} \sur{Fuchs}}\email{tobias.fuchs@kit.edu}
+\author*{\fnm{Tobias} \sur{Fuchs}}\email{tobias.fuchs@kit.edu}
 \author{\fnm{Jakob} \sur{Bach}}\email{jakob.bach@kit.edu}
 \author{\fnm{Markus} \sur{Iser}}\email{markus.iser@kit.edu}
 
-\affil{\orgname{Karlsruhe Institute of Technology}, \orgaddress{\city{Karlsruhe}, \country{Germany}}}
+\affil{\orgname{Karlsruhe Institute of Technology (KIT)}, \orgaddress{\city{Karlsruhe}, \country{Germany}}}
 
 \abstract{
   Benchmarking is a crucial phase when developing algorithms.
@@ -130,7 +113,7 @@ In the following, we discuss related work from the areas of static benchmark sel
 Table~\ref{tab:requirements} compares the most relevant approaches, which all pursue slightly different goals.
 Thus, our approach is \emph{not} a general improvement over the others but the only one fully aligned with Definition~\ref{def:new-solver-problem}.
 
-\subsubsection{Static Benchmark Selection.}
+\subsection{Static Benchmark Selection}
 
 Benchmark selection is essential for competitions, e.g., the SAT Competition.
 In such competitions, the organizers define the rules for composing the benchmarks.
@@ -168,7 +151,7 @@ The approach does, however, not optimize for benchmark \emph{runtime} and select
   \end{tabular}
 \end{table}
 
-\subsubsection{Algorithm Configuration.}
+\subsection{Algorithm Configuration}
 
 Further related work can be found within the field of algorithm configuration~\cite{HoosHL21,Stutzle0P22}, e.g., the configuration system SMAC~\cite{HutterHL11}.
 Thereby, the goal is to tune SAT solvers for a given sub-domain of problem instances.
@@ -177,7 +160,7 @@ For example, SMAC also employs an iterative, model-based selection procedure, th
 An algorithm configurator, however, cannot be used to \emph{rank/score} a new solver since algorithm configuration solemnly seeks to find the best-performing configuration.
 Also, while using a model-based selection strategy to sample configurations, instance selection is made \emph{randomly}, i.e., without building a model over instances.
 
-\subsubsection{Incremental Benchmark Selection.}
+\subsection{Incremental Benchmark Selection}
 
 Matricon~et~al. present an incremental benchmark selection approach~\cite{MatriconAFSH21}.
 Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
@@ -191,7 +174,7 @@ Moreover, a significant shortcoming is the lacking \emph{scalability} with the n
 Comparing only pairs of solvers, evaluating a new solver requires sampling a separate benchmark for each existing solver.
 In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one benchmark.
 
-\subsubsection{Active Learning.}
+\subsection{Active Learning}
 
 Prediction models in passive machine learning are trained on datasets with given instance labels (cf.~Fig.~\ref{fig:passive}).
 In contrast, active learning (AL) starts with no or little labeled data.
@@ -379,7 +362,7 @@ The features described in Section~\ref{sec:exdesign:data} serve as the input to 
 Further, note that we build a new prediction model in each iteration since running experiments (Line~5) dominates the runtime of model training by magnitudes.
 Finally, we predict the score of the new solver $\hat a$ with the prediction function~$f$ (Line~8).
 
-\subsubsection{Runtime Transformation.}
+\subsubsection{Runtime Transformation}
 
 For the prediction model~$M$, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
 For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for the instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
@@ -392,7 +375,7 @@ Given an instance $e \in \mathcal{I}$, a solver $a \in \mathcal{A}$ belongs to t
 In preliminary experiments, we achieved higher accuracy for predicting such discrete runtime labels than for predicting raw runtimes.
 Research on portfolio solvers has also shown that discretization works well in practice~\cite{CollauttiMMO13,NgokoCT19}.
 
-\subsubsection{Ranking Solvers.}
+\subsubsection{Ranking Solvers}
 
 To determine solver ranks, we use the transformed runtimes $\gamma_k(a, e)$ in the adapted scoring function $s_k : \mathcal{A} \rightarrow [1, 2 \cdot k]$ as follows:
 %
@@ -420,7 +403,7 @@ These methods require the model's predictions to include probabilities for the $
 Let \mbox{$f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$} denote this modified prediction function.
 In the following, the set $\tilde{\mathcal{I}} \subseteq \mathcal{I}$ denotes the instances that have already been sampled.
 
-\subsubsection{Uncertainty Sampling.}
+\subsubsection{Uncertainty Sampling}
 
 The uncertainty sampling strategy selects the instance closest to the model's decision boundary, i.e., 
 we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that minimizes $U(e)$, which is specified as follows:
@@ -429,7 +412,7 @@ we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that mi
   \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
 \end{equation*}
 
-\subsubsection{Information-Gain Sampling.}
+\subsubsection{Information-Gain Sampling}
 
 The information-gain sampling strategy selects the instance with the highest expected entropy reduction regarding the runtime labels of the instance.
 To be more specific, we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that maximizes $IG(e)$, which is specified as follows:
@@ -447,7 +430,7 @@ By maximizing information gain, we select instances that identify solvers with s
 
 In this section, we present the two dynamic stopping criteria in our experiments, the Wilcoxon and the ranking stopping criterion (cf. Algorithm~\ref{algALBenchmark}, Line~3).
 
-\subsubsection{Wilcoxon Stopping Criterion.}
+\subsubsection{Wilcoxon Stopping Criterion}
 
 The Wilcoxon stopping criterion stops the active-learning process when we are confident enough that the predicted runtime labels of the new solver are sufficiently different from existing solvers.
 This criterion is loosely inspired by Matricon et.~al.~\cite{MatriconAFSH21}.
@@ -464,7 +447,7 @@ To improve the stability of this criterion, we use an exponential moving average
   W_{\exp}^{\left(i\right)} &:= \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(i - 1\right)}
 \end{align*}
 
-\subsubsection{Ranking Stopping Criterion.}
+\subsubsection{Ranking Stopping Criterion}
 
 The ranking stopping criterion is less sophisticated in comparison.
 It stops the active-learning process if the ranking induced by the model's predictions (Equation~\ref{eq:rankingeq}) remained unchanged within the last~$l$~iterations.
@@ -571,7 +554,7 @@ This \emph{tuning dataset} allows for a more extensive exploration of the hyper-
 Given Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three sub-routines, i.e., \emph{ranking}, \emph{selection}, and \emph{stopping}.
 We describe these experimental configurations in the following.
 
-\subsubsection{Ranking.}
+\subsubsection{Ranking}
 
 Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with the following approaches and hyper-parameter values:
 
@@ -587,7 +570,7 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with 
   \end{itemize}
 \end{itemize}
 
-\subsubsection{Selection.}
+\subsubsection{Selection}
 
 For \emph{selection} (cf. Section~\ref{sec:main:selection}), we experiment with the following methods and hyper-parameter values.
 Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches, which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
@@ -608,7 +591,7 @@ A drawback of this is the lack of parallel execution of runtime experiments.
   \end{itemize}
 \end{itemize}
 
-\subsubsection{Stopping.}
+\subsubsection{Stopping}
 
 For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experiment with the following criteria and hyper-parameter values:
 
@@ -1067,14 +1050,28 @@ Benchmarking on a computing cluster with $n$ cores benefits from having batches 
 However, bigger batch sizes $n$ impede \emph{active learning}.
 Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
 
-\subsubsection*{Acknowledgments.}
+\backmatter
+
+\section*{Declarations}
+
+\bmhead{Funding}
 
 This work was supported by the Ministry of Science, Research and the Arts Baden-Württemberg, project \emph{Algorithm Engineering for the Scalability Challenge (AESC)}.
 
-%
-% ---- Bibliography ----
-%
-\bibliographystyle{splncs04}
+\bmhead{Competing interests}
+
+The authors have no competing interests to declare that are relevant to the content of this article.
+
+\bmhead{Availability of data and materials}
+
+All experimental data are available online at \url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}.
+% TODO: does this also include all the data for the newly added results?
+
+\bmhead{Code availability}
+
+The code is available online at \url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}.
+%TODO: README in code repo should also describe how to reproduce the experiments for the newly added results (at least running the corresponding plot notebook is necessary; currently, README only refers to "anni_results.ipynb")
+
 \bibliography{literature}
 
 \end{document}
