@@ -74,6 +74,9 @@
 \section{Introduction}
 \label{sec:intro}
 
+% TODO: somewhere in introduction, refer to conference version ("fuchs2023active") and state what has changed in journal version
+% TODO: if appropriate, extend with motivation/results regarding runtime discretization and prediction models
+
 One of the main phases of algorithm engineering is benchmarking.
 This also applies to propositional satisfiability (SAT), the archetypal $\mathcal{NP}$-complete problem.
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
@@ -115,6 +118,8 @@ On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
 
 \section{Related Work}
+
+% TODO: if appropriate, extend with related work regarding runtime discretization and prediction models
 
 Benchmarking is not only of high interest in many fields but also an active research area on its own.
 Recent studies show that benchmark selection is challenging for multiple reasons.
@@ -990,7 +995,7 @@ It can predict a new solver's PAR-2 ranking with \SI{92.33}{\%} accuracy ($O_{\o
 Table~\ref{tab:fulldataset} shows how both active-learning approaches (column \emph{AL}) compare against two static baselines:
 \emph{Random} samples instances until it reaches roughly the same fraction of runtime as the AL benchmark sets.
 We repeat sampling 1000 times and report average results.
-\emph{Most Freq.} uses a static benchmark set consisting of those instances most frequently sampled by our active learning approach.
+\emph{Most Frequent} uses a static benchmark set consisting of those instances most frequently sampled by our active learning approach.
 In particular, we consider the average sampling frequency over all solvers and Pareto-optimal active-learning approaches.
 
 Both our AL approaches perform better than random sampling.
@@ -1042,6 +1047,8 @@ A possible explanation is that these instances are very similar, such that a sma
 Text.
 
 \section{Conclusions and Future Work}
+
+% TODO: if appropriate, extend with results regarding runtime discretization and prediction models
 
 In this work, we have addressed the \emph{New-Solver Problem}:
 Given a new solver, we want to find its ranking amidst competitors.
