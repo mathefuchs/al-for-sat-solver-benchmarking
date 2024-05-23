@@ -22,6 +22,7 @@ This document provides:
 * The folder `src` contains the code of the experiments.
 * Additionally, there are the following files in the root directory:
   * The notebook `anni_results.ipynb` analyzes the results produced by the code under `src` and generates all plots within `plots`.
+  * The notebook `bonus_results.ipynb` contains additional results and plots that are part of the extended journal version.
   * `LICENSE` describes the repository's licensing.
   * The Jupyter notebook `prepare_data.ipynb` shows how we prepare the underlying data for our experiments.
   * `README.md` is this document.
