@@ -29,7 +29,7 @@
 
 \begin{document}
 
-\title[Active Learning for SAT Solver Benchmarking]{Active Learning for SAT Solver Benchmarking} % short and long title
+\title[Active Learning for SAT Solver Benchmarking]{Active Learning for SAT Solver Benchmarking {\large (extended and revised version)}} % short and long title
 
 \author*{\fnm{Tobias} \sur{Fuchs}}\email{tobias.fuchs@kit.edu}
 \author{\fnm{Jakob} \sur{Bach}}\email{jakob.bach@kit.edu}
@@ -96,7 +96,7 @@ Cross-validation was performed by treating each solver once as the new solver an
 On average, our predictions achieve an accuracy of approximately \SI{92}{\%} with only approximately \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
 
-This article is an extended and refined version of our conference paper with the same title, ``Active Learning for SAT Solver Benchmarking''~\cite{fuchs2023active}.
+This article is an extended and refined version of our conference paper with the title ``Active Learning for SAT Solver Benchmarking''~\cite{fuchs2023active}.
 In particular, we significantly extended the analysis of runtime-prediction approaches, which led to our choice of a solver runtime model for use in benchmark instance selection (cf.~Section~\ref{sec:exdesign:disc-pred}).
 Furthermore, we expanded the evaluation of which benchmark instances are selected by our approach (cf.~Section~\ref{sec:eval:instance}).
 % TODO: before submission, we should check which other changes we made and list them here accordingly
