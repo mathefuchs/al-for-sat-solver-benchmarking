@@ -1051,21 +1051,24 @@ One possible explanation for this discrepancy is that these instances are highly
 \section{Conclusions and Future Work}
 
 In this work, we have addressed the \emph{New-Solver Problem}:
-Given a new solver, we want to find its ranking amidst competitors.
-Our approach provides accurate ranking predictions while needing significantly less runtime than a complete evaluation on a given benchmark set.
-On data from the SAT~Competition~2022 Anniversary Track, we can determine a new solver's PAR-2 ranking with about \SI{92}{\%} accuracy while only needing \SI{10}{\%} of the full-evaluation time.
-We have evaluated several ranking algorithms, instance-selection approaches, and stopping criteria within our sequential active-learning framework.
-We also took a brief look at which instance families are the most prevalent in selection decisions.
+Given a new solver, we aim to determine its ranking relative to competitors.
+Our approach provides accurate ranking predictions while requiring significantly less runtime than a complete evaluation on a given benchmark set.
+On data from the SAT~Competition~2022 Anniversary Track, we can determine a new solver's PAR-2 ranking with about \SI{92}{\%} accuracy while only requiring \SI{10}{\%} of the full-evaluation time.
+We have evaluated several ranking algorithms, instance-selection approaches, and stopping criteria within our sequential active learning framework.
+We have also looked at which instance families are the most prevalent in selection decisions.
 
-Future work may compare further sub-routines for ranking, instance selection, and stopping.
-Additionally, one can apply our evaluation framework to arbitrary computation-intensive problems, e.g., other $\mathcal{NP}$-complete problems than SAT, as all discussed active-learning methods are problem-agnostic.
-Such problems share most of the relevant properties of SAT solving, i.e., there are established instance features, a complete benchmark is expensive, and traditional benchmark selection requires expert knowledge.
+Future work could compare more sub-routines for ranking, instance selection, and stopping.
+Our evaluation framework can be used for other computation-intensive problems, like other $\mathcal{NP}$-complete problems than SAT.
+Such problems share most of the relevant properties of SAT, like established instance features, a complete benchmark is expensive, and traditional benchmark selection requires expert knowledge.
 
-From the technical perspective, one could formulate runtime discretization as an optimization problem rather than addressing it empirically.
+From a technical perspective, we could formulate the problem of runtime discretization as an optimization problem, rather than addressing it empirically.
 Further, a major shortcoming of our current approach is the lack of parallelization, selecting instances one at a time.
 Benchmarking on a computing cluster with $n$ cores benefits from having batches of $n$ instances.
 However, bigger batch sizes $n$ impede \emph{active learning}.
 Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
+
+In order to perform benchmarking on a computer cluster with multiple cores, it is necessary to have batches of multiple instances. This application demonstrates one of the principal limitations of our approach: it does not permit the concurrent execution of multiple instances, but rather necessitates the benchmarking of a single instance at a time.
+In future work, we intend to investigate models that learn from partial labels, which can be extracted from larger batch sizes in a parallel approach that synchronizes instance selection and model updates.
 
 \backmatter
 
