@@ -38,15 +38,15 @@
 \affil{\orgname{Karlsruhe Institute of Technology (KIT)}, \orgaddress{\city{Karlsruhe}, \country{Germany}}}
 
 \abstract{
-  Benchmarking is a crucial phase when developing algorithms.
-  This also applies to solvers for the SAT (propositional satisfiability) problem.
-  Benchmark selection is about choosing representative problem instances that reliably discriminate solvers based on their runtime.
-  In this paper, we present a dynamic benchmark selection approach based on active learning.
-  Our approach predicts the rank of a new solver among its competitors with minimum runtime and maximum rank prediction accuracy.
-  We evaluated this approach on the Anniversary Track dataset from the 2022 SAT Competition.
-  Our selection approach can predict the rank of a new solver after about \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of about \SI{92}{\%}. 
-  We also discuss the importance of instance families in the selection process. 
-  Overall, our tool provides a reliable way for solver engineers to determine a new solver's performance efficiently.
+Benchmarking is a crucial phase in the development of algorithms.
+This also applies to SAT solvers for the problem of propositional satisfiability.
+Benchmark selection is about choosing representative problem instances that reliably discriminate solvers based on their runtime.
+In this paper, we present a dynamic benchmark selection approach based on active learning.
+Our approach predicts the rank of a new solver among its competitors with minimum runtime and maximum rank prediction accuracy.
+This approach was evaluated on the Anniversary Track dataset from the 2022 SAT Competition.
+Our selection approach can predict the rank of a new solver after approximately \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of approximately \SI{92}{\%}. 
+Additionally, the importance of instance families in the selection process is discussed.  
+In conclusion, our tool offers a reliable method for solver engineers to assess a new solver's performance in an efficient manner.
 }
 
 \keywords{Propositional satisfiability, Benchmarking, Active learning}
