@@ -457,7 +457,7 @@ Nevertheless, in this case, the induced ranking is of sole interest.
 \label{sec:exdesign}
 
 In light of the preceding instantiations of Algorithm~\ref{algALBenchmark}, this section outlines the experimental design employed in the presented study.
-This includes an overview of the evaluation framework, the data sets employed, the hyper-parameter selections, and the implementation details.
+This includes an overview of the evaluation framework, the data sets employed, the hyperparameter selections, and the implementation details.
 
 \subsection{Evaluation Framework}
 \label{sec:exdesign:eval}
@@ -555,14 +555,14 @@ This \emph{tuning dataset} allows a more extensive exploration of the hyperparam
 Given the Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three subroutines \emph{ranking}, \emph{selection}, and \emph{stopping}.
 These experimental configurations are described in the following.
 
-\subsubsection{Ranking}
+\subparagraph{Ranking}
+Regarding \emph{ranking}, we experiment with the following instantiations.
 
-Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with the following approaches and hyper-parameter values:
-
-\begin{itemize}
+\begin{itemize}\setlength{\itemsep}{1pt}
   \item Observed PAR-2 ranking of already sampled instances
   \item Predicted runtime-label ranking
-  \begin{itemize}
+  \vspace*{-1ex}
+  \begin{itemize}\setlength{\itemsep}{1pt}
     \item
     History size: Consider the latest 1, 10, 20, 30, or 40 predictions within a voting approach for stability.
     The latest $x$ predictions for each instance vote on the instance's winning label.
@@ -571,41 +571,43 @@ Regarding \emph{ranking} (cf. Section~\ref{sec:main:model}), we experiment with 
   \end{itemize}
 \end{itemize}
 
-\subsubsection{Selection}
-
-For \emph{selection} (cf. Section~\ref{sec:main:selection}), we experiment with the following methods and hyper-parameter values.
-Since the potential runtime of experiments is by magnitudes larger than the model's update time, we only consider incrementing our benchmark by one instance at a time rather than using batches, which is also proposed in current active-learning advances~\cite{SinhaED19,2019gaal}.
+\subparagraph{Selection}
+We experiment with the following instantiations of instance \emph{selection}.
+We experiment with the following instantiations of the instance \emph{selection} criteria.
+Since the potential runtime of the experiments is orders of magnitude larger than the model update time, we consider incrementing our benchmark one instance at a time rather than using batches, which is also proposed in recent advances in active learning~\cite{SinhaED19,2019gaal}.
 A drawback of this is the lack of parallel execution of runtime experiments.
 
-\begin{itemize}
+\begin{itemize}\setlength{\itemsep}{1pt}
   \item Random sampling 
   \item Uncertainty sampling
-  \begin{itemize}
+  \vspace*{-1ex}
+  \begin{itemize}\setlength{\itemsep}{1pt}
     \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
     \item Runtime scaling: Whether to normalize uncertainty scores per instance by the average runtime of solvers on it or use the absolute values.
   \end{itemize}
 
   \item Information-gain sampling
+  \vspace*{-1ex}
   \begin{itemize}
     \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
     \item Runtime scaling: Whether to normalize information-gain scores per instance by the average runtime of solvers on it or use the absolute values.
   \end{itemize}
 \end{itemize}
 
-\subsubsection{Stopping}
+\subparagraph{Stopping}
+We evaluate the following \emph{stopping} criteria.
 
-For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experiment with the following criteria and hyper-parameter values:
-
-\begin{itemize}
+\begin{itemize}\setlength{\itemsep}{1pt}
   \item Subset-size stopping criterion, using \SI{10}{\%} or \SI{20}{\%} of instances
   \item Ranking stopping criterion
-  \begin{itemize}
+  \vspace*{-1ex}
+  \begin{itemize}\setlength{\itemsep}{1pt}
     \item Minimum amount: Sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
     \item Convergence duration: Stop if the predicted ranking stays the same for a number of sampled instances equal to \SI{1}{\%} or \SI{2}{\%} of all instances.
   \end{itemize}
-
   \item Wilcoxon stopping criterion
-  \begin{itemize}
+  \vspace*{-1ex}
+  \begin{itemize}\setlength{\itemsep}{1pt}
     \item Minimum amount: Sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
     \item Average of $p$-values to drop below: \SI{5}{\%}.
     \item Exponential-moving average: Incorporate previous significance values by using an EMA with $\beta = 0.1$ or $\beta = 0.7$.
@@ -614,18 +616,15 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
 
 \subsection{Runtime Discretization and Prediction}
 \label{sec:exdesign:disc-pred}
-One of the most crucial parts of our framework is the choice of the surrogate model to predict runtime labels and inform active-learning selection decisions.
-In this section, we detail why we do \emph{not} directly predict absolute solver runtimes, which machine-learning models work best in predicting the timeouts of a solver, how clustering solver runtimes can lead to more nuanced runtime labels, and how ML models perform on those cluster labels.
+One of the most important parts of our framework is the choice of solver runtime model to inform active learning selection decisions.
+In this section, we detail how clustering solver runtimes can lead to nuanced runtime labels, and which machine learning models are best at predicting them.
 
-% MI: table with regression performance:
-Table~\ref{tab:regression} shows the prediction performance of two regression models, a Random-Forest-Regressor and an MLP-Regressor, on the test set.
-Both models have been chosen because of their robustness and capability of capturing non-linear dependencies~\cite{breiman2001random}.
-The instance feature vector consists of 46 instance features and 27 known solver runtimes.
-Both models perform poorly, which is evident from the magnitudes of the average regression errors.
-An RMSE error of about \SI{2000}{s} is quite poor compared to the solver runtimes which range from 0 to \SI{5000}{s}.
-Therefore, we decided to discretize runtimes.
-
-\begin{table}[tbp]
+As a baseline for improvement, Table~\ref{tab:regression} shows the runtime prediction performance of two regression models, a random forest regressor and an MLP regressor, using 46 instance features and 27 known solver runtimes.
+Both models were chosen for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}, and both perform poorly, as evidenced by the magnitudes of the mean regression errors.
+An RMSE error of about \SI{2000}{s} is quite poor compared to solver runtimes that range from 0 to \SI{5000}{s}.
+Therefore, we decided to discretize the runtimes.
+%
+\begin{table}[b]
   \centering
   \caption{Regression performance of models trained on 46 instance and 27 runtime features. We report the RMSE and MAE metrics on the test sets.}
   \label{tab:regression}
@@ -644,12 +643,11 @@ Therefore, we decided to discretize runtimes.
   \end{tabular}
 \end{table}
 
-% MI: table with timeout prediction performance: (merged with existing text)
 Table~\ref{tab:timeout-prediction} shows the performance of different models in predicting timeouts.
 While the second column shows the performance of models trained on the 46 instance features, the third column shows the performance of models trained on the 46 instance features and the 27 runtime features.
-While the Quadratic-DA model performs poorly on the 46 instance features, it performs well on the 46 instance features and 27 runtime features.
-The best prediction performance however is achieved by a stacking ensemble~\cite{wolpert1992stacked}, which combines quadratic-discriminant analysis~\cite{tharwat2016linear} and a random-forest classifier~\cite{breiman2001random}.
-Stacking means that another prediction model, in our case a simple decision tree, decides which of the two ensemble members makes the prediction on which instance.
+While the Quadratic DA model performs poorly on the 46 instance features, it performs well on the 46 instance features and the 27 runtime features.
+However, the best prediction performance is achieved by a stacking ensemble~\cite{wolpert1992stacked}, which combines quadratic discriminant analysis~\cite{tharwat2016linear} and a random forest classifier~\cite{breiman2001random}.
+Stacking means that another prediction model, in our case a simple decision tree, decides which of the two ensemble members makes the prediction about which instance.
 
 \begin{table}[tbp]
   \centering
@@ -680,21 +678,21 @@ Stacking means that another prediction model, in our case a simple decision tree
 \end{table}
 
 % MI: table with cluster prediction performance: (merged with existing text)
-As already mentioned, runtime prediction is quite challenging.
-Instead, we discretize runtimes.
-To define prediction targets, we use hierarchical clustering with $k$ clusters and a log-single-link criterion, which produced the most \emph{useful} labels in preliminary experiments.
-We denote this adapted solver scoring function with $s_k$ as defined in~\eqref{eq:rankingeq}.
+Since runtime prediction is quite challenging, we discretize the runtimes.
+To define prediction targets for each instance, we cluster the solver runtimes into $k$ clusters.
+We denote this adapted solver scoring function which assigns a solver to its cluster for each instance with $s_k$ as defined in Equation~\eqref{eq:rankingeq}.
+%
+In preliminary experiments, the most \emph{useful} labels were produced with hierarchical clustering and a log-single-link criterion.
 In our chosen hierarchical procedure, each non-timeout runtime starts in a separate interval.
-We then gradually merge intervals whose single-link logarithmic distance is the smallest until the desired number of partitions is reached.
-The clustering is instance-specific, i.e., the boundaries are chosen such that it produces groups of solvers with similar performances for each instance.
-Other clustering approaches that we tried include hierarchical clustering with mean-, median-, and complete-link criterion, as well as $k$-means and spectral clustering.
+We then gradually merge intervals with the smallest single-link logarithmic distance until the desired number of partitions is reached.
+The clustering is instance-specific, i.e., the bounds are chosen to produce groups of solvers with similar performance for each instance.
+Other clustering approaches we have tried include hierarchical clustering with mean, median, and full-link criteria, as well as $k$-means and spectral clustering.
 
-% MI: table with cluster prediction performance:
-We evaluated the performance of the best models from Table~\ref{tab:timeout-prediction} in predicting these runtime clusters as mentioned above.
-Table~\ref{tab:cluster-prediction} shows their performance in predicting the $C_k$ clusterings for $k \in \lbrace 3, 4, 5 \rbrace$.
-While the second column shows the prediction performance of the models trained on the 46 instance features including the 27 known solver runtimes, the third column shows the prediction performance of the models trained on those features plus 27 features representing the known $C_k$ clustering labels of the known solver runtimes.
+We evaluated the performance of the best models from Table~\ref{tab:timeout-prediction} in predicting the such determined $s_k$.
+Table~\ref{tab:cluster-prediction} shows their performance in predicting the $C_k$ clusters for $k \in \lbrace 3, 4, 5 \rbrace$.
+While the second column shows the prediction performance of the models trained on the 46 instance features including the 27 known solver runtimes, the third column shows the prediction performance of the models trained on these features plus 27 features representing the known $C_k$ clustering labels of the known solver runtimes.
 We observe that the models perform better when the clustering labels are included as features.
-Moreover, the prediction performance degrades rapidly with an increasing number of clusters.
+In addition, the prediction performance degrades rapidly as the number of clusters increases.
 In all cases, the stacking ensemble performs best.
 
 \begin{table}[tbp]
@@ -729,13 +727,12 @@ In all cases, the stacking ensemble performs best.
   \end{tabular}
 \end{table}
 
-% MI: table with runtime prediction performance: (merged with existing text)
-Our final choice for the prediction model is the stacking ensemble of a quadratic-discriminant analysis and a random forest.
-Both these models can learn non-linear relationships between the instance features and the runtime labels.
+Our final choice for the prediction model is the stacking ensemble of a quadratic discriminant analysis and a random forest.
+Both of these models can learn non-linear relationships between the instance features and the runtime labels.
 Figure~\ref{fig:confusion-matrices} shows the confusion matrices of the stacking ensemble for predicting timeouts and $C_3$ clusters.
 Both perform reasonably well, with the $C_3$ cluster prediction model performing slightly worse than the timeout prediction model.
 Notably, for the $C_3$ prediction model, there is less confusion between the non-timeout labels (labels 1 and 2) and the timeout label (label 3) than between the non-timeout labels (labels 1 and 2).
-This indicates that deciding timeouts is easier than distinguishing different groups of solvers.
+This suggests that deciding on timeouts is easier than distinguishing between different groups of solvers.
 
 \begin{figure}[tbp]
   \centering
@@ -753,10 +750,9 @@ This indicates that deciding timeouts is easier than distinguishing different gr
   \label{fig:confusion-matrices}
 \end{figure}
 
-% MI: table with rankings after discretization: (merged with existing text)
-To obtain \emph{useful} labels, we also need to ensure that the discretized labels still discriminate solvers and align with the actual PAR-2 ranking.
+To ensure that we obtained \emph{useful} labels, we evaluated whether the discretized labels still discriminate solvers and agree with the actual PAR-2 ranking.
 Table~\ref{tab:ranking} shows the ranking of the solvers in the SAT Competition~2022 Anniversary Track~\cite{sat2022} according to the standard PAR-2 runtime score and according to our discretized $s_3$ score.
-We observe that our ranking approach correctly decides almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs, i.e., which solver is faster among two given solvers.
+We observe that our ranking approach correctly decides almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs, i.e. which solver is faster among two given solvers.
 In particular, the Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{0.988}{}, which is very close to the optimal value of~1~\cite{de2016comparing}.
 
 % TODO tf: Actual rankings with discretization
@@ -813,11 +809,10 @@ In particular, the Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{
   \end{tabular}
 \end{table}
 
-% MI: table with solver confusion matrices:
-We further analyzed how runtime discretization affects the distinguishability of solver pairs.
+We also analyzed how runtime discretization affects the distinguishability of solver pairs.
 Figure~\ref{fig:solver-confusion-matrices} shows the confusion matrices of solver pairs with significant differences in their PAR-2 scores, timeouts, and $s_3$ scores.
-According to a Wilcoxon signed-rank test with level $\alpha = 0.05$, \SI{87.83}{\%} of solver pairs have significantly different scores after discretization, only a slight drop compared to \SI{89.95}{\%} before discretization.
-These results underpin the usefulness of discretized runtimes for our framework.
+According to a Wilcoxon signed-rank test with a level of $\alpha = 0.05$, \SI{87.83}{\%} of the solver pairs have significantly different scores after discretization, only a small decrease compared to \SI{89.95}{\%} before discretization.
+These results support the usefulness of discretized runtimes for our framework.
 
 % TODO tfu: Amount of significant solver pairs (Wilcoxon signed-rank, 5% alpha), 
 % Amount of significant pairs:
@@ -849,8 +844,8 @@ These results underpin the usefulness of discretized runtimes for our framework.
 
 \subsection{Implementation Details}
 
-For reproducibility, our source code and data are available on GitHub (cf. footnotes in Section~\ref{sec:intro}).
-Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions and \emph{gbd-tools}~\cite{IserS18} for SAT-instance retrieval.
+For reproducibility, our source code and data are available on GitHub (see footnotes in Section~\ref{sec:intro}).
+Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions and \emph{gbd-tools}~\cite{IserS18} for retrieving SAT instances.
 
 
 \section{Evaluation}
@@ -861,7 +856,7 @@ First, we analyze and tune the different sub-routines of our framework on the tu
 Next, we evaluate the best configurations with the full dataset.
 Finally, we analyze the importance of different instance families to our framework.
 
-\subsection{Hyper-Parameter Analysis}
+\subsection{Hyperparameter Analysis}
 
 \begin{figure}[tbp!]
   \centering
@@ -894,20 +889,20 @@ Finally, we analyze the importance of different instance families to our framewo
     \label{fig:annitraincolorstopping}
   \end{subfigure}
   \caption{
-    $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams comparing different hyper-parameter instantiations of our active-learning framework on the hyper-parameter-tuning dataset.
+    $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams comparing different hyperparameter instantiations of our active-learning framework on the hyperparameter-tuning dataset.
     The x-axis shows the ratio of total solver runtime on the sampled instances relative to all instances.
     The y-axis shows the ranking accuracy (cf. Section~\ref{sec:exdesign:eval}).
-    Each line entails the front of Pareto-optimal configurations for the respective hyper-parameter instantiation.
+    Each line entails the front of Pareto-optimal configurations for the respective hyperparameter instantiation.
   }
   \label{fig:e2eallsolvers}
 \end{figure}
 
 Our experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:eval}.
-Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the hyper-parameter-tuning dataset.
+Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams for the hyperparameter-tuning dataset.
 Evaluating a particular configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
 We do not show intermediate results of the active-learning procedure but only the final results after stopping.
 The plotted lines represent the best-performing configurations per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
-In particular, we show the Pareto front, i.e., of all configurations that share a particular value of the plotted hyper-parameter, we take the maximum ranking accuracy over all remaining hyper-parameters \emph{not} displayed in the corresponding plot.
+In particular, we show the Pareto front, i.e., of all configurations that share a particular value of the plotted hyperparameter, we take the maximum ranking accuracy over all remaining hyperparameters \emph{not} displayed in the corresponding plot.
 
 Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the predicted $s_3$-induced run\-time-label rank\-ing consistently outperforms the partially observed PAR-2 ranking for each possible value of the trade-off parameter~$\delta$.
 This outcome is expected since selection decisions are not random.
@@ -946,7 +941,7 @@ The subset-size stopping criterion performs reasonably well but does not improve
   \end{subfigure}
 
   \caption{
-    Scatter plot comparing different instantiations of trade-off parameter~$\delta$ for our active-learning framework on the hyper-parameter-tuning dataset.
+    Scatter plot comparing different instantiations of trade-off parameter~$\delta$ for our active-learning framework on the hyperparameter-tuning dataset.
     The x-axis shows the fraction of runtime $O_{\operatorname{rt}}$ of the sample, while the y-axes show the fraction of instances sampled and ranking accuracy, respectively.
     The color indicates the weighting between different optimization goals $\delta \in \left[0, 1\right]$.
     The larger $\delta$, the more we favor accuracy over runtime.
@@ -967,7 +962,7 @@ We consider this region to be most promising, analogous to the \emph{elbow} meth
 
 \subsection{Full-Dataset Evaluation}
 
-Having selected the most promising hyper-parameters, we run our active-learning experiments on the complete Anniversary Track dataset (5355 instances).
+Having selected the most promising hyperparameters, we run our active-learning experiments on the complete Anniversary Track dataset (5355 instances).
 The aforementioned range $\delta \in \left[0.2, 0.8\right]$ only results in two distinct configurations.
 The best-performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime-label ranking, information-gain sampling, and ranking stopping criterion.
 It can predict a new solver's PAR-2 ranking with \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$) in only \SI{5.41}{\%} of the full evaluation time ($O_{\operatorname{rt}}$).
