@@ -43,7 +43,7 @@ This also applies to SAT solvers for the problem of propositional satisfiability
 Benchmark selection is about choosing representative problem instances that reliably discriminate solvers based on their runtime.
 In this paper, we present a dynamic benchmark selection approach based on active learning.
 Our approach predicts the rank of a new solver among its competitors with minimum runtime and maximum rank prediction accuracy.
-This approach was evaluated on the Anniversary Track dataset from the 2022 SAT Competition.
+This approach was evaluated on the Anniversary track dataset from the 2022 SAT Competition.
 Our selection approach can predict the rank of a new solver after approximately \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of approximately \SI{92}{\%}. 
 Additionally, the importance of instance families in the selection process is discussed.  
 In conclusion, our tool offers a reliable method for solver engineers to assess a new solver's performance in an efficient manner.
@@ -82,9 +82,7 @@ One could also imagine a collaborative filtering scenario, where runtimes are on
 The approach presented in this paper meets several criteria for benchmarking that are considered desirable.
 Rather than outputting a binary classification, namely whether the new solver is worse than an existing solver or not, we provide a scoring function that shows by which margin a solver is worse and how similar it is to existing solvers.
 In particular, our approach enables ranking the new solver amidst a set of existing solvers.
-For this ranking, it is not necessary to predict the exact runtime of the solvers, which would be a more challenging task.
-This is demonstrated in Section~\ref{sec:exdesign:disc-pred}.
-%
+We show that for ranking, it is not necessary to predict the exact per-instance runtime of the solvers, which would be a more challenging task.
 Furthermore, we optimize the \emph{runtime} required for our strategy to arrive at its conclusion.
 To this end, we use instance \emph{features} and known solver \emph{runtimes}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
