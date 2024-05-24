@@ -58,46 +58,49 @@
 % TODO: if appropriate, extend with motivation/results regarding runtime discretization and prediction models
 
 One of the main phases of algorithm engineering is benchmarking.
-This also applies to propositional satisfiability (SAT), the archetypal $\mathcal{NP}$-complete problem.
+This also applies to propositional satisfiability (SAT), the canonical $\mathcal{NP}$-complete problem.
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
-While benchmarking a single SAT solver might still be feasible, developing new, competitive SAT solvers requires extensive experimentation with a variety of ideas~\cite{FroleyksHIJS21,sat2022}.
+While it is still feasible to benchmark a single or fixed amount of SAT solvers, developing new, competitive SAT solvers requires extensive experimentation with a variety of ideas, which often results in a combinatorial explosion of the configuration space of each algorithm~\cite{HutterHL11}.
 In particular, a new solver idea is rarely best on the first try.
 Thus, it is highly desirable to reduce benchmarking time and discard unpromising ideas early, allowing to test more approaches or spend more time on promising ones.
-The field of SAT solver benchmarking is well established, but traditional benchmark selection approaches do not optimize benchmark runtime.
-Instead, they focus on selecting a representative set of instances for scoring solvers~\cite{Gelder11,HoosKSS13}.
-For the latter, SAT~Competitions typically employ the \mbox{PAR-2} score, i.e., the average runtime with a penalty of $2 \tau$ for timeouts with time-limit~$\tau$~\cite{FroleyksHIJS21}.
+The field of SAT solver benchmarking is well established, yet traditional benchmark selection approaches do not optimize benchmark runtime.
+Instead, they focus on selecting a representative set of instances for ranking solvers~\cite{Gelder11,HoosKSS13}.
+With regard to the ranking of solvers, SAT Competitions typically employ the \mbox{PAR-2} score, which, given a time limit of $\tau$, is the average runtime with a penalty of $2 \tau$ for timeouts~\cite{FroleyksHIJS21}.
 
 In this paper, we present a novel benchmark selection approach based on active learning.
 Our approach can predict the rank of a new solver with high accuracy in only a fraction of the time needed to evaluate the complete benchmark.
 Definition~\ref{def:new-solver-problem} specifies the problem we address.
-
-\begin{definition}[New-Solver Problem]
-  Given solvers~$\mathcal{A}$, instances~$\mathcal{I}$, runtimes~$r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]$ with time-limit $\tau$, and a new solver $\hat{a} \notin \mathcal{A}$, incrementally select benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of $\hat{a}$ while minimizing the total benchmark runtime.
-  \label{def:new-solver-problem}
-\end{definition}
-
 Note that our scenario assumes knowing the runtimes of all solvers, except the new one, on all instances.
 One could also imagine a collaborative filtering scenario, where runtimes are only partially known~\cite{misir2017data,misir2017alors}.
 
-Our approach satisfies several desirable criteria for benchmarking:
-Rather than outputting a binary classification, i.e., whether the new solver is worse than an existing solver or not, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar it is to existing solvers.
-In particular, our approach enables \emph{ranking} the new solver amidst a set of existing solvers.
-For this ranking, we do not even need to predict exact solver runtimes, which is trickier.
-Further, we optimize the \emph{runtime} that our strategy needs to arrive at its conclusion.
-We use instance and runtime \emph{features}.
+\begin{definition}[New-Solver Problem]
+  Let us consider a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$, and runtimes~${r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]}$ with each solver having a runtime limit of $\tau$. 
+  For a new solver $\hat{a} \notin \mathcal{A}$, incrementally select benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of $\hat{a}$ while minimizing the total benchmark runtime.
+  \label{def:new-solver-problem}
+\end{definition}
+
+The approach presented in this paper meets several criteria for benchmarking that are considered desirable.
+Rather than outputting a binary classification, namely whether the new solver is worse than an existing solver or not, we provide a scoring function that shows by which margin a solver is worse and how similar it is to existing solvers.
+In particular, our approach enables ranking the new solver amidst a set of existing solvers.
+For this ranking, it is not necessary to predict the exact runtime of the solvers, which would be a more challenging task.
+This is demonstrated in Section~\ref{sec:exdesign:disc-pred}.
+%
+Furthermore, we optimize the \emph{runtime} required for our strategy to arrive at its conclusion.
+To this end, we use instance \emph{features} and known solver \emph{runtimes}.
 Moreover, we select instances \emph{non-randomly} and \emph{incrementally}.
 In particular, we consider runtime information from already done experiments when choosing the next.
 By doing so, we can control the properties of the benchmarking approach, such as its required runtime.
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
 In particular, we only subsample the benchmark once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
 
-We evaluate our approach with the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}, consisting of 5355~instances and runtimes of 28~solvers.
-We perform cross-validation by treating each solver once as the new solver and learning to predict the PAR-2 rank of that solver.
-On average, our predictions reach about \SI{92}{\%} accuracy with only about \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
+We evaluated our approach using the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}, consisting of 5355~instances and runtimes of 28~solvers.
+Cross-validation was performed by treating each solver once as the new solver and learning to predict the PAR-2 rank of that solver.
+On average, our predictions achieve an accuracy of approximately \SI{92}{\%} with only approximately \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
 
-This article is an extended version of a conference paper with the same name~\cite{fuchs2023active}.
-In particular, we significantly extended the analysis of runtime-prediction approaches (cf.~Section~\ref{sec:exdesign:disc-pred}) and added an evaluation of how often problem instances were selected in benchmarks (cf.~Section~\ref{sec:eval:inst-freq}).
+This article is an extended and refined version of our conference paper with the same title, ``Active Learning for SAT Solver Benchmarking''~\cite{fuchs2023active}.
+In particular, we significantly extended the analysis of runtime-prediction approaches, which led to our choice of a solver runtime model for use in benchmark instance selection (cf.~Section~\ref{sec:exdesign:disc-pred}).
+Furthermore, we expanded the evaluation of which benchmark instances are selected by our approach (cf.~Section~\ref{sec:eval:instance}).
 % TODO: before submission, we should check which other changes we made and list them here accordingly
 
 \section{Related Work}
@@ -612,7 +615,7 @@ For \emph{stopping} decisions (cf. Section~\ref{sec:main:stopping}), we experime
 \subsection{Runtime Discretization and Prediction}
 \label{sec:exdesign:disc-pred}
 One of the most crucial parts of our framework is the choice of the surrogate model to predict runtime labels and inform active-learning selection decisions.
-In this section, we detail why we do \emph{not} directly predict absolute solver runtimes, which machine-learning models work best in predicting the time-outs of a solver, how clustering solver runtimes can lead to more nuanced runtime labels, and how ML models perform on those cluster labels.
+In this section, we detail why we do \emph{not} directly predict absolute solver runtimes, which machine-learning models work best in predicting the timeouts of a solver, how clustering solver runtimes can lead to more nuanced runtime labels, and how ML models perform on those cluster labels.
 
 % MI: table with regression performance:
 Table~\ref{tab:regression} shows the prediction performance of two regression models, a Random-Forest-Regressor and an MLP-Regressor, on the test set.
@@ -1015,6 +1018,7 @@ This outcome is somewhat expected since the static benchmark does not reflect th
 Families whose instances are uniform-randomly selected by AL, e.g., for different solvers, appear less often in this benchmark than families where some instances are sampled more often than others.
 
 \subsection{Instance Frequency and Instance-Family Importance}
+\label{sec:eval:instance}
 
 \begin{figure}[tbp]
   \centering
@@ -1038,7 +1042,6 @@ Families whose instances are uniform-randomly selected by AL, e.g., for differen
   \label{fig:annifinalfamilies}
 \end{figure}
 
-% MI: instance frequency (not so much to say, TODO: maybe add some more text)
 We analyze the frequency of individual instances being selected by our active-learning approach.
 Fig.~\ref{fig:instoccs} shows the distribution of how often individual instances are selected within all active-learning benchmarks.
 We observe that a small fraction of instances is selected very often, while most instances are selected only a few times.
