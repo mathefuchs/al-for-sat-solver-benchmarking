@@ -456,7 +456,8 @@ Nevertheless, in this case, the induced ranking is of sole interest.
 \section{Experimental Design}
 \label{sec:exdesign}
 
-Given all the previously presented instantiations for Algorithm~\ref{algALBenchmark}, this section outlines our experimental design, including our evaluation framework, used data sets, hyper-parameter choices, and implementation details.
+In light of the preceding instantiations of Algorithm~\ref{algALBenchmark}, this section outlines the experimental design employed in the presented study.
+This includes an overview of the evaluation framework, the data sets employed, the hyper-parameter selections, and the implementation details.
 
 \subsection{Evaluation Framework}
 \label{sec:exdesign:eval}
@@ -470,7 +471,7 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
   \BlankLine
 
   $O \leftarrow \emptyset$
-  \BlankLine
+  % \BlankLine
 
   \For{$\hat{a} \in \mathcal{A}$}{
     $\mathcal{A}' \leftarrow \mathcal{A} \setminus \left\lbrace \hat{a} \right\rbrace$ \;
@@ -495,62 +496,64 @@ Given all the previously presented instantiations for Algorithm~\ref{algALBenchm
     }
   }
   
-  \BlankLine
+  % \BlankLine
     $O \leftarrow O \cup \bigl\{ ( O_{\operatorname{acc}},\, O_{\operatorname{rt}} ) \bigr\}$
   }
 
-  \BlankLine
+  % \BlankLine
   $\bigl( \bar{O}_{\operatorname{acc}}, \bar{O}_{\operatorname{rt}} \bigr) \leftarrow \operatorname{average}(O)$ \;
   
-  \BlankLine
+  % \BlankLine
   \Return $\bigl( \bar{O}_{\operatorname{acc}}, \bar{O}_{\operatorname{rt}} \bigr)$
 \end{algorithm}
 
 As stated in the Introduction, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-As described in Section~\ref{sec:main:model}, a prediction model $\mathcal{M}$ provides us with an estimated scoring~$s_{\hat a}$ for the new solver~$\hat{a}$.
+As described in Section~\ref{sec:main:model}, a prediction model provides us with an estimated scoring value for the new solver~$\hat{a}$.
+%
+To evaluate the efficacy of a concrete instantiation of Algorithm~\ref{algALBenchmark}, which entails a specific choice for all subroutines, we perform cross-validation on our set of solvers.
 
-To evaluate a concrete instantiation of Algorithm~\ref{algALBenchmark}, i.e., a concrete choice for all the sub-routines, we perform cross-validation on our set of solvers.
-Algorithm~\ref{alg:eval} shows this.
-That means each solver plays the role of the new solver~$\hat{a}$ once (Line~2).
-Note that the \emph{new} solver in each iteration is excluded from the set of solvers $\mathcal{A}$ to avoid data leakage (Line~3).
+This is demonstrated in Algorithm~\ref{alg:eval}.
+Each solver assumes the role of the new solver~$\hat{a}$ once (Line~2) and is consequently excluded from the set of solvers $\mathcal{A}$ (Line~3).
 After running our active-learning framework for solver~$\hat{a}$ (Line~4), we compute the value of both our optimization goals, i.e., ranking accuracy and runtime.
-We define the \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) by the fraction of pairs $\left(\hat{a}, a\right)$ for all $a \in \mathcal{A}$ that are decided correctly regarding the ground-truth scoring~$\operatorname{par_2}$ (Lines~5-8).
-The \emph{fraction of runtime} that the algorithm needs to arrive at its conclusion is denoted by $O_{\operatorname{rt}} \in \left[0, 1\right]$ (lower is better).
-This metric puts the runtime summed over the sampled instances in relation to the runtime summed over all instances in the dataset (Lines~9-13).
-Finally, we compute averages of the output metrics in Line~15 after we have collected all cross-validation results in Line~14.
-Overall, we want to find an approach that maximizes
+%
+The \emph{ranking accuracy}, expressed in the interval $[0,1]$ (higher is better), is defined as the fraction of correctly ranked pairs of elements, namely, $\left(\hat{a}, a\right)$, where $a$ belongs to the set of all solvers $\mathcal{A}$ ranked by the ground-truth scoring function $\operatorname{par_2}$ (Lines~5-8).
+%
+The \emph{fraction of runtime} required by the algorithm to reach its conclusion is represented by $O_{\operatorname{rt}}$, which lies within the interval $[0, 1]$ (lower is better).
+This metric compares the accumulated runtimes over the sampled instances to the accumulated runtimes over all instances in the dataset (Lines~9-13).
+Once all cross-validation results have been collected (Line~14), the output metrics are averaged (Line~15).
+
+The procedure is designed to identify an approach that maximizes Equation~\eqref{eq:opt}, in which $\delta \in \left[0, 1\right]$ is used for linear weighting, with weighting factor $\delta \in \left[0, 1\right]$, between the two optimization goals $O_{\operatorname{acc}}$ and $O_{\operatorname{rt}}$.
+The plotting of the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on an $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
 %
 \begin{equation}
   O_\delta := \delta O_{\operatorname{acc}} + \left(1 - \delta\right) \left(1 - O_{\operatorname{rt}}\right) \enspace \textrm{,}
   \label{eq:opt}
 \end{equation} 
 %
-whereby $\delta \in \left[0, 1\right]$ allows for linear weighting between the two optimization goals $O_{\operatorname{acc}}$ and $O_{\operatorname{rt}}$.
-Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on an $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
-
+%
 \subsection{Data}
 \label{sec:exdesign:data}
 
-In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022}.
-The dataset consists of 5355 instances with respective runtime data of 28 sequential SAT solvers.
+In our experiments we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022}.
+The dataset consists of 5355 instances with corresponding runtime data of 28 sequential SAT solvers.
 We also use a database of 56 instance features\footnote{\url{https://benchmark-database.de/getdatabase/base_db}} from the Global Benchmark Database~(GBD) by Iser~et~al.~\cite{IserS18}.
-They comprise instance size features and node distribution statistics for several graph representations of SAT instances, among others, and are primarily inspired by the SATzilla~2012 features described in~\cite{features}.
-All features are numeric and free of missing values.
-We drop 10 out of 56 features because of zero variance.
-Overall, prediction models have access to 46 instance features and 27 runtime features, i.e., excluding the current new solver~$\hat{a}$.
+They include instance size features and node distribution statistics for several graph representations of SAT instances, and are primarily inspired by the SATzilla~2012 features described in~\cite{features}.
+All features are numeric and have no missing values.
+We drop 10 of the 56 features due to zero variance.
+In total, the prediction models have access to 46 instance features and 27 out of 28 runtime features, excluding the respective new solver~$\hat{a}$.
 
-Additionally, we retrieve instance-family information\footnote{\url{https://benchmark-database.de/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
-Instance families comprise instances from the same application domain, e.g., planning, cryptography, etc., and are a valuable tool for analyzing solver performance.
+In addition, we retrieve instance family information\footnote{\url{https://benchmark-database.de/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
+Instance families consist of instances from the same application domain, such as planning, cryptography, etc., and are a valuable tool for analyzing solver performance.
+%
+For hyperparameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance family.
+All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them correspond to less than one instance, are put into a meta-family for stratification.
+This \emph{tuning dataset} allows a more extensive exploration of the hyperparameter space.
 
-For hyper-parameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instances' family.
-All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them corresponds to less than one instance, are put into one meta-family for stratification.
-This \emph{tuning dataset} allows for a more extensive exploration of the hyper-parameter space.
-
-\subsection{Hyper-parameters}
+\subsection{Hyperparameters}
 \label{sec:exdesign:hyper}
 
-Given Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three sub-routines, i.e., \emph{ranking}, \emph{selection}, and \emph{stopping}.
-We describe these experimental configurations in the following.
+Given the Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three subroutines \emph{ranking}, \emph{selection}, and \emph{stopping}.
+These experimental configurations are described in the following.
 
 \subsubsection{Ranking}
 
