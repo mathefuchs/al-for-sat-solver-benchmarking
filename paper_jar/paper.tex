@@ -56,6 +56,8 @@ In conclusion, our tool offers a reliable method for solver engineers to assess 
 \section{Introduction}
 \label{sec:intro}
 
+\subparagraph{Motivation}
+
 One of the main phases of algorithm engineering is benchmarking.
 This also applies to propositional satisfiability (SAT), the canonical $\mathcal{NP}$-complete problem.
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
@@ -66,6 +68,8 @@ Thus, it is highly desirable to reduce benchmarking time and discard unpromising
 The field of SAT solver benchmarking is well established, yet traditional benchmark selection approaches do not optimize benchmark runtime.
 Instead, they focus on selecting a representative set of instances for ranking solvers~\cite{Gelder11,HoosKSS13}.
 In this regard, SAT Competitions typically employ the \mbox{PAR-2} score, which, given a time limit of $\tau$, is the average runtime with a penalty of $2 \tau$ for timeouts~\cite{FroleyksHIJS21}.
+
+\subparagraph{Problem statement}
 
 In this paper, we present a novel benchmark selection approach based on active learning.
 Our approach can predict the rank of a new solver with high accuracy in only a fraction of the time needed to evaluate the complete benchmark.
@@ -91,16 +95,30 @@ By doing so, we can control the properties of the benchmarking approach, such as
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
 In particular, we only subsample the benchmark once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
 
+\subparagraph{Experiments}
+
 We evaluated our approach using the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}, consisting of 5355~instances and runtimes of 28~solvers.
 Cross-validation was performed by treating each solver once as the new solver and learning to predict the PAR-2 rank of that solver.
 On average, our predictions achieve an accuracy of approximately \SI{92}{\%} with only approximately \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
+
+\subparagraph{Outline}
+
+The remainder of this paper is organized as follows:
+Section~\ref{sec:related} reviews related work.
+Section~\ref{sec:main} describes our approach.
+Section~\ref{sec:exdesign} introduces the experimental design.
+Section~\ref{sec:eval} evaluates the experimental results.
+Section~\ref{sec:conclusion} concludes.
+
+\subparagraph{Disclaimer}
 
 This article is an extended and refined version of our conference paper with the title ``Active Learning for SAT Solver Benchmarking''~\cite{fuchs2023active}.
 In particular, we significantly extended the analysis of runtime-prediction approaches, which determined our chosen solver runtime model for instance selection (cf.~Section~\ref{sec:exdesign:disc-pred}).
 Furthermore, we expanded the evaluation of which benchmark instances are selected by our approach (cf.~Section~\ref{sec:eval:instance}).
 
 \section{Related Work}
+\label{sec:related}
 
 Benchmarking is of great interest in numerous research areas and represents an active field of research in its own right.
 Studies have shown that the compilation of benchmark instances poses a number of challenges.
@@ -108,11 +126,12 @@ The use of biased benchmarks can easily lead to fallacious interpretations~\cite
 Benchmarking also involves a number of interchangeable elements, including the performance measures used, the way the measures are aggregated, and the way missing values are handled.
 Questionable research practices could alter these elements a-posteriori in order to meet expectations, thereby skewing the results~\cite{NiesslHWCB22}.
 
-The following sections present a discussion of related work from the areas of static benchmark selection, algorithm configuration, incremental benchmark selection, and active learning.
+The following sections present a discussion of related work from the areas of static benchmark selection (cf.~Section~\ref{sec:related:static-selection}), algorithm configuration (cf.~Section~\ref{sec:related:algo-configuration}), incremental benchmark selection (cf.~Section~\ref{sec:related:incremental-selection}), and active learning (cf.~Section~\ref{sec:related:active-learning}).
 Table~\ref{tab:requirements} compares the most relevant approaches, which all pursue slightly different goals.
 Thus, our approach is \emph{not} a general improvement over the others but the only one fully aligned with Definition~\ref{def:new-solver-problem}.
 
 \subsection{Static Benchmark Selection}
+\label{sec:related:static-selection}
 
 Benchmark selection is essential for competitions such as the SAT Competition.
 In such competitions, the organizers define the rules for composing the benchmarks.
@@ -152,6 +171,7 @@ Instead, instances are selected \emph{at random}, with the exception of constrai
 \end{table}
 
 \subsection{Algorithm Configuration}
+\label{sec:related:algo-configuration}
 
 Further related work can be found within the field of algorithm configuration~\cite{HoosHL21,Stutzle0P22}, as exemplified by the configuration system SMAC~\cite{HutterHL11}.
 Thereby, the goal is to tune SAT solvers for a given sub-domain of problem instances.
@@ -161,6 +181,7 @@ However, an algorithm configurator cannot be used to \emph{rank} or \emph{score}
 Furthermore, while a model-based selection strategy is employed to sample configurations, instance selection is made \emph{randomly}, i.e., without building a model over instances.
 
 \subsection{Incremental Benchmark Selection}
+\label{sec:related:incremental-selection}
 
 Matricon~et~al. present an incremental benchmark selection approach~\cite{MatriconAFSH21}.
 Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem}, as given in Definition~\ref{def:new-solver-problem}.
@@ -174,6 +195,7 @@ Comparing only pairs of solvers, evaluating a new solver with their method requi
 In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one benchmark.
 
 \subsection{Active Learning}
+\label{sec:related:active-learning}
 
 In passive machine learning, prediction models are trained on datasets with given instance labels (cf.~Fig.~\ref{fig:passive}).
 In contrast, active learning (AL) begins with no or little labeled data.
@@ -302,7 +324,6 @@ Rather than benchmarking a solver's overall performance, their objective is to r
   \label{fig:activesynth}
   \end{subfigure}
   \end{tabular}
-  
   \caption{Types of machine learning (depiction inspired by Rubens~et.al.~\cite{RubensESK15}).}
   \label{fig:learning}
 \end{figure}
@@ -450,7 +471,7 @@ In order to improve the stability of this criterion, an exponential moving avera
 \paragraph{Ranking Stopping Criterion}
 
 In contrast, the ranking stopping criterion is less sophisticated than the previous one.
-In this case, the active learning process is terminated if the ranking induced by the model's predictions (Equation~\ref{eq:rankingeq}) remains unchanged within the last~$l$~iterations.
+In this case, the active learning process is terminated if the ranking induced by the model's predictions (Equation~\eqref{eq:rankingeq}) remains unchanged within the last~$l$~iterations.
 However, it should be noted that the concrete values of the predicted score $s_{\hat a}$ may still change.
 Nevertheless, in this case, the induced ranking is of sole interest.
 
@@ -458,7 +479,7 @@ Nevertheless, in this case, the induced ranking is of sole interest.
 \label{sec:exdesign}
 
 In light of the preceding instantiations of Algorithm~\ref{algALBenchmark}, this section outlines the experimental design employed in the presented study.
-This includes an overview of the evaluation framework, the datasets employed, the hyperparameter selections, and the implementation details.
+This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exdesign:eval}), the datasets employed (cf.~Section~\ref{sec:exdesign:data}), the hyperparameter selections (cf.~Section~\ref{sec:exdesign:hyper}), the runtime discretization (cf.~Section~\ref{sec:exdesign:disc-pred}), and the implementation (cf.~Section~\ref{sec:exdesign:impl}).
 
 \subsection{Evaluation Framework}
 \label{sec:exdesign:eval}
@@ -841,6 +862,7 @@ These results support the usefulness of discretized runtimes for our framework.
 \end{figure}
 
 \subsection{Implementation Details}
+\label{sec:exdesign:impl}
 
 For reproducibility, our source code and data are available on GitHub (see footnotes in Section~\ref{sec:intro}).
 Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions and \emph{gbd-tools}~\cite{IserS18} for retrieving SAT instances.
@@ -850,11 +872,12 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 \label{sec:eval}
 
 In this section, we evaluate our active learning framework.
-First, we analyze and tune the different subroutines of our framework on the tuning dataset.
-Next, we evaluate the best configurations on the full dataset.
-Finally, we analyze the importance of different instance families for our framework.
+First, we analyze and tune the different subroutines of our framework on the tuning dataset (cf.~Section~\ref{sec:eval:hyper}).
+Next, we evaluate the best configurations on the full dataset (cf.~Section~\ref{sec:eval:full}).
+Finally, we analyze the importance of instance families for our framework (cf.~Section~\ref{sec:eval:instance}).
 
 \subsection{Hyperparameter Analysis}
+\label{sec:eval:hyper}
 
 \begin{figure}[tbp!]
   \centering
@@ -958,6 +981,7 @@ The range $\delta \in \left[0.2, 0.8\right]$ corresponds to the points with a ru
 We consider this region to be the most promising, analogous to the \emph{elbow} method in cluster analysis~\cite{kodinariya2013review}.
 
 \subsection{Full-Dataset Evaluation}
+\label{sec:eval:full}
 
 After selecting the most promising hyperparameters, we run our active learning experiments on the complete Anniversary Track dataset (5355 instances).
 The above range $\delta \in \left[0.2, 0.8\right]$ results in only two different configurations.
@@ -1047,6 +1071,7 @@ Finally, instances of the family \emph{cryptography} are less important in disti
 One possible explanation for this discrepancy is that these instances are highly similar, such that a small fraction of them is sufficient to estimate a solver's performance on all of them.
 
 \section{Conclusions and Future Work}
+\label{sec:conclusion}
 
 In this work, we have addressed the \emph{New-Solver Problem}:
 Given a new solver, we aim to determine its ranking relative to competitors.
