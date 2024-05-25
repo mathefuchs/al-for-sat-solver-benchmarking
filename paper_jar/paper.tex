@@ -385,6 +385,7 @@ Furthermore, it should be noted that a new prediction model is constructed in ea
 Finally, the score of the new solver, denoted by $\hat a$, is predicted with the prediction function~$f$ (Line~8).
 
 \subsubsection{Runtime Transformation}
+\label{sec:main:model:transformation}
 
 For the prediction model~$M$, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
 For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for the instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
@@ -400,6 +401,7 @@ Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime
 The analysis demonstrates that our approach achieves higher accuracy for discrete runtime labels than for raw runtimes.
 
 \subsubsection{Ranking Solvers}
+\label{sec:main:model:ranking}
 
 To determine the rank of solvers, we apply PAR-2 scoring using the discrete runtime labels $\gamma_k(a, e)$.
 The adapted scoring function $s_k : \mathcal{A} \rightarrow [1, 2 \cdot k]$ induces a ranking among solvers and is depicted in Equation~\eqref{eq:rankingeq}.
@@ -638,106 +640,118 @@ We evaluate the following \emph{stopping} (cf. Section~\ref{sec:main:stopping}) 
 \subsection{Runtime Discretization and Prediction}
 \label{sec:exdesign:disc-pred}
 
-One of the most important parts of our framework is the choice of solver runtime model to inform active learning selection decisions.
-In this section, we detail how clustering solver runtimes can lead to nuanced runtime labels, and which machine learning models are best at predicting them.
+One of the most important parts of our framework is the solver runtime model (cf.~Section~\ref{sec:main:model}), which influences instance selection in active learning.
+In this section, we detail how clustering solver runtimes can lead to informative runtime labels, and which machine learning models are best at predicting them.
+To this end, we analyze prediction performance for estimating runtimes, timeouts, and discretized runtimes.
 
-As a baseline for improvement, Table~\ref{tab:regression} shows the runtime prediction performance of two regression models, a random forest and a multilayer perceptron, using 46 instance features and 27 known solver runtimes.
-Both models were chosen for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}, and both perform poorly, as evidenced by the magnitudes of the mean regression errors.
-An RMSE error of about \SI{2000}{s} is quite poor compared to solver runtimes that range from 0 to \SI{5000}{s}.
-Therefore, we decided to discretize the runtimes.
-%
-\begin{table}[b]
-  \centering
-  \caption{Regression performance of models trained on 46 instance and 27 runtime features. We report the RMSE and MAE metrics on the test sets.}
-  \label{tab:regression}
-  \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.33855\textwidth}
-    >{\centering\arraybackslash}m{0.01\textwidth}
-    >{\centering\arraybackslash}m{0.2562\textwidth}
-    >{\centering\arraybackslash}m{0.2562\textwidth}
-  }
-    \toprule
-    {Regression Models} & & {Avg. RMSE ($\pm$ std)} & {Avg. MAE ($\pm$ std)} \\
-    \midrule
-    Random Forest & & \SI{1929.84}{s} ($\pm$ \SI{1161.15}{s}) & \phantom{0}\SI{957.36}{s} ($\pm$ \SI{297.21}{s}) \\[0.4ex]
-    Multilayer Perceptron & & \SI{2275.20}{s} ($\pm$ \SI{1545.01}{s}) & \SI{1284.30}{s} ($\pm$ \SI{390.57}{s}) \\
-    \bottomrule
-  \end{tabular}
+\paragraph{Regressing runtime}
+
+\begin{table}[tb]
+	\centering
+	\caption{Test-set prediction performance for predicting solver runtime (a continuous target) with two prediction models.}
+	\label{tab:regression}
+	\begin{tabular}{lcc}
+		\toprule
+		{Regression Models} & {Avg. RMSE ($\pm$ std)} & {Avg. MAE ($\pm$ std)} \\
+		\midrule
+		Random Forest & \SI{1929.84}{s} ($\pm$ \SI{1161.15}{s}) & \phantom{0}\SI{957.36}{s} ($\pm$ \SI{297.21}{s}) \\[0.4ex]
+		Multilayer Perceptron & \SI{2275.20}{s} ($\pm$ \SI{1545.01}{s}) & \SI{1284.30}{s} ($\pm$ \SI{390.57}{s}) \\
+		\bottomrule
+	\end{tabular}
 \end{table}
 
-Table~\ref{tab:timeout-prediction} shows the performance of different models in predicting timeouts.
-While the second column shows the performance of models trained on the 46 instance features, the third column shows the performance of models trained on the 46 instance features and the 27 runtime features.
-While the Quadratic DA model performs poorly on the 46 instance features, it performs well on the 46 instance features and the 27 runtime features.
-However, the best prediction performance is achieved by a stacking ensemble~\cite{wolpert1992stacked}, which combines quadratic discriminant analysis~\cite{tharwat2016linear} and a random forest classifier~\cite{breiman2001random}.
-Stacking means that another prediction model, in our case a simple decision tree, decides which of the two ensemble members makes the prediction about which instance.
+As a baseline, Table~\ref{tab:regression} shows the prediction performance of two regression models, i.e., a random forest and a multilayer perceptron.
+We employ these models to directly estimate a new solver's runtime as the prediction target.
+To this end, we use 46 instance features and 27 known solver runtimes as inputs for the predictions.
+We repeat this evaluation for each solver as prediction target and report the average and standard deviation of prediction performance over the 28 solvers.
 
-\begin{table}[tbp]
-  \centering
-  \caption{MCC performance of models predicting timeouts. The models are trained 28 times with each solver as a target once.}
-  \label{tab:timeout-prediction}
-  ~\\[1em]
-  \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.4\textwidth}
-    >{\centering\arraybackslash}m{0.25\textwidth}
-    >{\centering\arraybackslash}m{0.25\textwidth}
-  }
-    \toprule
-    {Timeout Prediction Models} & {46 Instance Features Avg. MCC ($\pm$ std)} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} \\
-    \midrule
-    Stacking (QDA\,+\,RF)                 & 0.6513 ($\pm$ 0.0458) & 0.9527 ($\pm$ 0.0292) \\[0.4ex]
-    Quadratic Discriminant Analysis (QDA)                    & 0.2593 ($\pm$ 0.1310) & 0.9290 ($\pm$ 0.0339) \\[0.4ex]
-    Random Forest (RF)         & 0.6607 ($\pm$ 0.0547) & 0.8530 ($\pm$ 0.0479) \\[0.4ex]
-    AdaBoost                             & 0.5412 ($\pm$ 0.0612) & 0.8384 ($\pm$ 0.0444) \\[0.4ex]
-    Decision Tree                         & 0.5980 ($\pm$ 0.0423) & 0.8059 ($\pm$ 0.0707) \\[0.4ex]
-    Logistic Regression                   & 0.2031 ($\pm$ 0.0728) & 0.8052 ($\pm$ 0.1018) \\[0.4ex]
-    $k$NN                   & 0.5108 ($\pm$ 0.0387) & 0.7885 ($\pm$ 0.1521) \\[0.4ex]
-    Multilayer Perceptron                      & 0.1293 ($\pm$ 0.0718) & 0.7760 ($\pm$ 0.1408) \\[0.4ex]
-    Support Vector Machine               & 0.0595 ($\pm$ 0.0554) & 0.7757 ($\pm$ 0.2149) \\[0.4ex]
-    Naive Bayes                           & 0.1173 ($\pm$ 0.0872) & 0.7306 ($\pm$ 0.1394) \\
-    \bottomrule
-  \end{tabular}
+We chose both types of prediction models for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}.
+However, both still perform poorly, as evidenced by the magnitudes of the mean regression errors in Table~\ref{tab:regression}.
+In particular, a root mean squared error (RMSE) of about \SI{2000}{s} is quite high for solver runtimes that range from 0 to \SI{5000}{s}.
+Therefore, we decided to discretize the runtimes for prediction, moving from a regression scenario to a classification scenario.
+
+\paragraph{Classifying timeouts}
+
+\begin{table}[tb]
+	\centering
+	\caption{Test-set prediction performance for predicting solver timeouts (a binary target) with different prediction models.}
+	\label{tab:timeout-prediction}
+	~\\[1em]
+	\begin{tabular}{lcc}
+		\toprule
+		\multirow[c]{2}{*}{Timeout Prediction Models} & \multicolumn{2}{c}{Average MCC ($\pm$ std)} \\
+		\cmidrule(lr){2-3}
+		& {Without Runtime Feat.} & {With Runtime Feat.} \\
+		\midrule
+		Stacking (QDA\,+\,RF)                 & 0.6513 ($\pm$ 0.0458) & 0.9527 ($\pm$ 0.0292) \\[0.4ex]
+		Quadratic Discriminant Analysis (QDA)                    & 0.2593 ($\pm$ 0.1310) & 0.9290 ($\pm$ 0.0339) \\[0.4ex]
+		Random Forest (RF)         & 0.6607 ($\pm$ 0.0547) & 0.8530 ($\pm$ 0.0479) \\[0.4ex]
+		AdaBoost                             & 0.5412 ($\pm$ 0.0612) & 0.8384 ($\pm$ 0.0444) \\[0.4ex]
+		Decision Tree                         & 0.5980 ($\pm$ 0.0423) & 0.8059 ($\pm$ 0.0707) \\[0.4ex]
+		Logistic Regression                   & 0.2031 ($\pm$ 0.0728) & 0.8052 ($\pm$ 0.1018) \\[0.4ex]
+		$k$NN                   & 0.5108 ($\pm$ 0.0387) & 0.7885 ($\pm$ 0.1521) \\[0.4ex]
+		Multilayer Perceptron                      & 0.1293 ($\pm$ 0.0718) & 0.7760 ($\pm$ 0.1408) \\[0.4ex]
+		Support Vector Machine               & 0.0595 ($\pm$ 0.0554) & 0.7757 ($\pm$ 0.2149) \\[0.4ex]
+		Naive Bayes                           & 0.1173 ($\pm$ 0.0872) & 0.7306 ($\pm$ 0.1394) \\
+		\bottomrule
+	\end{tabular}
 \end{table}
 
-% MI: table with cluster prediction performance: (merged with existing text)
-Since runtime prediction is quite challenging, we discretize the runtimes.
-To define prediction targets for each instance, we cluster the solver runtimes into $k$ clusters.
-We denote this adapted solver scoring function which assigns a solver to its cluster for each instance with $s_k$ as defined in Equation~\eqref{eq:rankingeq}.
-In preliminary experiments, the most \emph{useful} labels were produced with hierarchical clustering and a log-single-link criterion.
-In our chosen hierarchical procedure, each non-timeout runtime starts in a separate interval.
-We then gradually merge intervals with the smallest single-link logarithmic distance until the desired number of partitions is reached.
-The clustering is instance-specific, i.e., the bounds are chosen to produce groups of solvers with similar performance for each instance.
-Other clustering approaches we have tried include hierarchical clustering with mean, median, and full-link criteria, as well as $k$-means and spectral clustering.
+Table~\ref{tab:timeout-prediction} shows the prediction performance for estimating whether a solver times out or not.
+This binary prediction target represents a very strong discretization of runtimes.
+We compare a variety of prediction models, which pursue different learning paradigms, each of them trained with either instance features only (second column) or instance and runtime features (third column).
+As the evaluation metric for prediction performance, we use Matthews Correlation Coefficient (MCC)~\cite{gorodkin2004comparing, matthews1975comparison}, which reaches its maximum of~1 for a perfect prediction, is~0 for random guessing, and has a minimum of~-1.
 
-We evaluated the performance of the best models from Table~\ref{tab:timeout-prediction} in predicting the such determined $s_k$.
-Table~\ref{tab:cluster-prediction} shows their performance in predicting the $C_k$ clusters for $k \in \lbrace 3, 4, 5 \rbrace$.
-While the second column shows the prediction performance of the models trained on the 46 instance features including the 27 known solver runtimes, the third column shows the prediction performance of the models trained on these features plus 27 features representing the known $C_k$ clustering labels of the known solver runtimes.
-We observe that the models perform better when the clustering labels are included as features.
-In addition, the prediction performance degrades rapidly as the number of clusters increases.
-In all cases, the stacking ensemble performs best.
+Training the classification models with instance features only, a random forest performs best.
+In contrast, a quadratic discriminant analysis performs poorly in this scenario but performs very well if runtime features are included.
+However, the best prediction performance with all features is achieved by a stacking ensemble~\cite{wolpert1992stacked} out of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
+Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, makes a prediction based on the predictions of the ensembled models.
 
-\begin{table}[tbp]
+\paragraph{Classifying discretized runtime labels}
+
+Building on the success of binary timeout prediction, we investigate a classification scenario where the target is solver runtime discretized into multiple categories.
+
+\subparagraph{Label definition}
+
+To define this prediction target, we partition the solver runtimes into $k$~clusters.
+We conduct this clustering step per instance, i.e., the solvers forming a particular cluster may differ from instance to instance.
+This clustering forms the basis of the adapted solver scoring function~$s_k$ (cf.~Equation~\eqref{eq:rankingeq}).
+In preliminary experiments, the most \emph{useful} labels were produced with hierarchical clustering and a log-single-linkage criterion; we will discuss our notion of labels usefulness later.
+Other clustering approaches we have tried include hierarchical clustering with mean-, median-, and full-linkage criteria, as well as $k$-means and spectral clustering.
+%JB: What is "full" -- "complete"?
+
+In our chosen hierarchical clustering procedure, each non-timeout runtime starts in a separate cluster.
+We then gradually merge the closest clusters until the desired number of $k-1$ partitions is reached.
+By definition, the $k$-th cluster always contains the timeouts and no other runtimes (cf.~Section~\ref{sec:main:model:transformation}).
+To quantify the distance between two clusters, we consider the minimum pairwise difference of logarithmic runtimes between solvers in the two clusters.
+
+\subparagraph{Label prediction}
+
+\begin{table}[tb]
   \centering
-  \caption{MCC performance of the best models predicting the $C_k$ clusterings.}
+  \caption{Test-set prediction performance for predicting the $C_k$ cluster labels (a discrete target) with the best performing models.}
   \label{tab:cluster-prediction}
-  \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.4\textwidth}
-    >{\centering\arraybackslash}m{0.25\textwidth}
-    >{\centering\arraybackslash}m{0.25\textwidth}
-  }
+  \begin{tabular}{lcc}
     \toprule
-    {$C_3$ Cluster Prediction Models} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    \multirow[c]{2}{*}{$C_3$ Cluster Prediction Models} & \multicolumn{2}{c}{Average MCC ($\pm$ std)} \\
+    \cmidrule(lr){2-3}
+    & {Without Clustering Feat.} & {With Clustering Feat.} \\
     \midrule
     Stacking (QDA\,+\,RF)                 & 0.7464 ($\pm$ 0.0497) & 0.8380 ($\pm$ 0.0634) \\[0.4ex]
     Quadratic Discriminant Analysis (QDA)                     & 0.6903 ($\pm$ 0.0607) & 0.7738 ($\pm$ 0.0459) \\[0.4ex]
     Random Forest (RF)         & 0.7116 ($\pm$ 0.0385) & 0.7841 ($\pm$ 0.0469) \\[0.4ex]
     \midrule
-    {$C_4$ Cluster Prediction Models} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    \multirow[c]{2}{*}{$C_4$ Cluster Prediction Models} & \multicolumn{2}{c}{Average MCC ($\pm$ std)} \\
+    \cmidrule(lr){2-3}
+    & {Without Clustering Feat.} & {With Clustering Feat.} \\
     \midrule
     Stacking (QDA\,+\,RF)                 & 0.6562 ($\pm$ 0.0538) & 0.7366 ($\pm$ 0.0377) \\[0.4ex]
     Quadratic Discriminant Analysis (QDA)                     & 0.6007 ($\pm$ 0.0765) & 0.6872 ($\pm$ 0.0469) \\[0.4ex]
     Random Forest (RF)         & 0.6033 ($\pm$ 0.0455) & 0.6828 ($\pm$ 0.0527) \\[0.4ex]
     \midrule
-    {$C_5$ Cluster Prediction Models} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    \multirow[c]{2}{*}{$C_5$ Cluster Prediction Models} & \multicolumn{2}{c}{Average MCC ($\pm$ std)} \\
+    \cmidrule(lr){2-3}
+    & {Without Clustering Feat.} & {With Clustering Feat.} \\
     \midrule
     Stacking (QDA\,+\,RF)                 & 0.5835 ($\pm$ 0.0615) & 0.6396 ($\pm$ 0.0553) \\[0.4ex]
     Quadratic Discriminant Analysis (QDA)                      & 0.5508 ($\pm$ 0.0669) & 0.5881 ($\pm$ 0.0912) \\[0.4ex]
@@ -746,92 +760,94 @@ In all cases, the stacking ensemble performs best.
   \end{tabular}
 \end{table}
 
-Our final choice for the prediction model is the stacking ensemble of a quadratic discriminant analysis and a random forest.
-Both of these models can learn non-linear relationships between the instance features and the runtime labels.
-Fig.~\ref{fig:confusion-matrices} shows the confusion matrices of the stacking ensemble for predicting timeouts and $C_3$ clusters.
-Both perform reasonably well, with the $C_3$ cluster prediction model performing slightly worse than the timeout prediction model.
-Notably, for the $C_3$ prediction model, there is less confusion between the non-timeout labels (labels 1 and 2) and the timeout label (label 3) than between the non-timeout labels (labels 1 and 2).
-This suggests that deciding on timeouts is easier than distinguishing between different groups of solvers.
+Given this discretization procedure, we evaluate the performance of the best classification models from Table~\ref{tab:timeout-prediction} in predicting these runtime labels.
+Table~\ref{tab:cluster-prediction} shows the prediction performance for $k \in \lbrace 3, 4, 5 \rbrace$ clusters.
+We train the prediction models either with 46 instance features and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
+For all prediction models and values of~$k$, the prediction performance is better when the cluster labels are included as features.
+In addition, the prediction performance degrades rapidly as the number of clusters increases.
+In all cases, the stacking ensemble performs best, so we use it in all subsequent experiments.
 
-\begin{figure}[tbp]
-  \centering
-  \begin{subfigure}{0.45\textwidth}
-    \centering
-    \includegraphics[height=4.123cm]{../plots/cm2labels.pdf}
-    \caption{Timeout prediction.}
-  \end{subfigure}
-  \begin{subfigure}{0.45\textwidth}
-    \centering
-    \includegraphics[height=4.228cm]{../plots/cm3labels.pdf}
-    \caption{$C_3$ cluster prediction.}
-  \end{subfigure}
-  \caption{Confusion matrices for predicting timeouts and $C_3$ clusters.}
-  \label{fig:confusion-matrices}
+\begin{figure}[tb]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[height=4.123cm]{../plots/cm2labels.pdf}
+		\caption{Timeout prediction.}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\centering
+		\includegraphics[height=4.228cm]{../plots/cm3labels.pdf}
+		\caption{$C_3$ cluster prediction.}
+	\end{subfigure}
+	\caption{Confusion matrices for predicting timeouts and $C_3$ cluster labels.}
+	\label{fig:confusion-matrices}
 \end{figure}
 
-To ensure that we obtained \emph{useful} labels, we evaluated whether the discretized labels still discriminate solvers and agree with the actual PAR-2 ranking.
-Table~\ref{tab:ranking} shows the ranking of the solvers in the SAT Competition~2022 Anniversary Track~\cite{sat2022} according to the standard PAR-2 runtime score and according to our discretized $s_3$ score.
-We observe that our ranking approach correctly decides almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs, i.e., which solver is faster among two given solvers.
-In particular, the Spearman correlation of $s_3$ and PAR-2 ranking is about \SI{0.988}{}, which is very close to the optimal value of~1~\cite{de2016comparing}.
+To analyze the stacking ensemble in more depth, Fig.~\ref{fig:confusion-matrices} shows the confusion matrices for predicting timeouts and $C_3$ cluster labels.
+Both scenarios admit relatively good prediction performance, with the model for $C_3$ performing slightly worse than the model for timeouts.
+Notably, for $C_3$, there is less confusion between the non-timeout labels (Labels~1 and~2) and the timeout label (Label~3) than between the non-timeout labels (Labels~1 and~2).
+This observation suggests that deciding on timeouts is easier than distinguishing between discretized non-timeout runtimes.
+
+\subparagraph{Label usefulness}
 
 % TODO tf: Actual rankings with discretization
 % * Correct ranking pairs in table below: 97.45%
 % * Max. difference between wrong pairs 0.11
 % * Spearman correlation of PAR2 and Discrete rank: 0.9862
-\begin{table}[tbp]
-  \centering
-  \caption{Ranking of Anniversary-Track solvers with standard PAR-2 runtime and our discretized $s_3$ ranking.}
-  \label{tab:ranking}
-  ~\\[1em]
-  \begin{tabular}{
-    >{\centering\arraybackslash}m{0.09\textwidth}
-    >{\centering\arraybackslash}m{0.15\textwidth}
-    >{\centering\arraybackslash}m{0.09\textwidth}
-    >{\centering\arraybackslash}m{0.15\textwidth}
-    >{\raggedright\arraybackslash}m{0.01\textwidth}
-    >{\raggedright\arraybackslash}m{0.314\textwidth}
-  }
-    \toprule
-    \multicolumn{2}{c}{PAR-2} & \multicolumn{2}{c}{$s_3$} & & \multirow[c]{2}{*}{\vspace{-0.15cm}\hspace{-0.02cm}Solver} \\
-    \cmidrule(r){1-2}\cmidrule(r){3-4}
-    Rank &   Score & Rank &  Score & & \\
-    \midrule
-       1 & 2808.13 &    1 & 1.1717 & & kissat-mab-esa \\
-       2 & 2812.93 &    2 & 1.1832 & & kissat-sc2022-bulky \\
-       3 & 2835.25 &    3 & 1.1862 & & ekissat-mab-gb-db \\
-       4 & 2835.59 &    4 & 1.1868 & & kissat-mab-ucb \\
-       5 & 2836.92 &    5 & 1.1868 & & kissat-inc \\
-       6 & 2845.19 &    6 & 1.1926 & & ekissat-mab-db-v1 \\
-       7 & 2846.73 &    7 & 1.1930 & & kissat-mab-moss \\
-       8 & 2857.67 &    8 & 1.1947 & & kissat-mab-hywalk \\
-       9 & 2869.45 &    9 & 1.1998 & & kissat-sc2022-light \\
-      10 & 2899.70 &   10 & 1.2164 & & kissat-els-v2 \\
-      11 & 2953.59 &   11 & 1.2290 & & hkis-unsat \\
-      12 & 2967.53 &   12 & 1.2347 & & kissat-adaptive-restart \\
-      13 & 2976.56 &   13 & 1.2475 & & seqfrost-noextend \\
-      14 & 3014.40 &   16 & 1.2645 & & kissat-els-v1 \\
-      15 & 3017.73 &   14 & 1.2509 & & cadical-esa \\
-      16 & 3036.83 &   15 & 1.2613 & & cadical-reorder \\
-      17 & 3049.90 &   20 & 1.3648 & & cadical-rel-scavel \\
-      18 & 3080.66 &   19 & 1.2965 & & kissat-relaxed \\
-      19 & 3095.73 &   17 & 1.2815 & & cadical-dvdl-v1 \\
-      20 & 3101.12 &   18 & 1.2856 & & cadical-dvdl-v2 \\
-      21 & 3273.95 &   21 & 1.3786 & & glucose-reboot \\
-      22 & 3290.90 &   25 & 1.4707 & & lstech-maple-hywalk \\
-      23 & 3292.68 &   23 & 1.4478 & & lstech-maple \\
-      24 & 3400.72 &   24 & 1.4693 & & slime-sc-2022-beta \\
-      25 & 3412.11 &   26 & 1.5237 & & slime-sc-2022 \\
-      26 & 3436.07 &   22 & 1.4161 & & hcad-v1-psids \\
-      27 & 3506.32 &   27 & 1.5433 & & maple-lcmdistchrbt-dl-v3 \\
-      28 & 4741.50 &   28 & 2.0581 & & isasat \\
-    \bottomrule
-  \end{tabular}
+\begin{table}[tb]
+	\centering
+	\caption{Ranking of solvers on the Anniversary Track for the PAR-2 score and our discretized $s_3$ score.}
+	\label{tab:ranking}
+	~\\[1em]
+	\begin{tabular}{
+			>{\centering\arraybackslash}m{0.09\textwidth}
+			>{\centering\arraybackslash}m{0.15\textwidth}
+			>{\centering\arraybackslash}m{0.09\textwidth}
+			>{\centering\arraybackslash}m{0.15\textwidth}
+			>{\raggedright\arraybackslash}m{0.01\textwidth}
+			>{\raggedright\arraybackslash}m{0.314\textwidth}
+		}
+		\toprule
+		\multicolumn{2}{c}{PAR-2} & \multicolumn{2}{c}{$s_3$} & & \multirow[c]{2}{*}{\vspace{-0.15cm}\hspace{-0.02cm}Solver} \\
+		\cmidrule(r){1-2}\cmidrule(r){3-4}
+		Rank &   Score & Rank &  Score & & \\
+		\midrule
+		1 & 2808.13 &    1 & 1.1717 & & kissat-mab-esa \\
+		2 & 2812.93 &    2 & 1.1832 & & kissat-sc2022-bulky \\
+		3 & 2835.25 &    3 & 1.1862 & & ekissat-mab-gb-db \\
+		4 & 2835.59 &    4 & 1.1868 & & kissat-mab-ucb \\
+		5 & 2836.92 &    5 & 1.1868 & & kissat-inc \\
+		6 & 2845.19 &    6 & 1.1926 & & ekissat-mab-db-v1 \\
+		7 & 2846.73 &    7 & 1.1930 & & kissat-mab-moss \\
+		8 & 2857.67 &    8 & 1.1947 & & kissat-mab-hywalk \\
+		9 & 2869.45 &    9 & 1.1998 & & kissat-sc2022-light \\
+		10 & 2899.70 &   10 & 1.2164 & & kissat-els-v2 \\
+		11 & 2953.59 &   11 & 1.2290 & & hkis-unsat \\
+		12 & 2967.53 &   12 & 1.2347 & & kissat-adaptive-restart \\
+		13 & 2976.56 &   13 & 1.2475 & & seqfrost-noextend \\
+		14 & 3014.40 &   16 & 1.2645 & & kissat-els-v1 \\
+		15 & 3017.73 &   14 & 1.2509 & & cadical-esa \\
+		16 & 3036.83 &   15 & 1.2613 & & cadical-reorder \\
+		17 & 3049.90 &   20 & 1.3648 & & cadical-rel-scavel \\
+		18 & 3080.66 &   19 & 1.2965 & & kissat-relaxed \\
+		19 & 3095.73 &   17 & 1.2815 & & cadical-dvdl-v1 \\
+		20 & 3101.12 &   18 & 1.2856 & & cadical-dvdl-v2 \\
+		21 & 3273.95 &   21 & 1.3786 & & glucose-reboot \\
+		22 & 3290.90 &   25 & 1.4707 & & lstech-maple-hywalk \\
+		23 & 3292.68 &   23 & 1.4478 & & lstech-maple \\
+		24 & 3400.72 &   24 & 1.4693 & & slime-sc-2022-beta \\
+		25 & 3412.11 &   26 & 1.5237 & & slime-sc-2022 \\
+		26 & 3436.07 &   22 & 1.4161 & & hcad-v1-psids \\
+		27 & 3506.32 &   27 & 1.5433 & & maple-lcmdistchrbt-dl-v3 \\
+		28 & 4741.50 &   28 & 2.0581 & & isasat \\
+		\bottomrule
+	\end{tabular}
 \end{table}
 
-We also analyzed how runtime discretization affects the distinguishability of solver pairs.
-Fig.~\ref{fig:solver-confusion-matrices} shows the confusion matrices of solver pairs with significant differences in their PAR-2 scores, timeouts, and $s_3$ scores.
-According to a Wilcoxon signed-rank test with a level of $\alpha = 0.05$, \SI{87.83}{\%} of the solver pairs have significantly different scores after discretization, only a small decrease compared to \SI{89.95}{\%} before discretization.
-These results support the usefulness of discretized runtimes for our framework.
+To ensure that the runtime labels cannot only be predicted well but are \emph{useful} for active learning, we evaluate whether the labels still discriminate solvers and agree with the actual PAR-2 ranking.
+Table~\ref{tab:ranking} shows the ranking of the solvers in the SAT Competition~2022 Anniversary Track~\cite{sat2022} according to the standard PAR-2 score and according to our discretized $s_3$ score.
+We observe that ranking with our score correctly decides for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
+In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all solvers is about \SI{0.988}{}, which is very close to the optimal value of~1~\cite{de2016comparing}.
 
 % TODO tfu: Amount of significant solver pairs (Wilcoxon signed-rank, 5% alpha), 
 % Amount of significant pairs:
@@ -840,26 +856,33 @@ These results support the usefulness of discretized runtimes for our framework.
 % k=3:     662/756 = 0.8757
 % k=4:     662/756 = 0.8757
 % k=5:     662/756 = 0.8757
-\begin{figure}[tbp]
-  \centering
-  \begin{subfigure}{0.32\textwidth}
-    \centering
-    \includegraphics[width=3.9cm]{../plots/par2sigdiff.pdf}
-    \caption{PAR-2 scores.}
-  \end{subfigure}
-  \begin{subfigure}{0.32\textwidth}
-    \centering
-    \includegraphics[width=3.9cm]{../plots/timeoutsigdiff.pdf}
-    \caption{Timeouts.}
-  \end{subfigure}
-  \begin{subfigure}{0.32\textwidth}
-    \centering
-    \includegraphics[width=3.9cm]{../plots/s3sigdiff.pdf}
-    \caption{$s_3$ scores.}
-  \end{subfigure}
-  \caption{Solver pairs with significant differences regarding the respective scorings are colored white. Non-significant differences are colored black. Solvers are ordered indentically to Tab.~\ref{tab:ranking}.}
-  \label{fig:solver-confusion-matrices}
+\begin{figure}[tb]
+	\centering
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\includegraphics[width=3.9cm]{../plots/par2sigdiff.pdf}
+		\caption{PAR-2 scores.}
+	\end{subfigure}
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\includegraphics[width=3.9cm]{../plots/timeoutsigdiff.pdf}
+		\caption{Timeouts.}
+	\end{subfigure}
+	\begin{subfigure}{0.32\textwidth}
+		\centering
+		\includegraphics[width=3.9cm]{../plots/s3sigdiff.pdf}
+		\caption{$s_3$ scores.}
+	\end{subfigure}
+	\caption{Solver pairs with significant differences regarding their scorings are colored white, non-significant ones black. Solvers are ordered indentically to Table~\ref{tab:ranking}.}
+	\label{fig:solver-confusion-matrices}
 \end{figure}
+
+We also analyze how runtime discretization affects the distinguishability of solver pairs.
+The matrices in Fig.~\ref{fig:solver-confusion-matrices} visualize which solver pairs exhibit significant differences in their PAR-2 scores, timeouts, and $s_3$ scores.
+According to a Wilcoxon signed-rank test with a significance level of $\alpha = 0.05$, \SI{87.83}{\%} of the solver pairs have significantly different scores after discretization, which is only a small decrease compared to \SI{89.95}{\%} before discretization.
+%JB: numbers in notebook "bonus_results" differ
+%JB: does "after discretization" mean s_3 or timeout? and what is then the number for the other one?
+These results support the usefulness of discretized runtimes for our framework.
 
 \subsection{Implementation Details}
 \label{sec:exdesign:impl}
@@ -1057,10 +1080,12 @@ For instance, families whose instances are uniformly randomly selected by AL, e.
 \end{figure}
 
 Fig.~\ref{fig:instoccs} illustrates the distribution of the frequency with which individual instances are selected across all active learning benchmarks.
+%JB: on the full dataset (complete Anniversary Track), I suppose? and what is "all" aggregating over? these information may also go into the figure's caption
 It can be observed that a small proportion of instances is selected with great frequency, while most instances are selected on only a few occasions.
 This indicates that there is no fixed subset of instances that can perfectly distinguish all solvers, which highlights the value of employing an active-learning-based strategy.
+%JB: could also indicate that (1) there is such a set but AL cannot always find it or (2) there are multiple such sets and different AL runs return different sets
 
-The selection decisions of our approach also reveal the importance of different instance families to our framework.
+The selection decisions of our approach also reveal the importance of instance families to our framework.
 Fig.~\ref{fig:annifinalfamilies} illustrates the occurrence of instance families within the dataset and the benchmarks created by active learning.
 We use the best performing configurations for all values of $\delta \in \left[0, 1\right]$ and examine the selection decisions made by the active learning approach on the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}.
 While most families exhibit the same fraction in the dataset and the sampled benchmarks, a few outliers require further discussion.
