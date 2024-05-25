@@ -617,7 +617,7 @@ We evaluate the following \emph{stopping} criteria.
 One of the most important parts of our framework is the choice of solver runtime model to inform active learning selection decisions.
 In this section, we detail how clustering solver runtimes can lead to nuanced runtime labels, and which machine learning models are best at predicting them.
 
-As a baseline for improvement, Table~\ref{tab:regression} shows the runtime prediction performance of two regression models, a random forest regressor and an MLP regressor, using 46 instance features and 27 known solver runtimes.
+As a baseline for improvement, Table~\ref{tab:regression} shows the runtime prediction performance of two regression models, a random forest and a multilayer perceptron, using 46 instance features and 27 known solver runtimes.
 Both models were chosen for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}, and both perform poorly, as evidenced by the magnitudes of the mean regression errors.
 An RMSE error of about \SI{2000}{s} is quite poor compared to solver runtimes that range from 0 to \SI{5000}{s}.
 Therefore, we decided to discretize the runtimes.
@@ -635,8 +635,8 @@ Therefore, we decided to discretize the runtimes.
     \toprule
     {Regression Models} & & {Avg. RMSE ($\pm$ std)} & {Avg. MAE ($\pm$ std)} \\
     \midrule
-    Random-Forest-Regressor & & \SI{1929.84}{s} ($\pm$ \SI{1161.15}{s}) & \phantom{0}\SI{957.36}{s} ($\pm$ \SI{297.21}{s}) \\[0.4ex]
-    MLP-Regressor           & & \SI{2275.20}{s} ($\pm$ \SI{1545.01}{s}) & \SI{1284.30}{s} ($\pm$ \SI{390.57}{s}) \\
+    Random Forest & & \SI{1929.84}{s} ($\pm$ \SI{1161.15}{s}) & \phantom{0}\SI{957.36}{s} ($\pm$ \SI{297.21}{s}) \\[0.4ex]
+    Multilayer Perceptron & & \SI{2275.20}{s} ($\pm$ \SI{1545.01}{s}) & \SI{1284.30}{s} ($\pm$ \SI{390.57}{s}) \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -653,24 +653,23 @@ Stacking means that another prediction model, in our case a simple decision tree
   \label{tab:timeout-prediction}
   ~\\[1em]
   \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.33855\textwidth}
-    >{\centering\arraybackslash}m{0.01\textwidth}
-    >{\centering\arraybackslash}m{0.2562\textwidth}
-    >{\centering\arraybackslash}m{0.2562\textwidth}
+    >{\raggedleft\arraybackslash}m{0.4\textwidth}
+    >{\centering\arraybackslash}m{0.25\textwidth}
+    >{\centering\arraybackslash}m{0.25\textwidth}
   }
     \toprule
-    {Timeout Prediction Models} & & {46 Instance Features Avg. MCC ($\pm$ std)} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} \\
+    {Timeout Prediction Models} & {46 Instance Features Avg. MCC ($\pm$ std)} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} \\
     \midrule
-    Stacking (QDA\,+\,RF)                 & & 0.6513 ($\pm$ 0.0458) & 0.9527 ($\pm$ 0.0292) \\[0.4ex]
-    Quadratic-DA (QDA)                    & & 0.2593 ($\pm$ 0.1310) & 0.9290 ($\pm$ 0.0339) \\[0.4ex]
-    Random-Forest-Classifier (RF)         & & 0.6607 ($\pm$ 0.0547) & 0.8530 ($\pm$ 0.0479) \\[0.4ex]
-    Ada-Boost                             & & 0.5412 ($\pm$ 0.0612) & 0.8384 ($\pm$ 0.0444) \\[0.4ex]
-    Decision-Tree                         & & 0.5980 ($\pm$ 0.0423) & 0.8059 ($\pm$ 0.0707) \\[0.4ex]
-    Logistic-Regression                   & & 0.2031 ($\pm$ 0.0728) & 0.8052 ($\pm$ 0.1018) \\[0.4ex]
-    $k$NN-Classifier                      & & 0.5108 ($\pm$ 0.0387) & 0.7885 ($\pm$ 0.1521) \\[0.4ex]
-    MLP-Classifier                        & & 0.1293 ($\pm$ 0.0718) & 0.7760 ($\pm$ 0.1408) \\[0.4ex]
-    Support-Vector-Machines               & & 0.0595 ($\pm$ 0.0554) & 0.7757 ($\pm$ 0.2149) \\[0.4ex]
-    Naive-Bayes                           & & 0.1173 ($\pm$ 0.0872) & 0.7306 ($\pm$ 0.1394) \\
+    Stacking (QDA\,+\,RF)                 & 0.6513 ($\pm$ 0.0458) & 0.9527 ($\pm$ 0.0292) \\[0.4ex]
+    Quadratic Discriminant Analysis (QDA)                    & 0.2593 ($\pm$ 0.1310) & 0.9290 ($\pm$ 0.0339) \\[0.4ex]
+    Random Forest (RF)         & 0.6607 ($\pm$ 0.0547) & 0.8530 ($\pm$ 0.0479) \\[0.4ex]
+    AdaBoost                             & 0.5412 ($\pm$ 0.0612) & 0.8384 ($\pm$ 0.0444) \\[0.4ex]
+    Decision Tree                         & 0.5980 ($\pm$ 0.0423) & 0.8059 ($\pm$ 0.0707) \\[0.4ex]
+    Logistic Regression                   & 0.2031 ($\pm$ 0.0728) & 0.8052 ($\pm$ 0.1018) \\[0.4ex]
+    $k$NN                   & 0.5108 ($\pm$ 0.0387) & 0.7885 ($\pm$ 0.1521) \\[0.4ex]
+    Multilayer Perceptron                      & 0.1293 ($\pm$ 0.0718) & 0.7760 ($\pm$ 0.1408) \\[0.4ex]
+    Support Vector Machine               & 0.0595 ($\pm$ 0.0554) & 0.7757 ($\pm$ 0.2149) \\[0.4ex]
+    Naive Bayes                           & 0.1173 ($\pm$ 0.0872) & 0.7306 ($\pm$ 0.1394) \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -698,29 +697,28 @@ In all cases, the stacking ensemble performs best.
   \caption{MCC performance of the best models predicting the $C_k$ clusterings.}
   \label{tab:cluster-prediction}
   \begin{tabular}{
-    >{\raggedleft\arraybackslash}m{0.33855\textwidth}
-    >{\centering\arraybackslash}m{0.01\textwidth}
-    >{\centering\arraybackslash}m{0.2562\textwidth}
-    >{\centering\arraybackslash}m{0.2562\textwidth}
+    >{\raggedleft\arraybackslash}m{0.4\textwidth}
+    >{\centering\arraybackslash}m{0.25\textwidth}
+    >{\centering\arraybackslash}m{0.25\textwidth}
   }
     \toprule
-    {$C_3$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    {$C_3$ Cluster Prediction Models} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
     \midrule
-    Stacking (QDA\,+\,RF)                 & & 0.7464 ($\pm$ 0.0497) & 0.8380 ($\pm$ 0.0634) \\[0.4ex]
-    Quadratic-DA (QDA)                    & & 0.6903 ($\pm$ 0.0607) & 0.7738 ($\pm$ 0.0459) \\[0.4ex]
-    Random-Forest-Classifier (RF)         & & 0.7116 ($\pm$ 0.0385) & 0.7841 ($\pm$ 0.0469) \\[0.4ex]
+    Stacking (QDA\,+\,RF)                 & 0.7464 ($\pm$ 0.0497) & 0.8380 ($\pm$ 0.0634) \\[0.4ex]
+    Quadratic Discriminant Analysis (QDA)                     & 0.6903 ($\pm$ 0.0607) & 0.7738 ($\pm$ 0.0459) \\[0.4ex]
+    Random Forest (RF)         & 0.7116 ($\pm$ 0.0385) & 0.7841 ($\pm$ 0.0469) \\[0.4ex]
     \midrule
-    {$C_4$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    {$C_4$ Cluster Prediction Models} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
     \midrule
-    Stacking (QDA\,+\,RF)                 & & 0.6562 ($\pm$ 0.0538) & 0.7366 ($\pm$ 0.0377) \\[0.4ex]
-    Quadratic-DA (QDA)                    & & 0.6007 ($\pm$ 0.0765) & 0.6872 ($\pm$ 0.0469) \\[0.4ex]
-    Random-Forest-Classifier (RF)         & & 0.6033 ($\pm$ 0.0455) & 0.6828 ($\pm$ 0.0527) \\[0.4ex]
+    Stacking (QDA\,+\,RF)                 & 0.6562 ($\pm$ 0.0538) & 0.7366 ($\pm$ 0.0377) \\[0.4ex]
+    Quadratic Discriminant Analysis (QDA)                     & 0.6007 ($\pm$ 0.0765) & 0.6872 ($\pm$ 0.0469) \\[0.4ex]
+    Random Forest (RF)         & 0.6033 ($\pm$ 0.0455) & 0.6828 ($\pm$ 0.0527) \\[0.4ex]
     \midrule
-    {$C_5$ Cluster Prediction Models} & & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
+    {$C_5$ Cluster Prediction Models} & {46\,+\,27 Runtime Feat. Avg. MCC ($\pm$ std)} & {46\,+\,27\,+\,27 Clus. Feat. Avg. MCC ($\pm$ std)} \\
     \midrule
-    Stacking (QDA\,+\,RF)                 & & 0.5835 ($\pm$ 0.0615) & 0.6396 ($\pm$ 0.0553) \\[0.4ex]
-    Quadratic-DA (QDA)                    & & 0.5508 ($\pm$ 0.0669) & 0.5881 ($\pm$ 0.0912) \\[0.4ex]
-    Random-Forest-Classifier (RF)         & & 0.5420 ($\pm$ 0.0459) & 0.5895 ($\pm$ 0.0475) \\
+    Stacking (QDA\,+\,RF)                 & 0.5835 ($\pm$ 0.0615) & 0.6396 ($\pm$ 0.0553) \\[0.4ex]
+    Quadratic Discriminant Analysis (QDA)                      & 0.5508 ($\pm$ 0.0669) & 0.5881 ($\pm$ 0.0912) \\[0.4ex]
+    Random Forest (RF)         & 0.5420 ($\pm$ 0.0459) & 0.5895 ($\pm$ 0.0475) \\
     \bottomrule
   \end{tabular}
 \end{table}
