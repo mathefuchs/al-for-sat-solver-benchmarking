@@ -103,7 +103,7 @@ We evaluated our approach using the SAT Competition~2022 Anniversary Track datas
 Cross-validation was performed by treating each solver as the new solver once and learning to predict its PAR-2 rank.
 On average, our predictions achieve a ranking accuracy of approximately \SI{92}{\%} with only approximately \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
-%JB: data repo not updated since TACAS; does it also contain all the results for the new experiments? as a minimum, it should mention the journal version of the paper (see README of code repo)
+%JB: data repo not updated since TACAS; does it also contain all the results for the new experiments (some numbers in notebook "bonus_results" seem to be hardcoded rather than dynamically computed or retrieved from saved results)? as a minimum, it should mention the journal version of the paper (see README of code repo)
 %JB: code repo currently has all JAR changes in a branch; probably best to push these changes to "main" for review (in case reviewers have a look at repo but don't switch branches)
 
 \subparagraph{Outline}
@@ -709,6 +709,7 @@ Table~\ref{tab:timeout-prediction} shows the prediction performance for estimati
 This binary prediction target represents a very strong discretization of runtimes.
 We compare a variety of prediction models that pursue different learning paradigms.
 Each is trained with either instance features only (second column) or instance and runtime features (third column).
+%JB: according to text in notebook, values in 3rd column also use additional transformation ("Lognorm-Base and Transformed Runtimes")
 As the evaluation metric for prediction performance, we use Matthews Correlation Coefficient (MCC)~\cite{gorodkin2004comparing, matthews1975comparison}, which reaches its maximum of~1 for a perfect prediction, is~0 for random guessing, and has a minimum of~-1.
 
 Training the classification models with instance features only, a random forest performs best.
@@ -858,6 +859,7 @@ To ensure that the runtime labels also are \emph{useful} for active learning, we
 Table~\ref{tab:ranking} shows the ranking of the solvers in the SAT Competition~2022 Anniversary Track~\cite{sat2022} according to the standard PAR-2 score and according to our discretized $s_3$ score.
 We observe that ranking with our score correctly decides for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
 In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all solvers is about \SI{0.988}{}, which is very close to the optimal value of~1~\cite{de2016comparing}.
+%JB: notebook "bonus_results" mentions a slightly different figure for correlation (without actually computing it)
 
 % TODO tfu: Amount of significant solver pairs (Wilcoxon signed-rank, 5% alpha), 
 % Amount of significant pairs:
