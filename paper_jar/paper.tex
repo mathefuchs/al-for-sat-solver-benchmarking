@@ -42,7 +42,7 @@ Benchmarking is crucial for developing new algorithms.
 This also applies to solvers for the propositional satisfiability (SAT) problem.
 Benchmark selection is about choosing representative problem instances that reliably discriminate solvers based on their runtime.
 In this paper, we present a dynamic benchmark selection approach based on active learning.
-Our approach estimates the rank of a new solver among its competitors, striving to minimize benchmarking runtime but maximize rank prediction accuracy.
+Our approach estimates the rank of a new solver among its competitors, striving to minimize benchmarking runtime but maximize ranking accuracy.
 Instead of using real-valued solver runtimes, our approach works with discretized runtime labels, which yielded better solver rank predictions.
 We evaluated this approach on the Anniversary Track dataset from the SAT Competition 2022.
 Our benchmark selection approach can predict the rank of a new solver after approximately \SI{10}{\%} of the time it would take to run the solver on all instances of this dataset, with a prediction accuracy of approximately \SI{92}{\%}. 
@@ -207,7 +207,7 @@ In contrast, active learning (AL) begins with no or little labeled data.
 AL then repeatedly selects interesting problem instances for which to acquire labels, gradually improving the prediction model (cf.~Fig.~\ref{fig:activepool}).
 AL methods are particularly advantageous when acquiring labels is computationally expensive, such as obtaining solver runtimes.
 Without AL methods, it is not evident which instances to label and which not.
-In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the rank prediction accuracy.
+In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the ranking accuracy.
 Our second goal is to minimize the cost of label acquisition, which is measured by the instance's predicted runtime.
 Consequently, our overall objective is to develop an accurate prediction model without the necessity of labeling each data point.
 
@@ -401,7 +401,7 @@ $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
 Empirical studies on portfolio solvers have demonstrated that discretization is an effective approach in practice~\cite{CollauttiMMO13,NgokoCT19}.
 Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation in our scenario.
-In particular, the analysis demonstrates that our benchmarking approach achieves higher rank prediction accuracy when working with discrete runtime labels rather than raw runtimes.
+In particular, the analysis demonstrates that our benchmarking approach achieves higher ranking accuracy when working with discrete runtime labels rather than raw runtimes.
 
 \subsubsection{Ranking Solvers}
 \label{sec:main:model:ranking}
@@ -486,8 +486,8 @@ While the concrete values of the predicted score $s_{\hat a}$ may still change, 
 \section{Experimental Design}
 \label{sec:exdesign}
 
-In light of the preceding instantiations of Algorithm~\ref{algALBenchmark}, this section outlines the experimental design employed in the presented study.
-This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exdesign:eval}), the datasets employed (cf.~Section~\ref{sec:exdesign:data}), the hyperparameter selections (cf.~Section~\ref{sec:exdesign:hyper}), the runtime discretization (cf.~Section~\ref{sec:exdesign:disc-pred}), and the implementation (cf.~Section~\ref{sec:exdesign:impl}).
+This section outlines the experimental design employed in the presented study.
+This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exdesign:eval}), the datasets employed (cf.~Section~\ref{sec:exdesign:data}), the hyperparameter configuration (cf.~Section~\ref{sec:exdesign:hyper}), the runtime discretization (cf.~Section~\ref{sec:exdesign:disc-pred}), and the implementation (cf.~Section~\ref{sec:exdesign:impl}).
 
 \subsection{Evaluation Framework}
 \label{sec:exdesign:eval}
@@ -511,6 +511,7 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   \tcp{Determine Ranking Accuracy}
     $O_{\operatorname{acc}} \leftarrow 0$ \;    
     \For{$a \in \mathcal{A}$}{
+      %JB: mabye Lines 6 and 8 should use A' instead of A (at the moment, solver is also compared to itself but this does not increase ranking accuracy since second factor in Line 7 is 0)
       \If{$\bigl(s_k(a) - s_{\hat a}\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
            $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}|}$ \;
       }
@@ -518,11 +519,11 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   
   \BlankLine
   \tcp{Determine Runtime Fraction}
-  $r \leftarrow \sum\limits_{e \in \mathcal{I}} r(\hat a, e)$\;
+  $t_{\text{total}} \leftarrow \sum\limits_{e \in \mathcal{I}} r(\hat a, e)$\;
   $O_{\operatorname{rt}} \leftarrow 0$\;
     \For{$e \in \mathcal{I}$}{
     \If{$\exists t, (e,t) \in \mathcal{R}$}{
-      $O_{\operatorname{rt}} \leftarrow O_{\operatorname{rt}} + \frac{t}{r}$\;
+      $O_{\operatorname{rt}} \leftarrow O_{\operatorname{rt}} + \frac{t}{t_{\text{total}}}$\;
     }
   }
   
@@ -537,33 +538,30 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   \Return $\bigl( \bar{O}_{\operatorname{acc}}, \bar{O}_{\operatorname{rt}} \bigr)$
 \end{algorithm}
 
-As stated in the Introduction, this work addresses the \emph{New-Solver Problem} (cf.~Definition~\ref{def:new-solver-problem}).
-As described in Section~\ref{sec:main:model}, a prediction model provides us with an estimated scoring value for the new solver~$\hat{a}$.
-To evaluate the efficacy of a concrete instantiation of Algorithm~\ref{algALBenchmark}, which entails a specific choice for all subroutines, we perform cross-validation on our set of solvers.
+To assess our active-learning framework, we perform cross-validation over a set of solvers (cf.~Algorithm~\ref{alg:eval}).
+Each solver assumes the role of the new solver~$\hat{a}$ once (Line~2) and is therefore excluded from the set of solvers $\mathcal{A}$ in that iteration (Line~3).
+After running active learning for solver~$\hat{a}$ (Line~4), we compute the value of two optimization goals, i.e., ranking accuracy and runtime.
+The \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) is defined as the fraction of correctly ranked solver pairs~$\left(\hat{a}, a\right)$ regarding the PAR-2 scoring, where $a$ belongs to the set of all solvers $\mathcal{A}$ (Lines~5--8).
+The \emph{fraction of runtime} required by the framework to reach its conclusion is represented by $O_{\operatorname{rt}} \in [0, 1]$ (lower is better).
+This metric compares the accumulated runtimes over the sampled instances to the accumulated runtimes over all instances in the dataset (Lines~9--13).
+Once all cross-validation results have been collected (Line~14), the output metrics are averaged and returned (Lines~15--16).
 
-This is demonstrated in Algorithm~\ref{alg:eval}.
-Each solver assumes the role of the new solver~$\hat{a}$ once (Line~2) and is consequently excluded from the set of solvers $\mathcal{A}$ (Line~3).
-After running our active-learning framework for solver~$\hat{a}$ (Line~4), we compute the value of both our optimization goals, i.e., ranking accuracy and runtime.
-The \emph{ranking accuracy} $O_{\operatorname{acc}} \in \left[0, 1\right]$ (higher is better) is defined as the fraction of correctly ranked pairs of elements, namely, $\left(\hat{a}, a\right)$, regarding the ground-truth scoring function $\operatorname{par_2}$, where $a$ belongs to the set of all solvers $\mathcal{A}$ (Lines~5-8).
-The \emph{fraction of runtime} required by the algorithm to reach its conclusion is represented by $O_{\operatorname{rt}}$, which lies within the interval $[0, 1]$ (lower is better).
-This metric compares the accumulated runtimes over the sampled instances to the accumulated runtimes over all instances in the dataset (Lines~9-13).
-Once all cross-validation results have been collected (Line~14), the output metrics are averaged (Line~15).
-
-The procedure is designed to identify an approach that maximizes Equation~\eqref{eq:opt}, in which $\delta \in \left[0, 1\right]$ is used for linear weighting, with weighting factor $\delta \in \left[0, 1\right]$, between the two optimization goals $O_{\operatorname{acc}}$ and $O_{\operatorname{rt}}$.
-The plotting of the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on an $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
+To compare different instantiations of our active-learning framework holistically, we insert the cross-validation results into Equation~\eqref{eq:opt}:
 %
 \begin{equation}
-  O_\delta := \delta O_{\operatorname{acc}} + \left(1 - \delta\right) \left(1 - O_{\operatorname{rt}}\right) \enspace \textrm{,}
-  \label{eq:opt}
+	O_\delta := \delta O_{\operatorname{acc}} + \left(1 - \delta\right) \left(1 - O_{\operatorname{rt}}\right) \enspace \textrm{,}
+	\label{eq:opt}
 \end{equation} 
 %
+$\delta \in \left[0, 1\right]$ is a factor for weighting the two optimization goals $O_{\operatorname{acc}}$ and $O_{\operatorname{rt}}$.
+Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\right]$ on an $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagram provides us with a Pareto front of the best approaches for different optimization-goal weightings.
 
 \subsection{Data}
 \label{sec:exdesign:data}
 
 In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022}.
-The dataset consists of 5355 instances with corresponding runtime data of 28 sequential SAT solvers.
-We also use a database of 56 instance features\footnote{\url{https://benchmark-database.de/getdatabase/base_db}} from the Global Benchmark Database~(GBD) by Iser~et~al.~\cite{IserS18}.
+This dataset consists of 5355 instances with corresponding runtimes of 28 sequential SAT solvers.
+For predictions within our framework, we also use a database of 56 instance features\footnote{\url{https://benchmark-database.de/getdatabase/base_db}} from the Global Benchmark Database~(GBD) by Iser~et~al.~\cite{IserS18}.
 They include instance size features and node distribution statistics for several graph representations of SAT instances, and are primarily inspired by the SATzilla~2012 features described in~\cite{features}.
 All features are numeric and have no missing values.
 We drop 10 of the 56 features due to zero variance.
@@ -573,21 +571,22 @@ In addition, we retrieve instance family information\footnote{\url{https://bench
 Instance families consist of instances from the same application domain, such as planning, cryptography, etc., and are a valuable tool for analyzing solver performance.
 %
 For hyperparameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance family.
-All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them correspond to less than one instance, are put into a meta-family for stratification.
+All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them correspond to less than one instance, are put into one meta-family for stratification.
+%JB: i.e., families with less than 10 instances? could be phrased more directly
 This \emph{tuning dataset} allows a more extensive exploration of the hyperparameter space.
 
 \subsection{Hyperparameters}
 \label{sec:exdesign:hyper}
 
-Given the Algorithm~\ref{algALBenchmark}, there are several possible instantiations for the three subroutines \emph{ranking}, \emph{selection}, and \emph{stopping}.
-These experimental configurations are described in the following.
+There are several possible instantiations for the three subroutines \emph{ranking}, \emph{selection}, and \emph{stopping} in Algorithm~\ref{algALBenchmark}.
+We describe these experimental configurations next.
 
 \subparagraph{Ranking}
 
-Regarding \emph{ranking} (cf.~Section~\ref{sec:main:model}), we experiment with the following instantiations.
+Regarding \emph{ranking} (cf.~Section~\ref{sec:main:model}), we experiment with the following instantiations:
 
 \begin{itemize}\setlength{\itemsep}{1pt}
-  \item Observed PAR-2 ranking of already sampled instances
+  \item Observed PAR-2 ranking of already sampled instances, without prediction
   \item Predicted runtime-label ranking
   \vspace*{-1ex}
   \begin{itemize}\setlength{\itemsep}{1pt}
@@ -602,7 +601,8 @@ Regarding \emph{ranking} (cf.~Section~\ref{sec:main:model}), we experiment with 
 \subparagraph{Selection}
 
 We experiment with the following instantiations of the instance \emph{selection} (cf. Section~\ref{sec:main:selection}).
-Since the potential runtime of the experiments is orders of magnitude larger than the model update time, we consider incrementing our benchmark one instance at a time rather than using batches, which is also proposed in recent advances in active learning~\cite{SinhaED19,2019gaal}.
+Since the potential runtime of the solver experiments is orders of magnitude larger than the model update time, we increment our benchmark one instance at a time rather than using batches of multiple instances, which is also proposed in recent advances in active learning~\cite{SinhaED19,2019gaal}.
+%JB: not entirely clear if one-at-a-time "is also propsed" or batching "is also proposed"
 A drawback of this is the lack of parallel execution of runtime experiments.
 
 \begin{itemize}\setlength{\itemsep}{1pt}
@@ -612,6 +612,7 @@ A drawback of this is the lack of parallel execution of runtime experiments.
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
     \item Runtime scaling: Whether to normalize uncertainty scores per instance by the average runtime of solvers on it or use the absolute values.
+    %JB: but isn't the uncertainty score a difference of probabilities rather than directly runtime-related anyway? so probably not a normalization in the strict sense (maybe use term "divide" instead)
   \end{itemize}
 
   \item Information-gain sampling
@@ -624,10 +625,10 @@ A drawback of this is the lack of parallel execution of runtime experiments.
 
 \subparagraph{Stopping}
 
-We evaluate the following \emph{stopping} (cf. Section~\ref{sec:main:stopping}) criteria.
+We evaluate the following \emph{stopping} (cf. Section~\ref{sec:main:stopping}) criteria:
 
 \begin{itemize}\setlength{\itemsep}{1pt}
-  \item Subset-size stopping criterion, using \SI{10}{\%} or \SI{20}{\%} of instances
+  \item Subset-size stopping criterion: Stop after sampling \SI{10}{\%} or \SI{20}{\%} of instances.
   \item Ranking stopping criterion
   \vspace*{-1ex}
   \begin{itemize}\setlength{\itemsep}{1pt}
@@ -639,18 +640,18 @@ We evaluate the following \emph{stopping} (cf. Section~\ref{sec:main:stopping}) 
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item Minimum amount: Sample at least \SI{2}{\%}, \SI{8}{\%}, \SI{10}{\%}, or \SI{12}{\%} of instances before applying the criterion.
     \item Average of $p$-values to drop below: \SI{5}{\%}.
-    \item Exponential-moving average: Incorporate previous significance values by using an EMA with $\beta = 0.1$ or $\beta = 0.7$.
+    \item Exponential moving average: Incorporate previous significance values by using an EMA with $\beta = 0.1$ or $\beta = 0.7$.
   \end{itemize}
 \end{itemize}
 
 \subsection{Runtime Discretization and Prediction}
 \label{sec:exdesign:disc-pred}
 
-One of the most important parts of our framework is the solver runtime model (cf.~Section~\ref{sec:main:model}), which influences instance selection in active learning.
+One of the most important parts of our framework is the solver runtime model (cf.~Section~\ref{sec:main:model}).
 In this section, we detail how clustering solver runtimes can lead to informative runtime labels, and which machine learning models are best at predicting them.
 To this end, we analyze prediction performance for estimating runtimes, timeouts, and discretized runtimes.
 
-\paragraph{Regressing runtime}
+\paragraph{Regressing Runtime}
 
 \begin{table}[tb]
 	\centering
@@ -669,14 +670,15 @@ To this end, we analyze prediction performance for estimating runtimes, timeouts
 As a baseline, Table~\ref{tab:regression} shows the prediction performance of two regression models, i.e., a random forest and a multilayer perceptron.
 We employ these models to directly estimate a new solver's runtime as the prediction target.
 To this end, we use 46 instance features and 27 known solver runtimes as inputs for the predictions.
-We repeat this evaluation for each solver as prediction target and report the average and standard deviation of prediction performance over the 28 solvers.
+We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers.
 
 We chose both types of prediction models for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}.
 However, both still perform poorly, as evidenced by the magnitudes of the mean regression errors in Table~\ref{tab:regression}.
 In particular, a root mean squared error (RMSE) of about \SI{2000}{s} is quite high for solver runtimes that range from 0 to \SI{5000}{s}.
+Such unreliable runtime estimates could affect active learning negatively.
 Therefore, we decided to discretize the runtimes for prediction, moving from a regression scenario to a classification scenario.
 
-\paragraph{Classifying timeouts}
+\paragraph{Classifying Timeouts}
 
 \begin{table}[tb]
 	\centering
@@ -713,7 +715,7 @@ In contrast, a quadratic discriminant analysis performs poorly in this scenario 
 However, the best prediction performance with all features is achieved by a stacking ensemble~\cite{wolpert1992stacked} out of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
 Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, makes a prediction based on the predictions of the ensembled models.
 
-\paragraph{Classifying discretized runtime labels}
+\paragraph{Classifying Discretized Runtime Labels}
 
 Building on the success of binary timeout prediction, we investigate a classification scenario where the target is solver runtime discretized into multiple categories.
 
@@ -721,7 +723,7 @@ Building on the success of binary timeout prediction, we investigate a classific
 
 To define this prediction target, we partition the solver runtimes into $k$~clusters.
 We conduct this clustering step per instance, i.e., the solvers forming a particular cluster may differ from instance to instance.
-This clustering forms the basis of the adapted solver scoring function~$s_k$ (cf.~Equation~\eqref{eq:rankingeq}).
+The adapted solver scoring function~$s_k$ (cf.~Equation~\eqref{eq:rankingeq}) subsequently uses the cluster labels.
 In preliminary experiments, the most \emph{useful} labels were produced with hierarchical clustering and a log-single-linkage criterion; we will discuss our notion of labels usefulness later.
 Other clustering approaches we have tried include hierarchical clustering with mean-, median-, and full-linkage criteria, as well as $k$-means and spectral clustering.
 %JB: What is "full" -- "complete"?
@@ -729,7 +731,7 @@ Other clustering approaches we have tried include hierarchical clustering with m
 In our chosen hierarchical clustering procedure, each non-timeout runtime starts in a separate cluster.
 We then gradually merge the closest clusters until the desired number of $k-1$ partitions is reached.
 By definition, the $k$-th cluster always contains the timeouts and no other runtimes (cf.~Section~\ref{sec:main:model:transformation}).
-To quantify the distance between two clusters, we consider the minimum pairwise difference of logarithmic runtimes between solvers in the two clusters.
+To quantify the distance between two clusters, we consider the minimum pairwise difference of logarithmic runtimes between solvers from the two clusters.
 
 \subparagraph{Label prediction}
 
@@ -766,9 +768,10 @@ To quantify the distance between two clusters, we consider the minimum pairwise 
   \end{tabular}
 \end{table}
 
-Given this discretization procedure, we evaluate the performance of the best classification models from Table~\ref{tab:timeout-prediction} in predicting these runtime labels.
-Table~\ref{tab:cluster-prediction} shows the prediction performance for $k \in \lbrace 3, 4, 5 \rbrace$ clusters.
+Next, we use the runtimes labels from this discretization procedure as prediction targets.
+Table~\ref{tab:cluster-prediction} shows the prediction performance for $k \in \lbrace 3, 4, 5 \rbrace$ clusters and using the best classification models from Table~\ref{tab:timeout-prediction}.
 We train the prediction models either with 46 instance features and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
+
 For all prediction models and values of~$k$, the prediction performance is better when the cluster labels are included as features.
 In addition, the prediction performance degrades rapidly as the number of clusters increases.
 In all cases, the stacking ensemble performs best, so we use it in all subsequent experiments.
@@ -802,7 +805,7 @@ This observation suggests that deciding on timeouts is easier than distinguishin
 % * Spearman correlation of PAR2 and Discrete rank: 0.9862
 \begin{table}[tb]
 	\centering
-	\caption{Ranking of solvers on the Anniversary Track for the PAR-2 score and our discretized $s_3$ score.}
+	\caption{Ranking of solvers for the PAR-2 score and our discretized $s_3$ score.}
 	\label{tab:ranking}
 	~\\[1em]
 	\begin{tabular}{
@@ -850,7 +853,7 @@ This observation suggests that deciding on timeouts is easier than distinguishin
 	\end{tabular}
 \end{table}
 
-To ensure that the runtime labels cannot only be predicted well but are \emph{useful} for active learning, we evaluate whether the labels still discriminate solvers and agree with the actual PAR-2 ranking.
+To ensure that the runtime labels also are \emph{useful} for active learning, we evaluate whether the labels still discriminate solvers and agree with the actual PAR-2 ranking.
 Table~\ref{tab:ranking} shows the ranking of the solvers in the SAT Competition~2022 Anniversary Track~\cite{sat2022} according to the standard PAR-2 score and according to our discretized $s_3$ score.
 We observe that ranking with our score correctly decides for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
 In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all solvers is about \SI{0.988}{}, which is very close to the optimal value of~1~\cite{de2016comparing}.
@@ -888,7 +891,7 @@ The matrices in Fig.~\ref{fig:solver-confusion-matrices} visualize which solver 
 According to a Wilcoxon signed-rank test with a significance level of $\alpha = 0.05$, \SI{87.83}{\%} of the solver pairs have significantly different scores after discretization, which is only a small decrease compared to \SI{89.95}{\%} before discretization.
 %JB: numbers in notebook "bonus_results" differ
 %JB: does "after discretization" mean s_3 or timeout? and what is then the number for the other one?
-These results support the usefulness of discretized runtimes for our framework.
+These results support the usefulness of discretized runtimes for our active learning framework.
 
 \subsection{Implementation Details}
 \label{sec:exdesign:impl}
