@@ -918,7 +918,7 @@ Finally, we analyze the importance of instance families for our framework (cf.~S
       \graphicspath{{../plots/}}
       \input{../plots/anni_train_color_ranking.pgf}
     }
-    \caption{Ranking approaches}
+    \caption{Ranking approaches.}
     \label{fig:annitraincolorranking}
   \end{subfigure}
   \\
@@ -928,7 +928,7 @@ Finally, we analyze the importance of instance families for our framework (cf.~S
       \graphicspath{{../plots/}}
       \input{../plots/anni_train_color_selection.pgf}
     }
-    \caption{Selection approaches}
+    \caption{Selection approaches.}
     \label{fig:annitraincolorselection}
   \end{subfigure}
   \\
@@ -938,29 +938,34 @@ Finally, we analyze the importance of instance families for our framework (cf.~S
       \graphicspath{{../plots/}}
       \input{../plots/anni_train_color_stopping.pgf}
     }
-    \caption{Stopping criteria}
+    \caption{Stopping criteria.}
     \label{fig:annitraincolorstopping}
   \end{subfigure}
   \caption{
-    $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams comparing different hyperparameter instantiations of our active-learning framework on the hyperparameter-tuning dataset.
+    $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$-diagrams (cf. Section~\ref{sec:exdesign:eval}) comparing different hyperparameter instantiations of our active-learning framework on the hyperparameter-tuning dataset.
     The x-axis shows the ratio of total solver runtime on the sampled instances relative to all instances.
-    The y-axis shows the ranking accuracy (cf. Section~\ref{sec:exdesign:eval}).
-    Each line entails the front of Pareto-optimal configurations for the respective hyperparameter instantiation.
+    The y-axis shows the ranking accuracy.
+    Each line represents the front of Pareto-optimal configurations for the respective hyperparameter instantiation.
   }
   \label{fig:e2eallsolvers}
 \end{figure}
 
-Our experiments follow the evaluation framework introduced in Section~\ref{sec:exdesign:eval}.
-Fig.~\ref{fig:e2eallsolvers} shows the performance of the approaches from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$ plots for the hyperparameter-tuning dataset.
-Evaluating a given configuration with Algorithm~\ref{alg:eval} returns a point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
+\subparagraph{Methodology}
+
+Fig.~\ref{fig:e2eallsolvers} shows the performance of the hyperparameter configurations from Section~\ref{sec:exdesign:hyper} on $O_{\operatorname{rt}}$-$O_{\operatorname{acc}}$ plots (cf.~Section~\ref{sec:exdesign:eval}) for the hyperparameter-tuning dataset.
+Evaluating one configuration with Algorithm~\ref{alg:eval} returns one point $\left(O_{\operatorname{rt}},\, O_{\operatorname{acc}}\right)$.
 We do not show intermediate results of the active learning procedure, but only the final results after stopping.
 The plotted lines represent the best performing configurations per ranking approach (Fig.~\ref{fig:annitraincolorranking}), selection approach (Fig.~\ref{fig:annitraincolorselection}), and stopping criterion (Fig.~\ref{fig:annitraincolorstopping}).
 In particular, we show the Pareto front, i.e., from all configurations that share a particular value of the plotted hyperparameter, we take the maximum ranking accuracy over all remaining hyperparameters \emph{not} shown in the corresponding plot.
 
-Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), using the predicted $s_3$-induced run\-time-label ranking consistently outperforms the partially observed PAR-2 ranking for every possible value of the tradeoff parameter~$\delta$.
-This result is expected, since selection decisions are not random.
-For example, we might sample more instances of a family if it benefits the discrimination of solvers.
-While the partially observed PAR-2 score is biased, the prediction model can account for this.
+\subparagraph{Ranking}
+
+Regarding ranking approaches (Fig.~\ref{fig:annitraincolorranking}), the predicted runtime-label ranking consistently outperforms the partially observed PAR-2 ranking for every possible value of the tradeoff parameter~$\delta$.
+This result is expected, since selection decisions are usually not random.
+For example, we might sample more instances of a particular family if it benefits the discrimination of solvers.
+While the partially observed PAR-2 score is biased by such a sampling, the prediction model can account for this.
+
+\subparagraph{Selection}
 
 Regarding the selection approaches (Fig.~\ref{fig:annitraincolorselection}), uncertainty sampling performs best in most cases.
 However, information-gain sampling is advantageous when runtime is strongly favored (small $\delta$; runtime fraction less than \SI{5}{\%}).
@@ -970,9 +975,11 @@ This means that we sample instances that reveal similarities between solvers rat
 However, the method cannot select instances that are useful for distinguishing solvers later.
 Random sampling performs reasonably well, but is outperformed by uncertainty sampling in all cases, demonstrating the benefit of actively selecting instances based on a prediction model.
 
+\subparagraph{Stopping}
+
 Regarding the stopping criteria (Fig.~\ref{fig:annitraincolorstopping}), the ranking stopping criterion performs most consistently well.
 When accuracy is strongly favored (very high $\delta$), the Wilcoxon stopping criterion performs better.
-The subset-size stopping criterion performs reasonably well, but does not improve beyond a certain accuracy because it samples a fixed subset of instances.
+The subset-size stopping criterion performs reasonably well, but does not improve beyond a certain accuracy because it samples a fixed subset of instances, independent from prediction performance.
 
 \begin{figure}[tb!]
   \centering
@@ -995,18 +1002,20 @@ The subset-size stopping criterion performs reasonably well, but does not improv
 
   \caption{
     Scatter plot comparing different instantiations of the tradeoff parameter~$\delta$ for our active learning framework on the hyperparameter-tuning dataset.
-    The x-axis shows the fraction of runtime $O_{\operatorname{rt}}$ of the sample, while the y-axes show the fraction of sampled instances and the ranking accuracy, respectively.
+    The x-axes show the fraction of runtime $O_{\operatorname{rt}}$ of the sample, while the y-axes show the fraction of sampled instances and the ranking accuracy, respectively.
     The color indicates the weighting between different optimization objectives $\delta \in \left[0, 1\right]$.
     The larger $\delta$, the more we favor accuracy over runtime.
   }
   \label{fig:annitrainoptgoal}
 \end{figure}
 
+\subparagraph{Objective weighting}
+
 Fig.~\ref{fig:annitrainoptgoalruntime} shows an interesting consequence of weighting our optimization goals:
-On the one hand, if we want to get a \emph{rough} estimate of a solver's performance quickly (low~$\delta$), the approaches favor selecting many \emph{easy} instances.
+On the one hand, if we want to get a \emph{rough} estimate of a solver's performance quickly (low~$\delta$), our framework favors selecting many \emph{easy} instances.
 In particular, the fraction of sampled instances is larger than the fraction of runtime.
 By having many observations, it is easier to build a model.
-On the other hand, if we want to get a \emph{good} estimate of a solver's performance in a moderate amount of time (high~$\delta$), approaches favor selecting few, \emph{difficult} instances.
+On the other hand, if we want to get a \emph{good} estimate of a solver's performance in a moderate amount of time (high~$\delta$), our framework favors selecting few, \emph{difficult} instances.
 In particular, the fraction of instances is smaller than the fraction of runtime.
 Furthermore, Fig.~\ref{fig:annitrainoptgoalacc} shows which values of $\delta$ make the most sense.
 The range $\delta \in \left[0.2, 0.8\right]$ corresponds to the points with a runtime fraction between \SI{0.03} and \SI{0.22}.
@@ -1016,7 +1025,7 @@ We consider this region to be the most promising, analogous to the \emph{elbow} 
 \label{sec:eval:full}
 
 After selecting the most promising hyperparameters, we run our active learning experiments on the complete Anniversary Track dataset (5355 instances).
-The above range $\delta \in \left[0.2, 0.8\right]$ results in only two different configurations.
+The above range $\delta \in \left[0.2, 0.8\right]$ results in only two different hyperparameter configurations.
 The best performing approach for $\delta \in \left[0.2, 0.7\right]$ uses the predicted runtime label ranking, information-gain sampling, and ranking stopping criterion.
 It can predict the PAR-2 ranking of a new solver with \SI{90.48}{\%} accuracy ($O_{\operatorname{acc}}$) in only \SI{5.41}{\%} of the total evaluation time ($O_{\operatorname{rt}}$).
 The best performing approach for $\delta \in (0.7, 0.8]$ uses the predicted runtime label ranking, uncertainty sampling, and ranking stopping criterion.
@@ -1050,7 +1059,7 @@ It can predict the PAR-2 ranking of a new solver with \SI{92.33}{\%} accuracy~($
   \end{tabular}
 \end{table}
 
-Table~\ref{tab:fulldataset} shows how the two active learning approaches (column \emph{AL}) compare to two static baselines:
+Table~\ref{tab:fulldataset} shows how these two active learning approaches (column \emph{AL}) compare to two static baselines:
 \emph{Random} samples instances until it reaches roughly the same fraction of runtime as the AL benchmark sets.
 We repeat the sampling 1000 times and report the average results.
 \emph{Most Frequent} uses a static benchmark set consisting of the instances most frequently sampled by our active learning approach.
@@ -1058,12 +1067,12 @@ In particular, we consider the average sampling frequency across all solvers and
 
 Both of our AL approaches outperform random sampling.
 However, the performance differences are not significant with respect to a Wilcoxon signed-rank test with $\alpha = 0.05$, and also depend on the fraction of the runtime sampled (cf.~Fig.~\ref{fig:annitraincolorselection}).
-However, a clear advantage of our approach is that it indicates when to stop adding new instances, depending on the tradeoff parameter~$\delta$.
+However, a clear advantage of our approach is that it indicates when to stop adding new instances.
 While the active learning results on the full dataset are not as strong as on the smaller tuning dataset, they still show the benefit of making the benchmark selection dependent on the solvers to be distinguished.
 
 A static benchmark utilizing the most frequently AL-sampled instances exhibits suboptimal performance when compared to active learning and random sampling.
 This outcome is somewhat anticipated, given that the static benchmark fails to reflect an appropriate balance of instance families.
-For instance, families whose instances are uniformly randomly selected by AL, e.g., for different solvers, appear less frequently in this benchmark than families where some instances are sampled more often than others.
+For example, families whose instances are uniformly randomly selected by AL, e.g., for different solvers, appear less frequently in this benchmark than families where some instances are sampled more often than others.
 % MI: What? I don't understand this sentence.
 
 \subsection{Instance Frequency and Instance-Family Importance}
@@ -1083,20 +1092,20 @@ For instance, families whose instances are uniformly randomly selected by AL, e.
     \input{../plots/anni_final_families.pgf}
   }
   \caption{
-    Scatter plot illustrating the relative importance of different instance families for ranking. The x-axis depicts the frequency of instance families in the dataset, while the y-axis represents the average frequency of instance families in the samples selected by active learning. The dashed line represents families that occur with the same frequency in the dataset and samples.
+    Scatter plot illustrating the relative importance of different instance families for ranking on the full dataset. The x-axis depicts the frequency of instance families in the dataset, while the y-axis represents the average frequency of instance families in the samples selected by active learning. The dashed line represents families that occur with the same frequency in the dataset and samples.
   }
   \label{fig:annifinalfamilies}
 \end{figure}
 
 Fig.~\ref{fig:instoccs} illustrates the distribution of the frequency with which individual instances are selected across all active learning benchmarks.
-%JB: on the full dataset (complete Anniversary Track), I suppose? and what is "all" aggregating over? these information may also go into the figure's caption
+%JB: on the full dataset, I suppose (since tuning dataset does not contain all instances)? and what is "all" aggregating over? these information may also go into the figure's caption
 It can be observed that a small proportion of instances is selected with great frequency, while most instances are selected on only a few occasions.
 This indicates that there is no fixed subset of instances that can perfectly distinguish all solvers, which highlights the value of employing an active-learning-based strategy.
 %JB: could also indicate that (1) there is such a set but AL cannot always find it or (2) there are multiple such sets and different AL runs return different sets
 
-The selection decisions of our approach also reveal the importance of instance families to our framework.
+The selection decisions of our approach also reveal the importance of instance families for our framework.
 Fig.~\ref{fig:annifinalfamilies} illustrates the occurrence of instance families within the dataset and the benchmarks created by active learning.
-We use the best performing configurations for all values of $\delta \in \left[0, 1\right]$ and examine the selection decisions made by the active learning approach on the SAT Competition~2022 Anniversary Track dataset~\cite{sat2022}.
+We use the best performing configurations for all values of $\delta \in \left[0, 1\right]$.
 While most families exhibit the same fraction in the dataset and the sampled benchmarks, a few outliers require further discussion.
 Instances of the families \emph{fpga}, \emph{quasigroup-completion}, and \emph{planning} are particularly useful for distinguishing solvers within our framework.
 These instances are selected in greater proportion than in the full dataset.
