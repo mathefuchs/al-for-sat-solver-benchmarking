@@ -130,20 +130,20 @@ The use of biased benchmarks can easily lead to fallacious interpretations~\cite
 Benchmarking also involves a number of interchangeable elements, including the performance measures used, the way the measures are aggregated, and the way missing values are handled.
 Questionable research practices could alter these elements a-posteriori in order to meet expectations, thereby skewing the results~\cite{NiesslHWCB22}.
 
-The following sections present a discussion of related work from the areas of static benchmark selection (cf.~Section~\ref{sec:related:static-selection}), algorithm configuration (cf.~Section~\ref{sec:related:algo-configuration}), incremental benchmark selection (cf.~Section~\ref{sec:related:incremental-selection}), and active learning (cf.~Section~\ref{sec:related:active-learning}).
+The following sections discusses related work from the areas of static benchmark selection (cf.~Section~\ref{sec:related:static-selection}), algorithm configuration (cf.~Section~\ref{sec:related:algo-configuration}), incremental benchmark selection (cf.~Section~\ref{sec:related:incremental-selection}), and active learning (cf.~Section~\ref{sec:related:active-learning}).
 Table~\ref{tab:requirements} compares the most relevant approaches, which all pursue slightly different goals.
-Thus, our approach is \emph{not} a general improvement over the others but the only one fully aligned with Definition~\ref{def:new-solver-problem}.
+In particular, our approach is \emph{not} a general improvement over the others but the only one fully aligned with Definition~\ref{def:new-solver-problem}.
 
 \subsection{Static Benchmark Selection}
 \label{sec:related:static-selection}
 
-Benchmark selection is essential for competitions such as the SAT Competition.
+Benchmark selection is essential for solver competitions like the SAT Competition.
 In such competitions, the organizers define the rules for composing the benchmarks.
 These selection strategies are primarily static, in that they do not depend on particular solvers to distinguish.
 Balint et al. provide an overview of benchmark-selection criteria in different solver competitions~\cite{balint2015overview}.
 Froleyks et al. describe benchmark selection in recent SAT~competitions~\cite{FroleyksHIJS21}.
-Manthey and Möhle propose an approach to remove redundancy from competition benchmarks~\cite{manthey2016better}, considering feature equivalence of formulas.
-M{\i}s{\i}r also presents a feature-based approach to reduce benchmarks, using matrix factorization and clustering~\cite{misir2021benchmark}.
+Manthey and Möhle propose an approach to remove redundancy from competition benchmarks by considering feature equivalence of formulas~\cite{manthey2016better}.
+M{\i}s{\i}r also presents a feature-based approach to reduce benchmarks by using matrix factorization and clustering~\cite{misir2021benchmark}.
 
 Hoos et al.~\cite{HoosKSS13} discuss desirable properties of SAT benchmark instances.
 They identify three key selection criteria: instance variety to avoid over-fitting, adapted instance hardness (not too easy but also not too hard), and the avoidance of duplicate instances. 
@@ -181,42 +181,43 @@ Further related work can be found within the field of algorithm configuration~\c
 Thereby, the goal is to tune SAT solvers for a given sub-domain of problem instances.
 While this task differs from our goal, for instance, in that we do not need to navigate the configuration space, there are similarities to our approach as well.
 For example, SMAC employs an iterative, model-based selection procedure similar to our approach, but this is for selecting configurations rather than instances.
-However, an algorithm configurator cannot be used to \emph{rank} or \emph{score} a new solver since algorithm configuration is designed to identify the optimal configuration.
-Furthermore, while a model-based selection strategy is employed to sample configurations, instance selection is made \emph{randomly}, i.e., without building a model over instances.
+In contrast, instance selection is made \emph{randomly} in SMAC, i.e., without building a model over instances.
+Furthermore, an algorithm configurator cannot be used to \emph{rank} or \emph{score} a new solver relative to others since algorithm configuration is designed to identify the optimal configuration.
 
 \subsection{Incremental Benchmark Selection}
 \label{sec:related:incremental-selection}
 
 Matricon~et~al. present an incremental benchmark selection approach~\cite{MatriconAFSH21}.
 Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to our \emph{New-Solver Problem}, as given in Definition~\ref{def:new-solver-problem}.
-To differentiate between \emph{a pair of} SAT solvers, the authors propose an iterative approach to select a solver-specific subset of instances until a desired confidence level is reached.
+To compare \emph{a pair of} SAT solvers, the authors propose an iterative approach to select a solver-specific subset of instances until a desired confidence level is reached.
 This is achieved by calculating a scoring metric for all unselected instances, running the experiment with the highest score, and updating the confidence.
 Their approach ticks off most of the desired features in Table~\ref{tab:requirements}.
-However, the approach only compares solvers binarily rather than providing a \emph{scoring}.
+However, the approach only compares solvers binarily rather than providing a multi-solver \emph{scoring} or \emph{ranking}.
 Consequently, it is unclear how similar two given solvers are or on which instances they behave similarly.
 Furthermore, a significant shortcoming is the lack of \emph{scalability} with the number of solvers.
-Comparing only pairs of solvers, evaluating a new solver with their method requires sampling a separate benchmark for each existing solver.
+Due to comparing only pairs of solvers, evaluating a new solver with their method requires sampling a separate benchmark for each existing solver.
 In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one benchmark.
 
 \subsection{Active Learning}
 \label{sec:related:active-learning}
 
+Our benchmark selection approach uses active learning.
 In passive machine learning, prediction models are trained on datasets with given instance labels (cf.~Fig.~\ref{fig:passive}).
 In contrast, active learning (AL) begins with no or little labeled data.
 AL then repeatedly selects interesting problem instances for which to acquire labels, gradually improving the prediction model (cf.~Fig.~\ref{fig:activepool}).
 AL methods are particularly advantageous when acquiring labels is computationally expensive, such as obtaining solver runtimes.
 Without AL methods, it is not evident which instances to label and which not.
-The first goal is to maximize the utility of instances to our model, which is measured by the rank prediction accuracy.
-The second goal is to minimize the cost of label acquisition, which is measured by the instance's predicted runtime.
-Consequently, the overall objective is to develop an accurate prediction model without the necessity of labeling each data point.
+In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the rank prediction accuracy.
+Our second goal is to minimize the cost of label acquisition, which is measured by the instance's predicted runtime.
+Consequently, our overall objective is to develop an accurate prediction model without the necessity of labeling each data point.
 
 Rubens et.~al.~\cite{RubensESK15} survey active-learning advances.
 While synthesis-based AL methods~\cite{0001AEMN22,GarzonMG22,2019gaal} generate instances for labeling, pool-based methods~\cite{GolbandiKL11,HarpaleY08,KorenBV09} rely on a fixed set of unlabeled instances to sample from.
 Recent synthesis-based methods within the field of SAT solving demonstrate the generation of problem instances with desired properties~\cite{0001AEMN22,GarzonMG22}.
 However, this objective is distinct from ours.
 While those approaches aim to generate instances on which a solver is either effective or ineffective, our objective is to predict whether a solver is effective or ineffective on an \emph{existing} benchmark.
-In their work, Volpato and Guangyan employ pool-based AL to train an instance-specific algorithm selector~\cite{volpato2019active}.
-Rather than benchmarking a solver's overall performance, their objective is to recommend the best solver for each SAT instance from a set of available solvers.
+In the latter direction, Volpato and Guangyan employ pool-based AL to train an instance-specific algorithm selector~\cite{volpato2019active}.
+However, their objective is not benchmarking a solver's overall performance but recommending the best solver for each SAT instance from a set of available solvers.
 
 \begin{figure}[tbp!]
   \centering
