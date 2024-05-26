@@ -1120,22 +1120,18 @@ In this work, we have addressed the \emph{New-Solver Problem}:
 Given a new solver, we aim to determine its ranking relative to competitors.
 Our approach provides accurate ranking predictions while requiring significantly less runtime than a complete evaluation on a given benchmark set.
 On data from the SAT~Competition~2022 Anniversary Track, we can determine a new solver's PAR-2 ranking with about \SI{92}{\%} accuracy while only requiring \SI{10}{\%} of the full-evaluation time.
-We have evaluated several ranking algorithms, instance-selection approaches, and stopping criteria within our sequential active learning framework.
+We have evaluated several ranking methods, instance-selection approaches, and stopping criteria within our sequential active learning framework.
 We have also looked at which instance families are the most prevalent in selection decisions.
 
 Future work could compare more sub-routines for ranking, instance selection, and stopping.
-Further, our evaluation framework can be used for other computation-intensive problems, like other $\mathcal{NP}$-complete problems than SAT.
-Such problems share most of the relevant properties of SAT, like established instance features, a complete benchmark is expensive, and traditional benchmark selection requires expert knowledge.
+Further, our evaluation framework can be used for other computation-intensive problems.
+In particular, many $\mathcal{NP}$-complete problems share most of the relevant properties of SAT, like established instance features, a complete benchmark is expensive, and traditional benchmark selection requires expert knowledge.
 
 From a technical perspective, we could formulate the problem of runtime discretization as an optimization problem, rather than addressing it empirically.
 Further, a major shortcoming of our current approach is the lack of parallelization, selecting instances one at a time.
 Benchmarking on a computing cluster with $n$ cores benefits from having batches of $n$ instances.
 However, bigger batch sizes $n$ impede \emph{active learning}.
 Also, it is unclear how to synchronize instance selection and updates of the prediction model without wasting too much runtime.
-
-To perform benchmarking on a computer cluster with multiple cores, it is beneficial to work with batches of multiple instances.
-In contrast, our approach is limited to benchmarking with a single instance at a time.
-In future work, we intend to investigate models that learn from partial labels, which can be extracted from larger batch sizes in a parallel approach that synchronizes instance selection and model updates.
 
 \backmatter
 
