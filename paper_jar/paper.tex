@@ -338,13 +338,13 @@ However, their objective is not benchmarking a solver's overall performance but 
 \label{sec:main}
 
 Algorithm~\ref{algALBenchmark} outlines our benchmarking framework. 
-Given a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$ and runtimes~$r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a \not\in \mathcal{A}$ (Line~1).
+Given a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$, and runtimes~$r$, we first initialize a prediction model~$\mathcal{M}$ for the new solver $\hat a \not\in \mathcal{A}$ (Line~1).
 The prediction model~$\mathcal{M}$ is used to select instances repeatedly (Line~4) for benchmarking the new solver $\hat a$ (Line~5). 
-The acquired result is subsequently employed to update the prediction model, denoted by~$\mathcal{M}$ (Line~7). 
-When the stopping criterion is met (Line~3), the benchmarking loop is terminated and the final score of $\hat{a}$ is estimated (Line~8). 
-Algorithm~\ref{algALBenchmark} returns this score, along with the acquired instances and runtime measurements. 
+The acquired result is subsequently employed to update the prediction model (Line~7). 
+When the stopping criterion is met (Line~3), the benchmarking loop terminates and the final score of $\hat{a}$ is estimated (Line~8). 
+Algorithm~\ref{algALBenchmark} returns this score, along with the acquired benchmark instances and runtime measurements. 
 
-Section~\ref{sec:main:model} provides an overview of the underlying prediction model~$\mathcal{M}$ and outlines the methodology for deriving a solver ranking from it.
+Section~\ref{sec:main:model} describes the underlying prediction model~$\mathcal{M}$ and outlines the methodology for deriving a solver ranking from it.
 Section~\ref{sec:main:selection} presents the criteria for selecting instances.
 Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 
@@ -358,6 +358,7 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
   \BlankLine
 
   $\mathcal{M} \leftarrow \operatorname{initModel}\left(\mathcal{A},\, \mathcal{I},\, r,\, \hat{a}\right)$ \tcp*{cf. Section~\ref{sec:main:model}}
+  %JB: do we actually need \hat{a} here? (does not provide any information we could store/use here)
   
   \BlankLine
   $\mathcal{R} \leftarrow \emptyset$ \;
@@ -381,13 +382,12 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-The model $M$ provides a runtime-label prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ for all solvers $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$.
+The model $M$ provides a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ for all solvers $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$.
+%JB: shouldn't we drop the algorithm as an argument (for $f$ and later for $f'$), since we only train and predict for one solver ($\hat{a}$) anyway? (what would the predictions for the other solvers be -- looking up the exact runtime values from $r$?); instead, could use $\hat{a}$ as a subscript of $f$
 This prediction function powers instance selection as described in Section~\ref{sec:main:selection}.
-During model updates (Algorithm~\ref{algALBenchmark},~Line~7), the prediction function $f$ is trained to predict a transformed version of the acquired runtime dataset~$\mathcal{R}$.
-We describe the transformation of the runtime dataset in the subsequent section.
-The features described in Section~\ref{sec:exdesign:data} serve as the input to the model.
-Furthermore, it should be noted that a new prediction model is constructed in each iteration, as the runtime of the experiments (Line~5) dominates the training time of the model by a significant margin.
-Finally, the score of the new solver, denoted by $\hat a$, is predicted with the prediction function~$f$ (Line~8).
+In the update step (Algorithm~\ref{algALBenchmark},~Line~7), the model is trained to predict a transformed version of solver runtime (cf.~Section~\ref{sec:main:model:transformation}) for the new solver~$\hat{a}$, using the features described in Section~\ref{sec:exdesign:data} and the previously acquired runtimes~$\mathcal{R}$.
+Each iteration trains a new prediction model from scratch, since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~$M$ on all acquired instances~$\mathcal{R}$ by a significant margin.
+Once the benchmarking loop terminates, the score of the new solver~$\hat{a}$ is predicted and then returned (Lines~8--9).
 
 \subsubsection{Runtime Transformation}
 \label{sec:main:model:transformation}
@@ -399,17 +399,14 @@ The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}}
 %
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
-In the context of such a clustering, for an instance $e \in \mathcal{I}$, a solver $a \in \mathcal{A}$ is defined as belonging to the $\gamma_k(a, e)$-fastest solvers on instance $e$. 
-%
 Empirical studies on portfolio solvers have demonstrated that discretization is an effective approach in practice~\cite{CollauttiMMO13,NgokoCT19}.
-Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation we designed for our approach.
-The analysis demonstrates that our approach achieves higher accuracy for discrete runtime labels than for raw runtimes.
+Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation in our scenario.
+In particular, the analysis demonstrates that our benchmarking approach achieves higher rank prediction accuracy when working with discrete runtime labels rather than raw runtimes.
 
 \subsubsection{Ranking Solvers}
 \label{sec:main:model:ranking}
 
-To determine the rank of solvers, we apply PAR-2 scoring using the discrete runtime labels $\gamma_k(a, e)$.
-The adapted scoring function $s_k : \mathcal{A} \rightarrow [1, 2 \cdot k]$ induces a ranking among solvers and is depicted in Equation~\eqref{eq:rankingeq}.
+To determine the rank of solvers, we apply PAR-2 scoring to the discrete runtime labels $\gamma_k(a, e)$ and obtain the adapted scoring function $s_k : \mathcal{A} \rightarrow [1, 2 \cdot k]$:
 %
 \begin{align}
   s_k(a) := \frac{1}{|\mathcal{I}|} \sum_{e \in \mathcal{I}} \gamma'_k(a, e)
@@ -421,12 +418,14 @@ The adapted scoring function $s_k : \mathcal{A} \rightarrow [1, 2 \cdot k]$ indu
   \label{eq:rankingeq}
 \end{align}
 %
+In particular, timeouts are still penalized.
+
 \subsection{Instance Selection}
 \label{sec:main:selection}
 
-Selecting an instance based on the model is a core functionality of our framework (cf.~Algorithm~\ref{algALBenchmark}, Line~4).
+Selecting an instance based on the prediction model is a core functionality of our framework (cf.~Algorithm~\ref{algALBenchmark}, Line~4).
 In this section, we introduce two instance sampling strategies, one that minimizes uncertainty and one that maximizes information gain.
-Both strategies use the model's label-prediction function $f$ and are inspired by existing work within the realms of active learning~\cite{settles2009active}.
+Both strategies use the model's prediction function~$f$ and are inspired by existing work on active learning~\cite{settles2009active}.
 These methods require the model's predictions to include probabilities for the $k$ discrete runtime labels.
 Let \mbox{$f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$} denote this modified prediction function.
 In the following, the set $\tilde{\mathcal{I}} \subseteq \mathcal{I}$ denotes the instances that have already been sampled.
@@ -434,7 +433,7 @@ In the following, the set $\tilde{\mathcal{I}} \subseteq \mathcal{I}$ denotes th
 \paragraph{Uncertainty Sampling}
 
 The uncertainty sampling strategy selects the instance that is closest to the model's decision boundary.
-This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that minimizes $U(e)$, which is specified by the following equation.
+This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that minimizes the certainty~$U(e)$, which is specified by the following equation:
 %
 \begin{equation*}
   \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
@@ -442,8 +441,8 @@ This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\
 
 \paragraph{Information-Gain Sampling}
 
-The information-gain sampling strategy selects the instance with the highest expected entropy reduction regarding the runtime labels of the instance.
-To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that maximizes $IG(e)$, which is specified in the following equation.
+The information-gain sampling strategy selects the instance with the highest expected entropy reduction regarding the runtime labels.
+To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that maximizes $IG(e)$, which is specified in the following equation:
 %
 \begin{equation*}
   \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{\hat H}_n(e)
@@ -452,35 +451,37 @@ To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\
 In the equation, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{H}(e, n)$ denotes the entropy of these labels plus $n$ as the runtime label for $\hat{a}$.
 The term $\operatorname{\hat H}_n(e)$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
 By maximizing the information gain, instances are selected that identify solvers with similar behavior.
+%JB: "similar behavior" is a bit vague; strategy favors instances where the distribution of solvers over clusters is skewed rather than uniform, right? and the new solver only has little influence here, since its predicted labels is only one of |A| + 1 labels to determine entropy, right?
 
 \subsection{Stopping Criteria}
 \label{sec:main:stopping}
 
-In this section, we present the two dynamic stopping criteria employed in our experiments: the Wilcoxon and the ranking stopping criterion (cf. Algorithm~\ref{algALBenchmark}, Line~3).
+In this section, we present the two dynamic stopping criteria (cf.~Algorithm~\ref{algALBenchmark}, Line~3) employed in our experiments: the Wilcoxon and the ranking stopping criterion.
 
 \paragraph{Wilcoxon Stopping Criterion}
 
-The Wilcoxon stopping criterion is employed to halt the active-learning process based on the confidence that the predicted runtime labels of the new solver are sufficiently different from those of existing solvers.
+The Wilcoxon stopping criterion terminates the active-learning process based on the confidence that the predicted runtime labels of the new solver are sufficiently different from those of existing solvers.
 This criterion is loosely inspired by Matricon et.~al.~\cite{MatriconAFSH21}.
-The average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $\operatorname{w}(S,P)$, as given by the following equation, of the two runtime label distributions ${S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}}$ for an existing solver $a$ and \mbox{$P=\{ f(\hat a, e) \mid e \in \mathcal{I} \}$} of the new solver $\hat{a}$ is used to assess the statistical significance of the predicted runtime labels.
+To assess the statistical significance of the predicted runtime labels, the criterion uses the average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $\operatorname{w}(S,P)$ of the runtime label distributions ${S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}}$ for an existing solver $a$ and \mbox{$P=\{ f(\hat a, e) \mid e \in \mathcal{I} \}$} of the new solver $\hat{a}$:
 %
 \begin{equation*}
   W_{\hat{a}} := \frac{1}{\lvert \mathcal{A} \rvert} \sum_{a \in \mathcal{A}} \operatorname{w}(S, P)
 \end{equation*}
 %
-In order to improve the stability of this criterion, an exponential moving average is employed to mitigate the impact of outliers, with the process terminated when the value of $W^{(i)}_{\exp}$ drops below a fixed threshold.
+To improve the stability of this criterion and mitigate the impact of outliers, we employ an exponential moving average~$W^{(i)}_{\exp}$:
 %
 \begin{align*}
   W_{\exp}^{\left(0\right)} &:= 1\\
   W_{\exp}^{\left(i\right)} &:= \beta W_{\hat{a}} + \left(1 - \beta\right) W_{\exp}^{\left(i - 1\right)}
 \end{align*}
+%
+Active learning terminates when the value of $W^{(i)}_{\exp}$ drops below a fixed threshold.
 
 \paragraph{Ranking Stopping Criterion}
 
 In contrast, the ranking stopping criterion is less sophisticated than the previous one.
-In this case, the active learning process is terminated if the ranking induced by the model's predictions (Equation~\eqref{eq:rankingeq}) remains unchanged within the last~$l$~iterations.
-However, it should be noted that the concrete values of the predicted score $s_{\hat a}$ may still change.
-Nevertheless, in this case, the induced ranking is of sole interest.
+In this case, active learning terminates when the ranking induced by the model's predictions (Equation~\eqref{eq:rankingeq}) has remained unchanged within the last~$l$~iterations.
+While the concrete values of the predicted score $s_{\hat a}$ may still change, the induced ranking is of sole interest in this criterion.
 
 \section{Experimental Design}
 \label{sec:exdesign}
