@@ -475,7 +475,7 @@ Active learning terminates when the value of $W^{(i)}_{\exp}$ drops below a fixe
 \paragraph{Ranking Stopping Criterion}
 
 In contrast, the ranking stopping criterion is less sophisticated than the previous one.
-In this case, active learning terminates when the ranking induced by the model's predictions (Equation~\eqref{eq:rankingeq}) has remained unchanged within the last~$l$~iterations.
+In this case, active learning terminates when the ranking induced by the model's predictions (cf.~Equation~\eqref{eq:rankingeq}) has remained unchanged within the last~$l$~iterations.
 While the concrete values of the predicted score $s_{\hat a}$ may still change, the induced ranking is of sole interest in this criterion.
 
 \section{Experimental Design}
@@ -553,9 +553,9 @@ Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\
 \subsection{Data}
 \label{sec:exdesign:data}
 
-In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022}.
+In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022,zenodoanniversarytrack}.
 This dataset consists of 5355 instances with corresponding runtimes of 28 sequential SAT solvers.
-For predictions within our framework, we also use a database of 56 instance features\footnote{\url{https://benchmark-database.de/getdatabase/base_db}} from the Global Benchmark Database~(GBD) by Iser~et~al.~\cite{IserS18}.
+For predictions within our framework, we also use a database of 56 instance features\footnote{\url{https://benchmark-database.de/getdatabase/base_db}} from the Global Benchmark Database~(GBD)~\cite{GBD24paper}.
 They include instance size features and node distribution statistics for several graph representations of SAT instances, and are primarily inspired by the SATzilla~2012 features described in~\cite{features}.
 All features are numeric and have no missing values.
 We drop 10 of the 56 features due to zero variance.
@@ -887,7 +887,7 @@ These results support the usefulness of discretized runtimes for our active lear
 \label{sec:exdesign:impl}
 
 For reproducibility, our source code and data are available on GitHub (see footnotes in Section~\ref{sec:intro}).
-Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions, and \emph{gbd-tools}~\cite{IserS18} for retrieving SAT instances.
+Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions, and \emph{gbd-tools}~\cite{GBD24paper} for retrieving SAT instances.
 
 
 \section{Evaluation}
