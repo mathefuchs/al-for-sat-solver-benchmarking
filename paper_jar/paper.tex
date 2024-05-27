@@ -379,11 +379,11 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-The model $M$ provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for solver $\hat a$.
+The model $M$ provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for the new solver $\hat a$.
 This prediction function powers instance selection as described in Section~\ref{sec:main:selection}.
-In the update step (Algorithm~\ref{algALBenchmark},~Line~7), the model is trained to predict a transformed version of solver runtime (cf.~Section~\ref{sec:main:model:transformation}) for the new solver~$\hat{a}$, using the features described in Section~\ref{sec:exdesign:data} and the previously acquired runtimes~$\mathcal{R}$.
+In the update step (Algorithm~\ref{algALBenchmark},~Line~7), the model is trained to predict a transformed version of solver runtime (cf.~Section~\ref{sec:main:model:transformation}) for the solver~$\hat{a}$, using the features described in Section~\ref{sec:exdesign:data} and the previously acquired runtimes~$\mathcal{R}$.
 Each iteration trains a new prediction model from scratch since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~$M$ on all acquired instances~$\mathcal{R}$ by a significant margin.
-Once the benchmarking loop terminates, the score of the new solver~$\hat{a}$ is predicted and then returned (Lines~8--9).
+Once the benchmarking loop terminates, the score of the solver~$\hat{a}$ is predicted and then returned (Lines~8--9).
 
 \subsubsection{Runtime Transformation}
 \label{sec:main:model:transformation}
@@ -595,8 +595,8 @@ Regarding \emph{ranking} (cf.~Section~\ref{sec:main:model}), we experiment with 
 
 We experiment with the following instantiations of the instance \emph{selection} (cf. Section~\ref{sec:main:selection}).
 Since the potential runtime of the solver experiments is orders of magnitude larger than the model update time, we increment our benchmark one instance at a time rather than using batches of multiple instances.
-Both are used in the state-of-the-art in active learning~\cite{SinhaED19,2019gaal}.
-A drawback of this is the lack of parallel execution of runtime experiments.
+Both these strategies are used in the state-of-the-art in active learning~\cite{SinhaED19,2019gaal}.
+A drawback of selecting instances one at a time is the lack of parallel execution of runtime experiments.
 
 \begin{itemize}\setlength{\itemsep}{1pt}
   \item Random sampling 
@@ -604,14 +604,14 @@ A drawback of this is the lack of parallel execution of runtime experiments.
   \vspace*{-1ex}
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
-    \item Runtime scaling: Whether to scale the uncertainty scores by the average runtime of solvers or use $\operatorname{U}(e)$ as is.
+    \item Runtime scaling: Whether to scale the uncertainty scores by the average runtime of solvers per instance or use $\operatorname{U}(e)$ as is.
   \end{itemize}
 
   \item Information-gain sampling
   \vspace*{-1ex}
   \begin{itemize}
     \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
-    \item Runtime scaling: Whether to normalize information-gain scores per instance by the average runtime of solvers on it or use the absolute values.
+    \item Runtime scaling: Whether to scale the information-gain scores by the average runtime of solvers per instance or use $\operatorname{IG}(e)$ as is.
   \end{itemize}
 \end{itemize}
 

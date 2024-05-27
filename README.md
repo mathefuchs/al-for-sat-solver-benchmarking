@@ -17,7 +17,7 @@ This document provides:
 ## Repository Structure
 
 * The folder `paper_jar` contains the LaTeX source of the journal version of the paper.
-  * The subfolder `plots` contains the pgf-plots used within the publication. All plots therein are generated with the Jupyter notebook `anni_results.ipynb`.
+  * The subfolder `plots` contains the pgf-plots used within the publication. All plots therein are generated with the Jupyter notebooks `anni_results.ipynb` and `bonus_results.ipynb`.
 * The folder `paper_tacas` contains the LaTeX source of the conference version of the paper.
 * The folder `src` contains the code of the experiments.
 * Additionally, there are the following files in the root directory:
@@ -91,7 +91,7 @@ Then, you can simply run the final experiment with:
 |----------------------------------|----------------------------------|
 | `sh run.sh` or `sh run_debug.sh` | `.\run.ps1` or `.\run_debug.ps1` |
 
-To obtain plots from the data, use the Jupyter notebook `anni_results.ipynb`.
+To obtain plots from the data, use the Jupyter notebooks `anni_results.ipynb` and `bonus_results.ipynb`.
 Running the final experiment takes about a week on a system with 32 cores (Setup: `AMD EPYC 7551 32-Core Processor`).
 
 ## Tweaking and Extending the Code
