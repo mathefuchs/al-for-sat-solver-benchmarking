@@ -103,8 +103,6 @@ We evaluated our approach using the SAT Competition~2022 Anniversary Track datas
 Cross-validation was performed by treating each solver as the new solver once and learning to predict its PAR-2 rank.
 On average, our predictions achieve a ranking accuracy of approximately \SI{92}{\%} with only approximately \SI{10}{\%} of the runtime required to evaluate these solvers on the complete set of instances.
 Our entire source code\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}} and experimental data\footnote{\url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data}} are available on GitHub.
-%JB: data repo not updated since TACAS; does it also contain all the results for the new experiments (some numbers in notebook "bonus_results" seem to be hardcoded rather than dynamically computed or retrieved from saved results)? as a minimum, it should mention the journal version of the paper (see README of code repo)
-%JB: code repo currently has all JAR changes in a branch; probably best to push these changes to "main" for review (in case reviewers have a look at repo but don't switch branches)
 
 \subparagraph{Outline}
 
@@ -357,8 +355,7 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 
   \BlankLine
 
-  $\mathcal{M} \leftarrow \operatorname{initModel}\left(\mathcal{A},\, \mathcal{I},\, r,\, \hat{a}\right)$ \tcp*{cf. Section~\ref{sec:main:model}}
-  %JB: do we actually need \hat{a} here? (does not provide any information we could store/use here)
+  $\mathcal{M} \leftarrow \operatorname{initModel}\left(\mathcal{A},\, \mathcal{I},\, r\right)$ \tcp*{cf. Section~\ref{sec:main:model}}
   
   \BlankLine
   $\mathcal{R} \leftarrow \emptyset$ \;
@@ -382,8 +379,7 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-The model $M$ provides a prediction function $f : \mathcal{\hat A} \times \mathcal{I} \rightarrow \mathbb{R}$ for all solvers $\mathcal{\hat A} := \mathcal{A} \cup \lbrace \hat a \rbrace$.
-%JB: shouldn't we drop the algorithm as an argument (for $f$ and later for $f'$), since we only train and predict for one solver ($\hat{a}$) anyway? (what would the predictions for the other solvers be -- looking up the exact runtime values from $r$?); instead, could use $\hat{a}$ as a subscript of $f$
+The model $M$ provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for solver $\hat a$.
 This prediction function powers instance selection as described in Section~\ref{sec:main:selection}.
 In the update step (Algorithm~\ref{algALBenchmark},~Line~7), the model is trained to predict a transformed version of solver runtime (cf.~Section~\ref{sec:main:model:transformation}) for the new solver~$\hat{a}$, using the features described in Section~\ref{sec:exdesign:data} and the previously acquired runtimes~$\mathcal{R}$.
 Each iteration trains a new prediction model from scratch since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~$M$ on all acquired instances~$\mathcal{R}$ by a significant margin.
@@ -427,7 +423,7 @@ Selecting an instance based on the prediction model is a core functionality of o
 In this section, we introduce two instance sampling strategies, one that minimizes uncertainty and one that maximizes information gain.
 Both strategies use the model's prediction function~$f$ and are inspired by existing work on active learning~\cite{settles2009active}.
 These methods require the model's predictions to include probabilities for the $k$ discrete runtime labels.
-Let \mbox{$f' : \mathcal{\hat A} \times \mathcal{I} \rightarrow \left[0, 1\right]^k$} denote this modified prediction function.
+Let $f_{\hat a}' : \mathcal{I} \rightarrow \left[0, 1\right]^k$ denote this modified prediction function.
 In the following, the set $\tilde{\mathcal{I}} \subseteq \mathcal{I}$ denotes the instances that have already been sampled.
 
 \paragraph{Uncertainty Sampling}
@@ -436,7 +432,7 @@ The uncertainty sampling strategy selects the instance closest to the model's de
 This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that minimizes the certainty~$U(e)$, which is specified by the following equation:
 %
 \begin{equation*}
-  \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f'\!\left(\hat{a}, e\right)_{n} \right\rvert
+  \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f_{\hat{a}}'(e)_{n} \right\rvert
 \end{equation*}
 
 \paragraph{Information-Gain Sampling}
@@ -445,13 +441,12 @@ The information-gain sampling strategy selects the instance with the highest exp
 To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that maximizes $IG(e)$, which is specified in the following equation:
 %
 \begin{equation*}
-  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f'(\hat{a}, e)_{n} \operatorname{\hat H}_n(e)
+  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f_{\hat{a}}'(e)_{n} \operatorname{\hat H}(e)_n
 \end{equation*}
 %
-In the equation, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{H}(e, n)$ denotes the entropy of these labels plus $n$ as the runtime label for $\hat{a}$.
-The term $\operatorname{\hat H}_n(e)$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
-By maximizing the information gain, instances are selected that identify solvers with similar behavior.
-%JB: "similar behavior" is a bit vague; strategy favors instances where the distribution of solvers over clusters is skewed rather than uniform, right? and the new solver only has little influence here, since its predicted labels is only one of |A| + 1 labels to determine entropy, right?
+In the equation, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{\hat H}(e)$ denotes the entropy of these labels plus the runtime label for $\hat{a}$.
+The term $\operatorname{\hat H}(e)_n$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
+By maximizing the information gain, instances are selected that identify solvers with similar runtime cluster labels, i.e., the new solver ranks similarly to the solvers in the same clusters.
 
 \subsection{Stopping Criteria}
 \label{sec:main:stopping}
@@ -462,7 +457,7 @@ In this section, we present the two dynamic stopping criteria (cf.~Algorithm~\re
 
 The Wilcoxon stopping criterion terminates the active-learning process based on the confidence that the predicted runtime labels of the new solver are sufficiently different from those of existing solvers.
 This criterion is loosely inspired by Matricon et~al.~\cite{MatriconAFSH21}.
-To assess the statistical significance of the predicted runtime labels, the criterion uses the average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $\operatorname{w}(S,P)$ of the runtime label distributions ${S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}}$ for an existing solver $a$ and \mbox{$P=\{ f(\hat a, e) \mid e \in \mathcal{I} \}$} of the new solver $\hat{a}$:
+To assess the statistical significance of the predicted runtime labels, the criterion uses the average $p$-value $W_{\hat{a}}$ of a Wilcoxon signed-rank test $\operatorname{w}(S,P)$ of the runtime label distributions ${S=\{ \gamma(a, e) \mid e \in \mathcal{I} \}}$ for an existing solver $a$ and \mbox{$P=\{ f_{\hat a}(e) \mid e \in \mathcal{I} \}$} of the new solver $\hat{a}$:
 %
 \begin{equation*}
   W_{\hat{a}} := \frac{1}{\lvert \mathcal{A} \rvert} \sum_{a \in \mathcal{A}} \operatorname{w}(S, P)
@@ -510,10 +505,9 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   \BlankLine
   \tcp{Determine Ranking Accuracy}
     $O_{\operatorname{acc}} \leftarrow 0$ \;    
-    \For{$a \in \mathcal{A}$}{
-      %JB: mabye Lines 6 and 8 should use A' instead of A (at the moment, solver is also compared to itself but this does not increase ranking accuracy since second factor in Line 7 is 0)
+    \For{$a \in \mathcal{A}'$}{
       \If{$\bigl(s_k(a) - s_{\hat a}\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
-           $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}|}$ \;
+           $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}'|}$ \;
       }
     }
   
@@ -571,8 +565,7 @@ In addition, we retrieve instance family information\footnote{\url{https://bench
 Instance families consist of instances from the same application domain, such as planning, cryptography, etc., and are valuable for analyzing solver performance.
 %
 For hyperparameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance family.
-All instance families that are too \emph{small}, i.e., \SI{10}{\%} of them correspond to less than one instance, are put into one meta-family for stratification.
-%JB: i.e., families with less than 10 instances? could be phrased more directly
+All instance families that are too \emph{small}, i.e., families with less than 10 instances, are put into one meta-family for stratification.
 This \emph{tuning dataset} allows a more extensive exploration of the hyperparameter space.
 
 \subsection{Hyperparameters}
@@ -601,8 +594,8 @@ Regarding \emph{ranking} (cf.~Section~\ref{sec:main:model}), we experiment with 
 \subparagraph{Selection}
 
 We experiment with the following instantiations of the instance \emph{selection} (cf. Section~\ref{sec:main:selection}).
-Since the potential runtime of the solver experiments is orders of magnitude larger than the model update time, we increment our benchmark one instance at a time rather than using batches of multiple instances, which is also proposed in recent advances in active learning~\cite{SinhaED19,2019gaal}.
-%JB: not entirely clear if one-at-a-time "is also propsed" or batching "is also proposed"
+Since the potential runtime of the solver experiments is orders of magnitude larger than the model update time, we increment our benchmark one instance at a time rather than using batches of multiple instances.
+Both are used in the state-of-the-art in active learning~\cite{SinhaED19,2019gaal}.
 A drawback of this is the lack of parallel execution of runtime experiments.
 
 \begin{itemize}\setlength{\itemsep}{1pt}
@@ -611,8 +604,7 @@ A drawback of this is the lack of parallel execution of runtime experiments.
   \vspace*{-1ex}
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item Fallback threshold: Use random sampling for the first \SI{0}{\%}, \SI{5}{\%}, \SI{10}{\%}, \SI{15}{\%}, or \SI{20}{\%} of instances to explore the instance space.
-    \item Runtime scaling: Whether to normalize uncertainty scores per instance by the average runtime of solvers on it or use the absolute values.
-    %JB: but isn't the uncertainty score a difference of probabilities rather than directly runtime-related anyway? so probably not a normalization in the strict sense (maybe use term "divide" instead)
+    \item Runtime scaling: Whether to scale the uncertainty scores by the average runtime of solvers or use $\operatorname{U}(e)$ as is.
   \end{itemize}
 
   \item Information-gain sampling
@@ -709,7 +701,6 @@ Table~\ref{tab:timeout-prediction} shows the prediction performance for estimati
 This binary prediction target represents a very strong discretization of runtimes.
 We compare a variety of prediction models that pursue different learning paradigms.
 Each is trained with either instance features only (second column) or instance and runtime features (third column).
-%JB: according to text in notebook, values in 3rd column also use additional transformation ("Lognorm-Base and Transformed Runtimes")
 As the evaluation metric for prediction performance, we use Matthews Correlation Coefficient (MCC)~\cite{gorodkin2004comparing, matthews1975comparison}, which reaches its maximum of~1 for a perfect prediction, is~0 for random guessing, and has a minimum of~-1.
 
 Training the classification models with instance features only, a random forest performs best.
@@ -727,8 +718,7 @@ To define this prediction target, we partition the solver runtimes into $k$~clus
 We conduct this clustering step per instance, i.e., the solvers forming a particular cluster may differ from instance to instance.
 The adapted solver scoring function~$s_k$ (cf.~Equation~\eqref{eq:rankingeq}) subsequently uses the cluster labels.
 In preliminary experiments, the most \emph{useful} labels were produced with hierarchical clustering and a log-single-linkage criterion; we will discuss our notion of label usefulness later.
-Other clustering approaches we have tried include hierarchical clustering with mean-, median-, and full-linkage criteria, as well as $k$-means and spectral clustering.
-%JB: What is "full" -- "complete"?
+Other clustering approaches we have tried include hierarchical clustering with mean-, median-, and complete-linkage criteria, as well as $k$-means and spectral clustering.
 
 In our chosen hierarchical clustering procedure, each non-timeout runtime starts in a separate cluster.
 We then gradually merge the closest clusters until the desired number of $k-1$ partitions is reached.
@@ -859,10 +849,8 @@ To ensure that the runtime labels also are \emph{useful} for active learning, we
 Table~\ref{tab:ranking} shows the ranking of the solvers in the SAT Competition~2022 Anniversary Track~\cite{sat2022} according to the standard PAR-2 score and according to our discretized $s_3$ score.
 We observe that ranking with our score correctly decides for almost all (about \SI{97.45}{\%}; $\sigma = \SI{3.68}{\%}$) solver pairs which solver is faster.
 In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all solvers is about \SI{0.988}{}, which is very close to the optimal value of~1~\cite{de2016comparing}.
-%JB: notebook "bonus_results" mentions a slightly different figure for correlation (without actually computing it)
 
-% TODO tfu: Amount of significant solver pairs (Wilcoxon signed-rank, 5% alpha), 
-% Amount of significant pairs:
+% Amount of significant solver pairs (Wilcoxon signed-rank, 5% alpha):
 % PAR-2:   684/756 = 0.9048
 % timeout: 660/756 = 0.8730
 % k=3:     662/756 = 0.8757
@@ -891,9 +879,8 @@ In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all so
 
 We also analyze how runtime discretization affects the distinguishability of solver pairs.
 The matrices in Fig.~\ref{fig:solver-confusion-matrices} visualize which solver pairs exhibit significant differences in their PAR-2 scores, timeouts, and $s_3$ scores.
-According to a Wilcoxon signed-rank test with a significance level of $\alpha = 0.05$, \SI{87.83}{\%} of the solver pairs have significantly different scores after discretization, which is only a slight decrease compared to \SI{89.95}{\%} before discretization.
-%JB: numbers in notebook "bonus_results" differ
-%JB: does "after discretization" mean s_3 or timeout? and what is then the number for the other one?
+According to a Wilcoxon signed-rank test with a significance level of $\alpha = 0.05$, \SI{87.57}{\%} of the solver pairs have significantly different scores after $\gamma_3$-discretization, which is only a slight decrease compared to \SI{90.48}{\%} before discretization.
+$\gamma_2$-discretization significantly distinguishes \SI{87.30}{\%} of solver pairs.
 These results support the usefulness of discretized runtimes for our active learning framework.
 
 \subsection{Implementation Details}
@@ -1075,8 +1062,6 @@ While the active learning results on the full dataset are not as strong as on th
 
 A static benchmark utilizing the most frequently AL-sampled instances exhibits suboptimal performance compared to active learning and random sampling.
 This outcome is anticipated since the static benchmark fails to reflect an appropriate balance of instance families.
-For example, families whose instances are uniformly randomly selected by AL, e.g., for different solvers, appear less frequently in this benchmark than families where some instances are sampled more often than others.
-% MI: What? I don't understand this sentence.
 
 \subsection{Instance Frequency and Instance-Family Importance}
 \label{sec:eval:instance}
@@ -1084,7 +1069,7 @@ For example, families whose instances are uniformly randomly selected by AL, e.g
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=0.6\textwidth]{../plots/instoccs.pdf}
-  \caption{Frequency with which individual problem instances are selected within all active-learning benchmarks. Instances that are chosen more frequently are intuitively more important for distinguishing solver runtimes.}
+  \caption{Frequency with which individual problem instances are selected within all active-learning benchmarks. Instances that are chosen more frequently are intuitively more important for distinguishing solver runtimes. Results are on the full dataset with cross-validation over all solvers.}
   \label{fig:instoccs}
 \end{figure}
 
@@ -1095,16 +1080,14 @@ For example, families whose instances are uniformly randomly selected by AL, e.g
     \input{../plots/anni_final_families.pgf}
   }
   \caption{
-    Scatter plot illustrating the relative importance of different instance families for ranking on the full dataset. The x-axis depicts the frequency of instance families in the dataset, while the y-axis represents the average frequency in the samples selected by active learning. The dashed line represents families that occur with the same frequency in the dataset and samples.
+    Scatter plot illustrating the relative importance of different instance families for ranking on the full dataset. The x-axis depicts the frequency of instance families in the dataset, while the y-axis represents the average frequency in the samples selected by active learning. The dashed line represents families that occur with the same frequency in the dataset and samples. Results are on the full dataset with cross-validation over all solvers.
   }
   \label{fig:annifinalfamilies}
 \end{figure}
 
-Fig.~\ref{fig:instoccs} illustrates the frequency distribution with which individual instances are selected across all active learning benchmarks.
-%JB: on the full dataset, I suppose (since tuning dataset does not contain all instances)? and what is "all" aggregating over? these information may also go into the figure's caption
+Fig.~\ref{fig:instoccs} illustrates the frequency distribution with which individual instances are selected across all active learning benchmarks regarding the full dataset with cross-validation over all solvers.
 A small proportion of instances is selected with great frequency, while most instances are selected on only a few occasions.
 This indicates that there is no fixed subset of instances that can perfectly distinguish all solvers, which highlights the value of employing an active-learning-based strategy.
-%JB: could also indicate that (1) there is such a set but AL cannot always find it or (2) there are multiple such sets and different AL runs return different sets
 
 The selection decisions of our approach also reveal the importance of instance families for our framework.
 Fig.~\ref{fig:annifinalfamilies} illustrates the occurrence of instance families within the dataset and the benchmarks created by active learning.
