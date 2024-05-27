@@ -772,12 +772,12 @@ The stacking ensemble performs best in all cases, so we use it in all subsequent
 	\centering
 	\begin{subfigure}{0.45\textwidth}
 		\centering
-		\includegraphics[height=4.123cm]{../plots/cm2labels.pdf}
+		\includegraphics[height=4.123cm]{plots/cm2labels.pdf}
 		\caption{Timeout prediction.}
 	\end{subfigure}
 	\begin{subfigure}{0.45\textwidth}
 		\centering
-		\includegraphics[height=4.228cm]{../plots/cm3labels.pdf}
+		\includegraphics[height=4.228cm]{plots/cm3labels.pdf}
 		\caption{$C_3$ cluster prediction.}
 	\end{subfigure}
 	\caption{Confusion matrices for predicting timeouts and $C_3$ cluster labels.}
@@ -860,17 +860,17 @@ In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all so
 	\centering
 	\begin{subfigure}{0.32\textwidth}
 		\centering
-		\includegraphics[width=3.9cm]{../plots/par2sigdiff.pdf}
+		\includegraphics[width=3.9cm]{plots/par2sigdiff.pdf}
 		\caption{PAR-2 scores.}
 	\end{subfigure}
 	\begin{subfigure}{0.32\textwidth}
 		\centering
-		\includegraphics[width=3.9cm]{../plots/timeoutsigdiff.pdf}
+		\includegraphics[width=3.9cm]{plots/timeoutsigdiff.pdf}
 		\caption{Timeouts.}
 	\end{subfigure}
 	\begin{subfigure}{0.32\textwidth}
 		\centering
-		\includegraphics[width=3.9cm]{../plots/s3sigdiff.pdf}
+		\includegraphics[width=3.9cm]{plots/s3sigdiff.pdf}
 		\caption{$s_3$ scores.}
 	\end{subfigure}
 	\caption{Solver pairs with significant differences regarding their scorings are colored white, non-significant ones black. Solvers are ordered identically to Table~\ref{tab:ranking}.}
@@ -905,8 +905,8 @@ Finally, we analyze the importance of instance families for our framework (cf.~S
   \centering
   \begin{subfigure}{1.0\textwidth}
     \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_color_ranking.pgf}
+      \graphicspath{{plots/}}
+      \input{plots/anni_train_color_ranking.pgf}
     }
     \caption{Ranking approaches.}
     \label{fig:annitraincolorranking}
@@ -915,8 +915,8 @@ Finally, we analyze the importance of instance families for our framework (cf.~S
   \vspace{0.2cm}
   \begin{subfigure}{1.0\textwidth}
     \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_color_selection.pgf}
+      \graphicspath{{plots/}}
+      \input{plots/anni_train_color_selection.pgf}
     }
     \caption{Selection approaches.}
     \label{fig:annitraincolorselection}
@@ -925,8 +925,8 @@ Finally, we analyze the importance of instance families for our framework (cf.~S
   \vspace{0.2cm}
   \begin{subfigure}{1.0\textwidth}
     \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_color_stopping.pgf}
+      \graphicspath{{plots/}}
+      \input{plots/anni_train_color_stopping.pgf}
     }
     \caption{Stopping criteria.}
     \label{fig:annitraincolorstopping}
@@ -975,16 +975,16 @@ The subset-size stopping criterion performs reasonably well, but does not improv
   \centering
   \begin{subfigure}{0.4775\textwidth}
     \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_optimization_goal.pgf}
+      \graphicspath{{plots/}}
+      \input{plots/anni_train_optimization_goal.pgf}
     }
     \caption{Runtime vs. Instances}
     \label{fig:annitrainoptgoalruntime}
   \end{subfigure}
   \begin{subfigure}{0.5125\textwidth}
     \resizebox{\textwidth}{!}{
-      \graphicspath{{../plots/}}
-      \input{../plots/anni_train_delta_acc.pgf}
+      \graphicspath{{plots/}}
+      \input{plots/anni_train_delta_acc.pgf}
     }
     \caption{Runtime vs. Accuracy}
     \label{fig:annitrainoptgoalacc}
@@ -1068,7 +1068,7 @@ This outcome is anticipated since the static benchmark fails to reflect an appro
 
 \begin{figure}[tbp]
   \centering
-  \includegraphics[width=0.6\textwidth]{../plots/instoccs.pdf}
+  \includegraphics[width=0.6\textwidth]{plots/instoccs.pdf}
   \caption{Frequency with which individual problem instances are selected within all active-learning benchmarks. Instances that are chosen more frequently are intuitively more important for distinguishing solver runtimes. Results are on the full dataset with cross-validation over all solvers.}
   \label{fig:instoccs}
 \end{figure}
@@ -1076,8 +1076,8 @@ This outcome is anticipated since the static benchmark fails to reflect an appro
 \begin{figure}[tb]
   \centering
   \resizebox{0.85\textwidth}{!}{
-    \graphicspath{{../plots/}}
-    \input{../plots/anni_final_families.pgf}
+    \graphicspath{{plots/}}
+    \input{plots/anni_final_families.pgf}
   }
   \caption{
     Scatter plot illustrating the relative importance of different instance families for ranking on the full dataset. The x-axis depicts the frequency of instance families in the dataset, while the y-axis represents the average frequency in the samples selected by active learning. The dashed line represents families that occur with the same frequency in the dataset and samples. Results are on the full dataset with cross-validation over all solvers.
