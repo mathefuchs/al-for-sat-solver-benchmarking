@@ -446,7 +446,8 @@ To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\
 %
 In the equation, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{\hat H}(e)$ denotes the entropy of these labels plus the runtime label for $\hat{a}$.
 The term $\operatorname{\hat H}(e)_n$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
-By maximizing the information gain, instances are selected that identify solvers with similar runtime cluster labels, i.e., the new solver ranks similarly to the solvers in the same clusters.
+By maximizing the information gain, one favors instances whose most likely cluster labels, as determined by $f_{\hat a}'$, are similar to a great number of existing solvers.
+This decreases the entropy among the cluster labels of the given instance and we know that the new solver performs similarly to a number of solvers.
 
 \subsection{Stopping Criteria}
 \label{sec:main:stopping}
