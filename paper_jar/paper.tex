@@ -25,6 +25,14 @@
 
 \newtheorem{definition}{Definition} % only kind of theorems we use are definitions (well, one)
 
+% Highlight changes for re-submission (might be removed later)
+\usepackage{soul}
+\soulregister\cite7 % some hacking to make highlighting work in special situations, e.g., if text contains references: https://tex.stackexchange.com/q/139463
+\soulregister\ref7
+\soulregister\pageref7
+\newcommand{\showchanges}{1} % set to 0 or 1
+\newcommand{\change}[1]{\ifnum \showchanges > 0 \sethlcolor{yellow}\hl{#1} \else #1 \fi}
+
 \raggedbottom
 
 \begin{document}
@@ -80,13 +88,18 @@ One could also imagine a collaborative filtering scenario, where runtimes are on
 
 \begin{definition}[New-Solver Problem]
   Let us consider a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$, and runtimes~${r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]}$, with each solver having a runtime limit of $\tau$.
-  The \emph{New-Solver Problem} is about incrementally selecting benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of a new solver $\hat{a} \notin \mathcal{A}$, while minimizing the total benchmark runtime.
+  The \emph{New-Solver Problem} is \change{about selecting} benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of a new solver $\hat{a} \notin \mathcal{A}$, while minimizing the \change{summed runtime of~$\hat{a}$ over all selected instances}.
   \label{def:new-solver-problem}
 \end{definition}
 
+\change{
+The two objectives of this problem are conflicting, i.e., the ranking's confidence typically benefits from more instances while the runtime criterion encourages less or at least shorter evaluations.
+The crux is finding a good trade-off.
+}
+
 The approach presented in this paper meets several criteria for benchmarking that are considered desirable (cf.~Table~\ref{tab:requirements}).
 Rather than outputting a binary classification, namely whether the new solver is worse than an existing solver or not, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar its performance is to existing solvers.
-In particular, our approach enables \emph{ranking} the new solver among a set of existing solvers.
+In particular, our approach enables \emph{ranking} the new solver among a set of existing solvers \change{in one benchmarking run}.
 We show that predicting the exact per-instance runtime of the solvers, which would be a more challenging task, is not necessary for ranking.
 Instead, we work with discretized runtime labels.
 We use instance features and known solver runtimes to predict these labels.
@@ -190,11 +203,12 @@ Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to
 To compare \emph{a pair of} SAT solvers, the authors propose an iterative approach to select a solver-specific subset of instances until a desired confidence level is reached.
 This is achieved by calculating a scoring metric for all unselected instances, running the experiment with the highest score, and updating the confidence.
 Their approach ticks off most of the desired features in Table~\ref{tab:requirements}.
-However, the approach only compares solvers binarily rather than providing a multi-solver \emph{scoring} or \emph{ranking}.
+However, the approach only compares solvers \change{pairwise} rather than providing a multi-solver \emph{scoring} or \emph{ranking}.
 Consequently, it is unclear how similar two given solvers are or on which instances they behave similarly.
 Furthermore, a significant shortcoming is the lack of \emph{scalability} with the number of solvers.
-Due to comparing only pairs of solvers, evaluating a new solver with their method requires sampling a separate benchmark for each existing solver.
-In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one benchmark.
+Due to comparing only pairs of solvers, evaluating a new solver with their method requires sampling \change{an individual set of benchmark instances} for each existing solver.
+\change{In particular, comparing against one existing solver will typically require a different set of instances than comparing against another one.}
+In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one \change{set of} benchmark \change{instances}.
 
 \subsection{Active Learning}
 \label{sec:related:active-learning}
@@ -206,7 +220,7 @@ AL then repeatedly selects interesting problem instances for which to acquire la
 AL methods are particularly advantageous when acquiring labels is computationally expensive, such as obtaining solver runtimes.
 Without AL methods, it is not evident which instances to label and which not.
 In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the ranking accuracy.
-Our second goal is to minimize the cost of label acquisition, which is measured by the instance's predicted runtime.
+Our second goal is to minimize the cost of label acquisition, which is \change{estimated} by the instance's predicted runtime.
 Consequently, our overall objective is to develop an accurate prediction model without labeling each data point.
 
 Rubens et~al.~\cite{RubensESK15} survey active-learning advances.
@@ -379,16 +393,16 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-The model $M$ provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for the new solver $\hat a$.
+The model~\change{$\mathcal{M}$} provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for the new solver $\hat a$.
 This prediction function powers instance selection as described in Section~\ref{sec:main:selection}.
 In the update step (Algorithm~\ref{algALBenchmark},~Line~7), the model is trained to predict a transformed version of solver runtime (cf.~Section~\ref{sec:main:model:transformation}) for the solver~$\hat{a}$, using the features described in Section~\ref{sec:exdesign:data} and the previously acquired runtimes~$\mathcal{R}$.
-Each iteration trains a new prediction model from scratch since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~$M$ on all acquired instances~$\mathcal{R}$ by a significant margin.
+Each iteration trains a new prediction model from scratch since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~\change{$\mathcal{M}$} on all acquired instances~$\mathcal{R}$ by a significant margin.
 Once the benchmarking loop terminates, the score of the solver~$\hat{a}$ is predicted and then returned (Lines~8--9).
 
 \subsubsection{Runtime Transformation}
 \label{sec:main:model:transformation}
 
-For the prediction model~$M$, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
+For the prediction model~\change{$\mathcal{M}$}, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
 For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for the benchmark instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
 Timeouts $\tau$ always form a separate cluster $C_{k}$.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
@@ -396,7 +410,7 @@ The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}}
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
 Empirical studies on portfolio solvers have demonstrated that discretization is an effective approach in practice~\cite{CollauttiMMO13,NgokoCT19}.
-Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation in our scenario.
+Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation in our scenario\change{, including the clustering approach}.
 In particular, the analysis demonstrates that our benchmarking approach achieves higher ranking accuracy when working with discrete runtime labels rather than raw runtimes.
 
 \subsubsection{Ranking Solvers}
@@ -414,7 +428,7 @@ To determine the rank of solvers, we apply PAR-2 scoring to the discrete runtime
   \label{eq:rankingeq}
 \end{align}
 %
-In particular, timeouts are still penalized.
+In \change{this way}, timeouts are still penalized.
 
 \subsection{Instance Selection}
 \label{sec:main:selection}
@@ -453,6 +467,10 @@ This decreases the entropy among the cluster labels of the given instance and we
 \label{sec:main:stopping}
 
 In this section, we present the two dynamic stopping criteria (cf.~Algorithm~\ref{algALBenchmark}, Line~3) employed in our experiments: the Wilcoxon and the ranking stopping criterion.
+\change{
+In the worst case, both criteria sample all instances, but typically they should terminate active learning considerably earlier.
+How early they terminate depends on how easy it is to determine the rank of the new solver among the existing ones.
+}
 
 \paragraph{Wilcoxon Stopping Criterion}
 
@@ -507,7 +525,7 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   \tcp{Determine Ranking Accuracy}
     $O_{\operatorname{acc}} \leftarrow 0$ \;    
     \For{$a \in \mathcal{A}'$}{
-      \If{$\bigl(s_k(a) - s_{\hat a}\bigr) \cdot \bigl(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a)\bigr) > 0$}{
+      \If(\tcp*[f]{\change{same sign/order}}){\change{$\operatorname{sgn}(s_k(a) - s_{\hat a}) = \operatorname{sgn}(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a))$}}{
            $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}'|}$ \;
       }
     }
@@ -707,7 +725,9 @@ As the evaluation metric for prediction performance, we use Matthews Correlation
 Training the classification models with instance features only, a random forest performs best.
 In contrast, a quadratic discriminant analysis performs poorly in this scenario but performs very well if runtime features are included.
 However, the best prediction performance with all features is achieved by a stacking ensemble~\cite{wolpert1992stacked} out of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
-Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, makes a prediction based on the predictions of the ensembled models.
+Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, \change{acts as a meta-model:
+The prediction outputs of the ensemble members, i.e., quadratic discriminant analysis and random forests, become the prediction inputs of the meta-model, i.e., decision tree.
+}
 
 \paragraph{Classifying Discretized Runtime Labels}
 
