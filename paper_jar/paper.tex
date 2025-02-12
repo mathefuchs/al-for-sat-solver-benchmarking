@@ -574,15 +574,15 @@ Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\
 
 In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022,zenodoanniversarytrack}.
 This dataset consists of 5355 instances with corresponding runtimes of 28 sequential SAT solvers.
-For predictions within our framework, we also use a database of 56 instance features\footnote{\url{https://benchmark-database.de/getdatabase/base_db}} from the Global Benchmark Database~(GBD)~\cite{GBD24paper}.
+For predictions within our framework, we also use a database of 56 instance features from the Global Benchmark Database~(GBD)~\cite{IserJ24}.
+\change{Refer to Appendix~\ref{sec:appendix-features} for a full list of all 56 features.}
 They include instance size features and node distribution statistics for several graph representations of SAT instances, and are primarily inspired by the SATzilla~2012 features described in~\cite{features}.
 All features are numeric and have no missing values.
 We drop 10 of the 56 features due to zero variance.
 In total, the prediction models have access to 46 instance features and 27 out of 28 runtime features, excluding the respective new solver~$\hat{a}$.
 
-In addition, we retrieve instance family information\footnote{\url{https://benchmark-database.de/getdatabase/meta_db}} to evaluate the composition of our sampled benchmarks.
+In addition, we retrieve instance family information\footnote{\url{https://benchmark-database.de/getdatabase/meta}} to evaluate the composition of our sampled benchmarks.
 Instance families consist of instances from the same application domain, such as planning, cryptography, etc., and are valuable for analyzing solver performance.
-%
 For hyperparameter tuning, we randomly sample \SI{10}{\%} of the complete set of 5355 instances with stratification regarding the instance family.
 All instance families that are too \emph{small}, i.e., families with less than 10 instances, are put into one meta-family for stratification.
 This \emph{tuning dataset} allows a more extensive exploration of the hyperparameter space.
@@ -680,7 +680,7 @@ To this end, we analyze prediction performance for estimating runtimes, timeouts
 
 As a baseline, Table~\ref{tab:regression} shows the prediction performance of two regression models, i.e., a random forest and a multilayer perceptron.
 We employ these models to estimate a new solver's raw runtime as the prediction target.
-To this end, we use 46 instance features and 27 known solver runtimes as inputs for the predictions.
+To this end, we use 46 instance features \change{(Section~\ref{sec:exdesign:data})} and 27 known solver runtimes as inputs for the predictions.
 We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers.
 
 We chose both types of prediction models for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}.
@@ -783,7 +783,7 @@ To quantify the distance between two clusters, we consider the minimum pairwise 
 
 Next, we use the runtimes labels from this discretization procedure as prediction targets.
 Table~\ref{tab:cluster-prediction} shows the prediction performance for the best classification models from Table~\ref{tab:timeout-prediction} and $k \in \lbrace 3, 4, 5 \rbrace$ clusters.
-We train the prediction models either with 46 instance features and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
+We train the prediction models either with 46 instance features \change{(Section~\ref{sec:exdesign:data})} and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
 
 For all prediction models and values of~$k$, the prediction performance is better when the cluster labels are included as features.
 In addition, the prediction performance degrades rapidly as the number of clusters increases.
@@ -908,7 +908,7 @@ These results support the usefulness of discretized runtimes for our active lear
 \label{sec:exdesign:impl}
 
 For reproducibility, our source code and data are available on GitHub (see footnotes in Section~\ref{sec:intro}).
-Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions, and \emph{gbd-tools}~\cite{GBD24paper} for retrieving SAT instances.
+Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{scikit-learn} for making predictions, and \emph{gbd-tools}~\cite{IserJ24} for retrieving SAT instances.
 
 
 \section{Evaluation}
@@ -1161,5 +1161,59 @@ All experimental data are available online at \url{https://github.com/mathefuchs
 The code is available online at \url{https://github.com/mathefuchs/al-for-sat-solver-benchmarking}.
 
 \bibliography{literature}
+
+%
+% ---- Appendix ----
+%
+
+\newpage
+\appendix
+\section{Instance Features}
+\label{sec:appendix-features}
+
+\change{For predictions within our framework, we use a database of 56 instance features\footnote{\url{https://udopia.github.io/gbdc/doc/extractors/CNFBaseFeatures.html}} from the Global Benchmark Database~(GBD)~\cite{IserJ24}.
+Table~\ref{tab:features} briefly summarizes all 56 features.
+The placeholder \texttt{<n>} can take values within the range 1 to 9 and the placeholder \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.
+Accounting for all possible instantiations of \texttt{<n>} and \texttt{<dist>}, there are 56 features in total.}
+
+\begin{table}[h]
+    \centering
+    \caption{
+      \change{List of all 56 instance features, where \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.}
+    }
+    \label{tab:features}
+    \begin{tabular}{
+      >{\arraybackslash}p{0.22\textwidth}
+      >{\arraybackslash}p{0.21\textwidth}
+      >{\arraybackslash}p{0.46\textwidth}
+    }
+      \toprule
+      Category & Feature Name & Description \\
+      \midrule
+      Basic statistics & \verb|clauses| & Number of clauses \\
+      & \verb|variables| & Number of variables \\
+      \midrule
+      Clause types & \verb|cls<n>| & Number of clauses with \verb|<n>| literals for \verb|<n>| in 1--9 \\
+      & \verb|cls10p| & Number of clauses with 10 or more literals \\
+      & \verb|horn| & Number of Horn clauses \\
+      & \verb|invhorn| & Number of inverted Horn clauses \\
+      & \verb|positive| & Number of positive clauses \\
+      & \verb|negative| & Number of negative clauses \\
+      \midrule
+      Horn proximity & \verb|hornvars_<dist>| & Distribution of variable occurrence in horn clauses \\
+      & \verb|invhornvars_<dist>| & Distribution of variable occurrence in inverted horn clauses \\
+      \midrule
+      Polarity balance & \verb|balancecls_<dist>| & Distributions of fractions of number of positive/negative literals in clauses \\
+      & \verb|balancevars_<dist>| & Distributions of fractions of number of positive/negative literals of variables \\
+      \midrule
+      Variable-clause graph & \verb|vcg_vdegree_<dist>| & Variable degree distribution \\
+      & \verb|vcg_cdegree_<dist>| & Clause degree distribution \\
+      \midrule
+      Variable graph & \verb|vg_degree_<dist>| & Degree distribution \\
+      \midrule
+      Clause graph & \verb|cg_degree_<dist>| & Degree distribution \\
+      \bottomrule
+    \end{tabular}
+\end{table}
 
 \end{document}
