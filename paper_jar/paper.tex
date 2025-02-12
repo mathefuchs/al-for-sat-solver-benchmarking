@@ -405,6 +405,8 @@ Once the benchmarking loop terminates, the score of the solver~$\hat{a}$ is pred
 For the prediction model~\change{$\mathcal{M}$}, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
 For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for the benchmark instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
 Timeouts $\tau$ always form a separate cluster $C_{k}$.
+\change{The clustering is performed on a per-instance level as the best runtimes may be seconds on one instance and minutes on another.
+After clustering, the best runtimes are all in the same cluster.}
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
 %
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
@@ -446,8 +448,10 @@ The uncertainty sampling strategy selects the instance closest to the model's de
 This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that minimizes the certainty~$U(e)$, which is specified by the following equation:
 %
 \begin{equation*}
-  \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f_{\hat{a}}'(e)_{n} \right\rvert
+  \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f_{\hat{a}}'(e)_{n} \right\rvert \text{.}
 \end{equation*}
+\change{Intuitively, uncertainty sampling selects the instances where it is most unclear in which runtime cluster the new solver resides.
+For example, if the new solver behaves similarly to two known solvers on the already run experiments, it is likely that this sampling strategy selects instances where these two solvers have runtimes that are not within the same cluster.}
 
 \paragraph{Information-Gain Sampling}
 
@@ -455,13 +459,14 @@ The information-gain sampling strategy selects the instance with the highest exp
 To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\mathcal{I}}$ that maximizes $IG(e)$, which is specified in the following equation:
 %
 \begin{equation*}
-  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f_{\hat{a}}'(e)_{n} \operatorname{\hat H}(e)_n
+  \operatorname{IG}(e) := \operatorname{H}(e) - \sum_{n = 1}^{k} f_{\hat{a}}'(e)_{n} \operatorname{\hat H}(e)_n \text{.}
 \end{equation*}
 %
 In the equation, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{\hat H}(e)$ denotes the entropy of these labels plus the runtime label for $\hat{a}$.
 The term $\operatorname{\hat H}(e)_n$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
-By maximizing the information gain, one favors instances whose most likely cluster labels, as determined by $f_{\hat a}'$, are similar to a great number of existing solvers.
-This decreases the entropy among the cluster labels of the given instance and we know that the new solver performs similarly to a number of solvers.
+\change{Intuitively, this strategy favors instances where the most likely predicted cluster labels (as determined by $f_{\hat a}'$) would provide the most insight regarding similarities to known solvers.
+For example, on a particular instance, one group of solvers might run into timeouts and another group of solvers might return a solution.
+In this case, the information-gain strategy will likely select this instance as it provides insight about the group of solvers the new solver is similar to.}
 
 \subsection{Stopping Criteria}
 \label{sec:main:stopping}
@@ -525,7 +530,7 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   \tcp{Determine Ranking Accuracy}
     $O_{\operatorname{acc}} \leftarrow 0$ \;    
     \For{$a \in \mathcal{A}'$}{
-      \If(\tcp*[f]{\change{same sign/order}}){\change{$\operatorname{sgn}(s_k(a) - s_{\hat a}) = \operatorname{sgn}(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a))$}}{
+      \If(\tcp*[f]{\change{Same sign/order}}){\change{$\operatorname{sgn}(s_k(a) - s_{\hat a}) = \operatorname{sgn}(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a))$}}{
            $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}'|}$ \;
       }
     }
