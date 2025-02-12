@@ -686,7 +686,8 @@ To this end, we analyze prediction performance for estimating runtimes, timeouts
 As a baseline, Table~\ref{tab:regression} shows the prediction performance of two regression models, i.e., a random forest and a multilayer perceptron.
 We employ these models to estimate a new solver's raw runtime as the prediction target.
 To this end, we use 46 instance features \change{(Section~\ref{sec:exdesign:data})} and 27 known solver runtimes as inputs for the predictions.
-We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers.
+\change{For this experiment, the data is split into a training set (80\% of all data) on which the target runtime is known and a test set (20\% of all data) on which we predict the runtimes of the new solver.}
+We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers \change{in Table~\ref{tab:regression}}.
 
 We chose both types of prediction models for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}.
 However, both still perform poorly, as evidenced by the magnitudes of the mean regression errors in Table~\ref{tab:regression}.
@@ -725,14 +726,14 @@ Table~\ref{tab:timeout-prediction} shows the prediction performance for estimati
 This binary prediction target represents a very strong discretization of runtimes.
 We compare a variety of prediction models that pursue different learning paradigms.
 Each is trained with either instance features only (second column) or instance and runtime features (third column).
+\change{For this experiment, the data is split into a training set (80\% of all data) on which the target label is known and a test set (20\% of all data) on which we predict the runtime label of the new solver.}
 As the evaluation metric for prediction performance, we use Matthews Correlation Coefficient (MCC)~\cite{gorodkin2004comparing, matthews1975comparison}, which reaches its maximum of~1 for a perfect prediction, is~0 for random guessing, and has a minimum of~-1.
 
-Training the classification models with instance features only, a random forest performs best.
+Training the classification models with instance features only \change{(as well as the target labels on the training set)}, a random forest performs best in predicting the target labels on the test set.
 In contrast, a quadratic discriminant analysis performs poorly in this scenario but performs very well if runtime features are included.
-However, the best prediction performance with all features is achieved by a stacking ensemble~\cite{wolpert1992stacked} out of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
+However, the best prediction performance with all features \change{(as well as the target labels on the training set)} is achieved by a stacking ensemble~\cite{wolpert1992stacked} consisting of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
 Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, \change{acts as a meta-model:
-The prediction outputs of the ensemble members, i.e., quadratic discriminant analysis and random forests, become the prediction inputs of the meta-model, i.e., decision tree.
-}
+The prediction outputs of the ensemble members, i.e., quadratic discriminant analysis and random forests, become the prediction inputs of the meta-model, i.e., decision tree.}
 
 \paragraph{Classifying Discretized Runtime Labels}
 
@@ -789,6 +790,7 @@ To quantify the distance between two clusters, we consider the minimum pairwise 
 Next, we use the runtimes labels from this discretization procedure as prediction targets.
 Table~\ref{tab:cluster-prediction} shows the prediction performance for the best classification models from Table~\ref{tab:timeout-prediction} and $k \in \lbrace 3, 4, 5 \rbrace$ clusters.
 We train the prediction models either with 46 instance features \change{(Section~\ref{sec:exdesign:data})} and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
+\change{For this experiment, the data is split into a training set (80\% of all data) on which the target cluster label is known and a test set (20\% of all data) on which we predict the cluster label of the new solver.}
 
 For all prediction models and values of~$k$, the prediction performance is better when the cluster labels are included as features.
 In addition, the prediction performance degrades rapidly as the number of clusters increases.
@@ -920,6 +922,7 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 \label{sec:eval}
 
 In this section, we evaluate our active learning framework.
+\change{While we split the data into a fixed train and test set to evaluate performance in Section~\ref{sec:exdesign:disc-pred}, in this section, the target runtime labels of the new solver are only known for the experiments that have already been selected by active-learning.}
 First, we analyze and tune the different subroutines of our framework on the tuning dataset (cf.~Section~\ref{sec:eval:hyper}).
 Next, we evaluate the best configurations on the full dataset (cf.~Section~\ref{sec:eval:full}).
 Finally, we analyze the importance of instance families for our framework (cf.~Section~\ref{sec:eval:instance}).
