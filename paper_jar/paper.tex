@@ -31,7 +31,7 @@
 \soulregister\ref7
 \soulregister\pageref7
 \newcommand{\showchanges}{1} % set to 0 or 1
-\newcommand{\change}[1]{\ifnum \showchanges > 0 \sethlcolor{yellow}\hl{#1} \else #1 \fi}
+\newcommand{\change}[1]{\ifnum \showchanges > 0 \sethlcolor{yellow}\hl{#1}\else#1\fi}
 
 \raggedbottom
 
@@ -97,6 +97,7 @@ The crux is finding a good trade-off.
 
 The approach presented in this paper meets several criteria for benchmarking that are considered desirable (cf.~Table~\ref{tab:requirements}).
 Rather than outputting a binary classification, namely whether the new solver is worse than an existing solver or not, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar its performance is to existing solvers.
+\change{This helps to identify the solvers that have the most similar runtimes more quickly.}
 In particular, our approach enables \emph{ranking} the new solver among a set of existing solvers \change{in one benchmarking run}.
 We show that predicting the exact per-instance runtime of the solvers, which would be a more challenging task, is not necessary for ranking.
 Instead, we work with discretized runtime labels.
