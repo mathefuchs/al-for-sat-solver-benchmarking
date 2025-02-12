@@ -65,8 +65,6 @@ In conclusion, our tool offers a reliable method for solver engineers to assess 
 \section{Introduction}
 \label{sec:intro}
 
-\subparagraph{Motivation}
-
 One of the main phases of algorithm engineering is benchmarking.
 This also applies to solvers for propositional satisfiability (SAT), the canonical $\mathcal{NP}$-complete problem.
 Benchmarking is, however, quite expensive regarding the runtime of experiments.
@@ -109,6 +107,29 @@ In particular, we consider runtime information from experiments already done whe
 By doing so, we can control the properties of the benchmarking approach, such as its required runtime.
 Our approach is \emph{scalable} in that it ranks a new solver $\hat{a}$ among any number of known solvers $\mathcal{A}$.
 In particular, we only subsample the benchmark once instead of comparing pairwise against each other solver~\cite{MatriconAFSH21}.
+
+\begin{table}[tbp]
+  \centering
+  \caption{Comparison of features of our benchmark-selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
+  }
+  \label{tab:requirements}
+  \begin{tabular}{
+    m{0.2752\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+    >{\centering\arraybackslash}m{0.1376\textwidth}
+  }
+    \toprule
+    Feature & Hoos~\cite{HoosKSS13} & SMAC~\cite{HutterHL11} & Matricon~\cite{MatriconAFSH21} & Our approach \\
+    \midrule
+    Ranking/Scoring & \cmark & \xmark & (\cmark) & \cmark \\
+    Runtime Minimization & \xmark & \cmark & \cmark & \cmark \\
+    Incremental/Non-Random & \xmark & \xmark & \cmark & \cmark \\
+    Scalability & \cmark & \cmark & \xmark & \cmark \\
+    \bottomrule
+  \end{tabular}
+\end{table}
 
 \subparagraph{Experiments}
 
@@ -162,29 +183,6 @@ To filter instances that are too similar, they employ a distance-based approach 
 It should be noted, however, that the approach does not optimize for benchmark \emph{runtime}.
 Instead, instances are selected \emph{at random} except considering constraints on instance hardness and feature distance.
 
-\begin{table}[tbp]
-  \centering
-  \caption{Comparison of features of our benchmark-selection approach, the static benchmark-selection approach by Hoos~et~al.~\cite{HoosKSS13}, the algorithm configuration system SMAC~\cite{HutterHL11}, and the active-learning approaches by Matricon et al.~\cite{MatriconAFSH21}.
-  }
-  \label{tab:requirements}
-  \begin{tabular}{
-    m{0.2752\textwidth}
-    >{\centering\arraybackslash}m{0.1376\textwidth}
-    >{\centering\arraybackslash}m{0.1376\textwidth}
-    >{\centering\arraybackslash}m{0.1376\textwidth}
-    >{\centering\arraybackslash}m{0.1376\textwidth}
-  }
-    \toprule
-    Feature & Hoos~\cite{HoosKSS13} & SMAC~\cite{HutterHL11} & Matricon~\cite{MatriconAFSH21} & Our approach \\
-    \midrule
-    Ranking/Scoring & \cmark & \xmark & (\cmark) & \cmark \\
-    Runtime Minimization & \xmark & \cmark & \cmark & \cmark \\
-    Incremental/Non-Random & \xmark & \xmark & \cmark & \cmark \\
-    Scalability & \cmark & \cmark & \xmark & \cmark \\
-    \bottomrule
-  \end{tabular}
-\end{table}
-
 \subsection{Algorithm Configuration}
 \label{sec:related:algo-configuration}
 
@@ -213,23 +211,6 @@ In contrast, our approach allows comparing a new solver against a set of existin
 \subsection{Active Learning}
 \label{sec:related:active-learning}
 
-Our benchmark selection approach uses active learning.
-In passive machine learning, prediction models are trained on datasets with given instance labels (cf.~Fig.~\ref{fig:passive}).
-In contrast, active learning (AL) begins with little or no labeled data.
-AL then repeatedly selects interesting problem instances for which to acquire labels, gradually improving the prediction model (cf.~Fig.~\ref{fig:activepool}).
-AL methods are particularly advantageous when acquiring labels is computationally expensive, such as obtaining solver runtimes.
-Without AL methods, it is not evident which instances to label and which not.
-In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the ranking accuracy.
-Our second goal is to minimize the cost of label acquisition, which is \change{estimated} by the instance's predicted runtime.
-Consequently, our overall objective is to develop an accurate prediction model without labeling each data point.
-
-Rubens et~al.~\cite{RubensESK15} survey active-learning advances.
-While synthesis-based AL methods~\cite{0001AEMN22,GarzonMG22,2019gaal} generate instances for labeling, pool-based methods~\cite{GolbandiKL11,HarpaleY08,KorenBV09} rely on a fixed set of unlabeled instances to sample from.
-Recent synthesis-based methods within the field of SAT solving demonstrate the generation of problem instances with desired properties~\cite{0001AEMN22,GarzonMG22}.
-However, this objective is distinct from ours.
-While those approaches aim to generate instances on which a solver is either effective or ineffective, our objective is to predict whether a solver is effective or ineffective on an \emph{existing} benchmark.
-In the latter direction, Volpato and Guangyan employ pool-based AL to train an instance-specific algorithm selector~\cite{volpato2019active}.
-However, their objective is not to benchmark a solver's overall performance but to recommend the best solver for each SAT instance from a set of available solvers.
 
 \begin{figure}[tbp!]
   \centering
@@ -344,6 +325,24 @@ However, their objective is not to benchmark a solver's overall performance but 
   \caption{Types of machine learning (depiction inspired by Rubens~et~al.~\cite{RubensESK15}).}
   \label{fig:learning}
 \end{figure}
+
+Our benchmark selection approach uses active learning.
+In passive machine learning, prediction models are trained on datasets with given instance labels (cf.~Fig.~\ref{fig:passive}).
+In contrast, active learning (AL) begins with little or no labeled data.
+AL then repeatedly selects interesting problem instances for which to acquire labels, gradually improving the prediction model (cf.~Fig.~\ref{fig:activepool}).
+AL methods are particularly advantageous when acquiring labels is computationally expensive, such as obtaining solver runtimes.
+Without AL methods, it is not evident which instances to label and which not.
+In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the ranking accuracy.
+Our second goal is to minimize the cost of label acquisition, which is \change{estimated} by the instance's predicted runtime.
+Consequently, our overall objective is to develop an accurate prediction model without labeling each data point.
+
+Rubens et~al.~\cite{RubensESK15} survey active-learning advances.
+While synthesis-based AL methods~\cite{0001AEMN22,GarzonMG22,2019gaal} generate instances for labeling, pool-based methods~\cite{GolbandiKL11,HarpaleY08,KorenBV09} rely on a fixed set of unlabeled instances to sample from.
+Recent synthesis-based methods within the field of SAT solving demonstrate the generation of problem instances with desired properties~\cite{0001AEMN22,GarzonMG22}.
+However, this objective is distinct from ours.
+While those approaches aim to generate instances on which a solver is either effective or ineffective, our objective is to predict whether a solver is effective or ineffective on an \emph{existing} benchmark.
+In the latter direction, Volpato and Guangyan employ pool-based AL to train an instance-specific algorithm selector~\cite{volpato2019active}.
+However, their objective is not to benchmark a solver's overall performance but to recommend the best solver for each SAT instance from a set of available solvers.
 
 
 \section{Active Learning for SAT Solver Benchmarking}
@@ -468,7 +467,7 @@ This decreases the entropy among the cluster labels of the given instance and we
 
 In this section, we present the two dynamic stopping criteria (cf.~Algorithm~\ref{algALBenchmark}, Line~3) employed in our experiments: the Wilcoxon and the ranking stopping criterion.
 \change{
-In the worst case, both criteria sample all instances, but typically they should terminate active learning considerably earlier.
+In the worst case, both criteria sample all instances, but typically they terminate earlier.
 How early they terminate depends on how easy it is to determine the rank of the new solver among the existing ones.
 }
 
@@ -816,7 +815,7 @@ This observation suggests that deciding on timeouts is easier than distinguishin
 % * Correct ranking pairs in table below: 97.45%
 % * Max. difference between wrong pairs 0.11
 % * Spearman correlation of PAR2 and Discrete rank: 0.9862
-\begin{table}[tb]
+\begin{table}[p]
 	\centering
 	\caption{Ranking of solvers for the PAR-2 score and our discretized $s_3$ score.}
 	\label{tab:ranking}
@@ -877,7 +876,7 @@ In particular, the Spearman correlation of $s_3$ and the PAR-2 score over all so
 % k=3:     662/756 = 0.8757
 % k=4:     662/756 = 0.8757
 % k=5:     662/756 = 0.8757
-\begin{figure}[tb]
+\begin{figure}[p]
 	\centering
 	\begin{subfigure}{0.32\textwidth}
 		\centering
