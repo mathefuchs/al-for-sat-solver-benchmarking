@@ -1086,8 +1086,9 @@ In particular, we consider the average sampling frequency across all solvers and
 
 Both of our AL approaches outperform random sampling.
 However, the performance differences are not significant for a Wilcoxon signed-rank test with $\alpha = 0.05$ and also depend on the fraction of the runtime sampled (cf.~Fig.~\ref{fig:annitraincolorselection}).
-However, a clear advantage of our approach is that it indicates when to stop adding new instances.
-While the active learning results on the full dataset are not as strong as on the smaller tuning dataset, they still show the benefit of making the benchmark selection dependent on the solvers to be distinguished.
+\change{However, an advantage of our approach is that it indicates when to stop adding new instances.
+Recall that Figure~\ref{fig:annitrainoptgoalacc} shows the trade-offs of the amount of sampled instances and the ranking accuracy.
+Active-learning helps to identify the optimal region as sampling too many instances only provides marginal improvements compared to its cost.}
 
 A static benchmark utilizing the most frequently AL-sampled instances exhibits suboptimal performance compared to active learning and random sampling.
 This outcome is anticipated since the static benchmark fails to reflect an appropriate balance of instance families.
