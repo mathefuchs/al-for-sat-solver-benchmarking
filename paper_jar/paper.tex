@@ -451,7 +451,7 @@ This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\
   \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f_{\hat{a}}'(e)_{n} \right\rvert \text{.}
 \end{equation*}
 \change{Intuitively, uncertainty sampling selects the instances where it is most unclear in which runtime cluster the new solver resides.
-For example, if the new solver behaves similarly to two known solvers on the already run experiments, it is likely that this sampling strategy selects instances where these two solvers have runtimes that are not within the same cluster.}
+For example, if the new solver behaves similarly to two known solvers in the already run experiments, it is likely that this sampling strategy selects instances where these two solvers have runtimes that are not within the same cluster.}
 
 \paragraph{Information-Gain Sampling}
 
@@ -685,8 +685,8 @@ To this end, we analyze prediction performance for estimating runtimes, timeouts
 
 As a baseline, Table~\ref{tab:regression} shows the prediction performance of two regression models, i.e., a random forest and a multilayer perceptron.
 We employ these models to estimate a new solver's raw runtime as the prediction target.
-To this end, we use 46 instance features \change{(Section~\ref{sec:exdesign:data})} and 27 known solver runtimes as inputs for the predictions.
-\change{For this experiment, the data is split into a training set (80\% of all data) on which the target runtime is known and a test set (20\% of all data) on which we predict the runtimes of the new solver.}
+To this end, we use 46 instance features \change{(cf.~Section~\ref{sec:exdesign:data})} and 27 known solver runtimes as inputs for the predictions.
+\change{For this experiment, we split the data into a training set (80\% of all data) on which the target runtime is known and a test set (20\% of all data) on which we predict the runtimes of the new solver.}
 We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers \change{in Table~\ref{tab:regression}}.
 
 We chose both types of prediction models for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}.
@@ -726,7 +726,7 @@ Table~\ref{tab:timeout-prediction} shows the prediction performance for estimati
 This binary prediction target represents a very strong discretization of runtimes.
 We compare a variety of prediction models that pursue different learning paradigms.
 Each is trained with either instance features only (second column) or instance and runtime features (third column).
-\change{For this experiment, the data is split into a training set (80\% of all data) on which the target label is known and a test set (20\% of all data) on which we predict the runtime label of the new solver.}
+\change{For this experiment, we split the data into a training set (80\% of all data) on which the target label is known and a test set (20\% of all data) on which we predict the runtime label of the new solver.}
 As the evaluation metric for prediction performance, we use Matthews Correlation Coefficient (MCC)~\cite{gorodkin2004comparing, matthews1975comparison}, which reaches its maximum of~1 for a perfect prediction, is~0 for random guessing, and has a minimum of~-1.
 
 Training the classification models with instance features only \change{(as well as the target labels on the training set)}, a random forest performs best in predicting the target labels on the test set.
@@ -789,8 +789,8 @@ To quantify the distance between two clusters, we consider the minimum pairwise 
 
 Next, we use the runtimes labels from this discretization procedure as prediction targets.
 Table~\ref{tab:cluster-prediction} shows the prediction performance for the best classification models from Table~\ref{tab:timeout-prediction} and $k \in \lbrace 3, 4, 5 \rbrace$ clusters.
-We train the prediction models either with 46 instance features \change{(Section~\ref{sec:exdesign:data})} and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
-\change{For this experiment, the data is split into a training set (80\% of all data) on which the target cluster label is known and a test set (20\% of all data) on which we predict the cluster label of the new solver.}
+We train the prediction models either with 46 instance features \change{(cf.~Section~\ref{sec:exdesign:data})} and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
+\change{For this experiment, we split the data into a training set (80\% of all data) on which the target cluster label is known and a test set (20\% of all data) on which we predict the cluster label of the new solver.}
 
 For all prediction models and values of~$k$, the prediction performance is better when the cluster labels are included as features.
 In addition, the prediction performance degrades rapidly as the number of clusters increases.
@@ -922,7 +922,7 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 \label{sec:eval}
 
 In this section, we evaluate our active learning framework.
-\change{While we split the data into a fixed train and test set to evaluate performance in Section~\ref{sec:exdesign:disc-pred}, in this section, the target runtime labels of the new solver are only known for the experiments that have already been selected by active-learning.}
+\change{While we split the data into a fixed train and test set to evaluate performance in Section~\ref{sec:exdesign:disc-pred}, in this section, the target runtime labels of the new solver are only known for the experiments that have already been selected by active learning.}
 First, we analyze and tune the different subroutines of our framework on the tuning dataset (cf.~Section~\ref{sec:eval:hyper}).
 Next, we evaluate the best configurations on the full dataset (cf.~Section~\ref{sec:eval:full}).
 Finally, we analyze the importance of instance families for our framework (cf.~Section~\ref{sec:eval:instance}).
@@ -1087,8 +1087,8 @@ In particular, we consider the average sampling frequency across all solvers and
 Both of our AL approaches outperform random sampling.
 However, the performance differences are not significant for a Wilcoxon signed-rank test with $\alpha = 0.05$ and also depend on the fraction of the runtime sampled (cf.~Fig.~\ref{fig:annitraincolorselection}).
 \change{However, an advantage of our approach is that it indicates when to stop adding new instances.
-Recall that Figure~\ref{fig:annitrainoptgoalacc} shows the trade-offs of the amount of sampled instances and the ranking accuracy.
-Active-learning helps to identify the optimal region as sampling too many instances only provides marginal improvements compared to its cost.}
+Recall that Fig.~\ref{fig:annitrainoptgoalacc} shows the trade-off of the number of sampled instances and the ranking accuracy.
+Active learning helps to identify the optimal region as sampling too many instances only provides marginal improvements compared to its cost.}
 
 A static benchmark utilizing the most frequently AL-sampled instances exhibits suboptimal performance compared to active learning and random sampling.
 This outcome is anticipated since the static benchmark fails to reflect an appropriate balance of instance families.
@@ -1182,7 +1182,7 @@ The code is available online at \url{https://github.com/mathefuchs/al-for-sat-so
 
 \change{For predictions within our framework, we use a database of 56 instance features\footnote{\url{https://udopia.github.io/gbdc/doc/extractors/CNFBaseFeatures.html}} from the Global Benchmark Database~(GBD)~\cite{IserJ24}.
 Table~\ref{tab:features} briefly summarizes all 56 features.
-The placeholder \texttt{<n>} can take values within the range 1 to 9 and the placeholder \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.
+The placeholder \texttt{<n>} can take values within the range from 1 to 9, and the placeholder \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.
 Accounting for all possible instantiations of \texttt{<n>} and \texttt{<dist>}, there are 56 features in total.}
 
 \begin{table}[h]
@@ -1210,7 +1210,7 @@ Accounting for all possible instantiations of \texttt{<n>} and \texttt{<dist>}, 
       & \verb|negative| & Number of negative clauses \\
       \midrule
       Horn proximity & \verb|hornvars_<dist>| & Distribution of variable occurrence in horn clauses \\
-      & \verb|invhornvars_<dist>| & Distribution of variable occurrence in inverted horn clauses \\
+      & \verb|invhornvars_<dist>| & Distribution of variable occurrence in inverted Horn clauses \\
       \midrule
       Polarity balance & \verb|balancecls_<dist>| & Distributions of fractions of number of positive/negative literals in clauses \\
       & \verb|balancevars_<dist>| & Distributions of fractions of number of positive/negative literals of variables \\
