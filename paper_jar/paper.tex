@@ -25,14 +25,6 @@
 
 \newtheorem{definition}{Definition} % only kind of theorems we use are definitions (well, one)
 
-% Highlight changes for re-submission (might be removed later)
-\usepackage{soul}
-\soulregister\cite7 % some hacking to make highlighting work in special situations, e.g., if text contains references: https://tex.stackexchange.com/q/139463
-\soulregister\ref7
-\soulregister\pageref7
-\newcommand{\showchanges}{0} % set to 0 or 1
-\newcommand{\change}[1]{\ifnum \showchanges > 0 \sethlcolor{yellow}\hl{#1}\else#1\fi}
-
 \raggedbottom
 
 \begin{document}
@@ -86,19 +78,17 @@ One could also imagine a collaborative filtering scenario, where runtimes are on
 
 \begin{definition}[New-Solver Problem]
   Let us consider a set of solvers~$\mathcal{A}$, instances~$\mathcal{I}$, and runtimes~${r\!: \mathcal{A} \times \mathcal{I} \rightarrow \left[0, \tau\right]}$, with each solver having a runtime limit of $\tau$.
-  The \emph{New-Solver Problem} is \change{about selecting} benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of a new solver $\hat{a} \notin \mathcal{A}$, while minimizing the \change{summed runtime of~$\hat{a}$ over all selected instances}.
+  The \emph{New-Solver Problem} is about selecting benchmark instances from $\mathcal{I}$ to maximize the confidence in predicting the rank of a new solver $\hat{a} \notin \mathcal{A}$, while minimizing the summed runtime of~$\hat{a}$ over all selected instances.
   \label{def:new-solver-problem}
 \end{definition}
 
-\change{
 The two objectives of this problem are conflicting, i.e., the ranking's confidence typically benefits from more instances while the runtime criterion encourages less or at least shorter evaluations.
 The crux is finding a good trade-off.
-}
 
 The approach presented in this paper meets several criteria for benchmarking that are considered desirable (cf.~Table~\ref{tab:requirements}).
 Rather than outputting a binary classification, namely whether the new solver is worse than an existing solver or not, we provide a \emph{scoring} function that shows by which margin a solver is worse and how similar its performance is to existing solvers.
-\change{This helps to identify the solvers that have the most similar runtimes more quickly.}
-In particular, our approach enables \emph{ranking} the new solver among a set of existing solvers \change{in one benchmarking run}.
+This helps to identify the solvers that have the most similar runtimes more quickly.
+In particular, our approach enables \emph{ranking} the new solver among a set of existing solvers in one benchmarking run.
 We show that predicting the exact per-instance runtime of the solvers, which would be a more challenging task, is not necessary for ranking.
 Instead, we work with discretized runtime labels.
 We use instance features and known solver runtimes to predict these labels.
@@ -202,12 +192,12 @@ Their \emph{per-set efficient algorithm selection problem} (PSEAS) is similar to
 To compare \emph{a pair of} SAT solvers, the authors propose an iterative approach to select a solver-specific subset of instances until a desired confidence level is reached.
 This is achieved by calculating a scoring metric for all unselected instances, running the experiment with the highest score, and updating the confidence.
 Their approach ticks off most of the desired features in Table~\ref{tab:requirements}.
-However, the approach only compares solvers \change{pairwise} rather than providing a multi-solver \emph{scoring} or \emph{ranking}.
+However, the approach only compares solvers pairwise rather than providing a multi-solver \emph{scoring} or \emph{ranking}.
 Consequently, it is unclear how similar two given solvers are or on which instances they behave similarly.
 Furthermore, a significant shortcoming is the lack of \emph{scalability} with the number of solvers.
-Due to comparing only pairs of solvers, evaluating a new solver with their method requires sampling \change{an individual set of benchmark instances} for each existing solver.
-\change{In particular, comparing against one existing solver will typically require a different set of instances than comparing against another one.}
-In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one \change{set of} benchmark \change{instances}.
+Due to comparing only pairs of solvers, evaluating a new solver with their method requires sampling an individual set of benchmark instances for each existing solver.
+In particular, comparing against one existing solver will typically require a different set of instances than comparing against another one.
+In contrast, our approach allows comparing a new solver against a set of existing solvers by sampling only one set of benchmark instances.
 
 \subsection{Active Learning}
 \label{sec:related:active-learning}
@@ -334,7 +324,7 @@ AL then repeatedly selects interesting problem instances for which to acquire la
 AL methods are particularly advantageous when acquiring labels is computationally expensive, such as obtaining solver runtimes.
 Without AL methods, it is not evident which instances to label and which not.
 In our scenario, the first goal is to maximize the utility of instances to our prediction model, which is measured by the ranking accuracy.
-Our second goal is to minimize the cost of label acquisition, which is \change{estimated} by the instance's predicted runtime.
+Our second goal is to minimize the cost of label acquisition, which is estimated by the instance's predicted runtime.
 Consequently, our overall objective is to develop an accurate prediction model without labeling each data point.
 
 Rubens et~al.~\cite{RubensESK15} survey active-learning advances.
@@ -393,26 +383,26 @@ Finally, Section~\ref{sec:main:stopping} presents potential stopping conditions.
 \subsection{Solver Model}
 \label{sec:main:model}
 
-The model~\change{$\mathcal{M}$} provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for the new solver $\hat a$.
+The model~$\mathcal{M}$ provides a prediction function $f_{\hat a} : \mathcal{I} \rightarrow \mathbb{R}$ for the new solver $\hat a$.
 This prediction function powers instance selection as described in Section~\ref{sec:main:selection}.
 In the update step (Algorithm~\ref{algALBenchmark},~Line~7), the model is trained to predict a transformed version of solver runtime (cf.~Section~\ref{sec:main:model:transformation}) for the solver~$\hat{a}$, using the features described in Section~\ref{sec:exdesign:data} and the previously acquired runtimes~$\mathcal{R}$.
-Each iteration trains a new prediction model from scratch since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~\change{$\mathcal{M}$} on all acquired instances~$\mathcal{R}$ by a significant margin.
+Each iteration trains a new prediction model from scratch since the time for running the solver~$\hat{a}$ on one instance~$e$ (Line~5) dominates the training time of the model~$\mathcal{M}$ on all acquired instances~$\mathcal{R}$ by a significant margin.
 Once the benchmarking loop terminates, the score of the solver~$\hat{a}$ is predicted and then returned (Lines~8--9).
 
 \subsubsection{Runtime Transformation}
 \label{sec:main:model:transformation}
 
-For the prediction model~\change{$\mathcal{M}$}, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
+For the prediction model~$\mathcal{M}$, we transform the real-valued runtimes into discrete runtime labels on a per-instance basis.
 For each instance $e \in \mathcal{I}$, we use a clustering algorithm to assign the runtimes in $\bigl\{ r(a, e) \mid a \in \mathcal{A} \bigr\}$ to one of $k$ clusters $C_1, \dots, C_k$ such that the fastest runtimes for the benchmark instance $e$ are in cluster $C_1$ and the slowest are in cluster $C_{k-1}$.
 Timeouts $\tau$ always form a separate cluster $C_{k}$.
-\change{The clustering is performed on a per-instance level as the best runtimes may be seconds on one instance and minutes on another.
-After clustering, the best runtimes are all in the same cluster.}
+The clustering is performed on a per-instance level as the best runtimes may be seconds on one instance and minutes on another.
+After clustering, the best runtimes are all in the same cluster.
 The runtime transformation function $\gamma_k : {\mathcal{A} \times \mathcal{I}} \rightarrow \left\lbrace 1, \dots, k \right\rbrace$ is then specified as follows:
 %
 $$\gamma_k(a, e) = j ~\Leftrightarrow~ r(a, e) \in C_j$$
 %
 Empirical studies on portfolio solvers have demonstrated that discretization is an effective approach in practice~\cite{CollauttiMMO13,NgokoCT19}.
-Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation in our scenario\change{, including the clustering approach}.
+Section~\ref{sec:exdesign:disc-pred} presents a detailed analysis of the runtime transformation in our scenario, including the clustering approach.
 In particular, the analysis demonstrates that our benchmarking approach achieves higher ranking accuracy when working with discrete runtime labels rather than raw runtimes.
 
 \subsubsection{Ranking Solvers}
@@ -430,7 +420,7 @@ To determine the rank of solvers, we apply PAR-2 scoring to the discrete runtime
   \label{eq:rankingeq}
 \end{align}
 %
-In \change{this way}, timeouts are still penalized.
+In this way, timeouts are still penalized.
 
 \subsection{Instance Selection}
 \label{sec:main:selection}
@@ -450,8 +440,9 @@ This is achieved by selecting the instance $e \in \mathcal{I} \setminus \tilde{\
 \begin{equation*}
   \operatorname{U}(e) := \left\lvert \frac{1}{k} - \max_{n \in \left\lbrace 1, \dots, k \right\rbrace} f_{\hat{a}}'(e)_{n} \right\rvert \text{.}
 \end{equation*}
-\change{Intuitively, uncertainty sampling selects the instances where it is most unclear in which runtime cluster the new solver resides.
-For example, if the new solver behaves similarly to two known solvers in the already run experiments, it is likely that this sampling strategy selects instances where these two solvers have runtimes that are not within the same cluster.}
+%
+Intuitively, uncertainty sampling selects the instances where it is most unclear in which runtime cluster the new solver resides.
+For example, if the new solver behaves similarly to two known solvers in the already run experiments, it is likely that this sampling strategy selects instances where these two solvers have runtimes that are not within the same cluster.
 
 \paragraph{Information-Gain Sampling}
 
@@ -464,18 +455,16 @@ To be more precise, we select the instance $e \in \mathcal{I} \setminus \tilde{\
 %
 In the equation, $\operatorname{H}(e)$ denotes the entropy of the runtime labels $\gamma(a, e)$ over all $a \in \mathcal{A}$ and $\operatorname{\hat H}(e)$ denotes the entropy of these labels plus the runtime label for $\hat{a}$.
 The term $\operatorname{\hat H}(e)_n$ is computed for every possible runtime label $n \in \{1, \dots, k\}$.
-\change{Intuitively, this strategy favors instances where the most likely predicted cluster labels (as determined by $f_{\hat a}'$) would provide the most insight regarding similarities to known solvers.
+Intuitively, this strategy favors instances where the most likely predicted cluster labels (as determined by $f_{\hat a}'$) would provide the most insight regarding similarities to known solvers.
 For example, on a particular instance, one group of solvers might run into timeouts and another group of solvers might return a solution.
-In this case, the information-gain strategy will likely select this instance as it provides insight about the group of solvers the new solver is similar to.}
+In this case, the information-gain strategy will likely select this instance as it provides insight about the group of solvers the new solver is similar to.
 
 \subsection{Stopping Criteria}
 \label{sec:main:stopping}
 
 In this section, we present the two dynamic stopping criteria (cf.~Algorithm~\ref{algALBenchmark}, Line~3) employed in our experiments: the Wilcoxon and the ranking stopping criterion.
-\change{
 In the worst case, both criteria sample all instances, but typically they terminate earlier.
 How early they terminate depends on how easy it is to determine the rank of the new solver among the existing ones.
-}
 
 \paragraph{Wilcoxon Stopping Criterion}
 
@@ -530,7 +519,7 @@ This includes an overview of the evaluation framework (cf.~Section~\ref{sec:exde
   \tcp{Determine Ranking Accuracy}
     $O_{\operatorname{acc}} \leftarrow 0$ \;    
     \For{$a \in \mathcal{A}'$}{
-      \If(\tcp*[f]{\change{Same sign/order}}){\change{$\operatorname{sgn}(s_k(a) - s_{\hat a}) = \operatorname{sgn}(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a))$}}{
+      \If(\tcp*[f]{Same sign/order}){$\operatorname{sgn}(s_k(a) - s_{\hat a}) = \operatorname{sgn}(\operatorname{par_2}(a) - \operatorname{par_2}(\hat a))$}{
            $O_{\operatorname{acc}} \leftarrow O_{\operatorname{acc}} + \frac{1}{|\mathcal{A}'|}$ \;
       }
     }
@@ -580,7 +569,7 @@ Plotting the approaches that maximize $O_\delta$ for all $\delta \in \left[0, 1\
 In our experiments, we work with the dataset of the SAT~Competition~2022 Anniversary Track~\cite{sat2022,zenodoanniversarytrack}.
 This dataset consists of 5355 instances with corresponding runtimes of 28 sequential SAT solvers.
 For predictions within our framework, we also use a database of 56 instance features from the Global Benchmark Database~(GBD)~\cite{IserJ24}.
-\change{Refer to Appendix~\ref{sec:appendix-features} for a full list of all 56 features.}
+Refer to Appendix~\ref{sec:appendix-features} for a full list of all 56 features.
 They include instance size features and node distribution statistics for several graph representations of SAT instances, and are primarily inspired by the SATzilla~2012 features described in~\cite{features}.
 All features are numeric and have no missing values.
 We drop 10 of the 56 features due to zero variance.
@@ -685,9 +674,9 @@ To this end, we analyze prediction performance for estimating runtimes, timeouts
 
 As a baseline, Table~\ref{tab:regression} shows the prediction performance of two regression models, i.e., a random forest and a multilayer perceptron.
 We employ these models to estimate a new solver's raw runtime as the prediction target.
-To this end, we use 46 instance features \change{(cf.~Section~\ref{sec:exdesign:data})} and 27 known solver runtimes as inputs for the predictions.
-\change{For this experiment, we split the data into a training set (80\% of all data) on which the target runtime is known and a test set (20\% of all data) on which we predict the runtimes of the new solver.}
-We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers \change{in Table~\ref{tab:regression}}.
+To this end, we use 46 instance features (cf.~Section~\ref{sec:exdesign:data}) and 27 known solver runtimes as inputs for the predictions.
+For this experiment, we split the data into a training set (80\% of all data) on which the target runtime is known and a test set (20\% of all data) on which we predict the runtimes of the new solver.
+We repeat this evaluation for each solver as the prediction target and report the average and standard deviation of prediction performance over the 28 solvers in Table~\ref{tab:regression}.
 
 We chose both types of prediction models for their robustness and ability to capture nonlinear dependencies~\cite{breiman2001random}.
 However, both still perform poorly, as evidenced by the magnitudes of the mean regression errors in Table~\ref{tab:regression}.
@@ -726,14 +715,14 @@ Table~\ref{tab:timeout-prediction} shows the prediction performance for estimati
 This binary prediction target represents a very strong discretization of runtimes.
 We compare a variety of prediction models that pursue different learning paradigms.
 Each is trained with either instance features only (second column) or instance and runtime features (third column).
-\change{For this experiment, we split the data into a training set (80\% of all data) on which the target label is known and a test set (20\% of all data) on which we predict the runtime label of the new solver.}
+For this experiment, we split the data into a training set (80\% of all data) on which the target label is known and a test set (20\% of all data) on which we predict the runtime label of the new solver.
 As the evaluation metric for prediction performance, we use Matthews Correlation Coefficient (MCC)~\cite{gorodkin2004comparing, matthews1975comparison}, which reaches its maximum of~1 for a perfect prediction, is~0 for random guessing, and has a minimum of~-1.
 
-Training the classification models with instance features only \change{(as well as the target labels on the training set)}, a random forest performs best in predicting the target labels on the test set.
+Training the classification models with instance features only (as well as the target labels on the training set), a random forest performs best in predicting the target labels on the test set.
 In contrast, a quadratic discriminant analysis performs poorly in this scenario but performs very well if runtime features are included.
-However, the best prediction performance with all features \change{(as well as the target labels on the training set)} is achieved by a stacking ensemble~\cite{wolpert1992stacked} consisting of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
-Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, \change{acts as a meta-model:
-The prediction outputs of the ensemble members, i.e., quadratic discriminant analysis and random forests, become the prediction inputs of the meta-model, i.e., decision tree.}
+However, the best prediction performance with all features (as well as the target labels on the training set) is achieved by a stacking ensemble~\cite{wolpert1992stacked} consisting of the quadratic discriminant analysis~\cite{tharwat2016linear} and the random forest~\cite{breiman2001random}.
+Stacking means that another model, in our case a simple decision tree~\cite{breiman1984classification}, acts as a meta-model:
+The prediction outputs of the ensemble members, i.e., quadratic discriminant analysis and random forests, become the prediction inputs of the meta-model, i.e., decision tree.
 
 \paragraph{Classifying Discretized Runtime Labels}
 
@@ -789,8 +778,8 @@ To quantify the distance between two clusters, we consider the minimum pairwise 
 
 Next, we use the runtimes labels from this discretization procedure as prediction targets.
 Table~\ref{tab:cluster-prediction} shows the prediction performance for the best classification models from Table~\ref{tab:timeout-prediction} and $k \in \lbrace 3, 4, 5 \rbrace$ clusters.
-We train the prediction models either with 46 instance features \change{(cf.~Section~\ref{sec:exdesign:data})} and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
-\change{For this experiment, we split the data into a training set (80\% of all data) on which the target cluster label is known and a test set (20\% of all data) on which we predict the cluster label of the new solver.}
+We train the prediction models either with 46 instance features (cf.~Section~\ref{sec:exdesign:data}) and 27 known solver runtimes (second column) or additionally including 27 features representing the known $C_k$ cluster labels of other solvers (third column).
+For this experiment, we split the data into a training set (80\% of all data) on which the target cluster label is known and a test set (20\% of all data) on which we predict the cluster label of the new solver.
 
 For all prediction models and values of~$k$, the prediction performance is better when the cluster labels are included as features.
 In addition, the prediction performance degrades rapidly as the number of clusters increases.
@@ -922,7 +911,7 @@ Our code is implemented in \textsc{Python} using \emph{scikit-learn}~\cite{sciki
 \label{sec:eval}
 
 In this section, we evaluate our active learning framework.
-\change{While we split the data into a fixed train and test set to evaluate performance in Section~\ref{sec:exdesign:disc-pred}, in this section, the target runtime labels of the new solver are only known for the experiments that have already been selected by active learning.}
+While we split the data into a fixed train and test set to evaluate performance in Section~\ref{sec:exdesign:disc-pred}, in this section, the target runtime labels of the new solver are only known for the experiments that have already been selected by active learning.
 First, we analyze and tune the different subroutines of our framework on the tuning dataset (cf.~Section~\ref{sec:eval:hyper}).
 Next, we evaluate the best configurations on the full dataset (cf.~Section~\ref{sec:eval:full}).
 Finally, we analyze the importance of instance families for our framework (cf.~Section~\ref{sec:eval:instance}).
@@ -1086,9 +1075,9 @@ In particular, we consider the average sampling frequency across all solvers and
 
 Both of our AL approaches outperform random sampling.
 However, the performance differences are not significant for a Wilcoxon signed-rank test with $\alpha = 0.05$ and also depend on the fraction of the runtime sampled (cf.~Fig.~\ref{fig:annitraincolorselection}).
-\change{However, an advantage of our approach is that it indicates when to stop adding new instances.
+However, an advantage of our approach is that it indicates when to stop adding new instances.
 Recall that Fig.~\ref{fig:annitrainoptgoalacc} shows the trade-off of the number of sampled instances and the ranking accuracy.
-Active learning helps to identify the optimal region as sampling too many instances only provides marginal improvements compared to its cost.}
+Active learning helps to identify the optimal region as sampling too many instances only provides marginal improvements compared to its cost.
 
 A static benchmark utilizing the most frequently AL-sampled instances exhibits suboptimal performance compared to active learning and random sampling.
 This outcome is anticipated since the static benchmark fails to reflect an appropriate balance of instance families.
@@ -1180,15 +1169,15 @@ The code is available online at \url{https://github.com/mathefuchs/al-for-sat-so
 \section{Instance Features}
 \label{sec:appendix-features}
 
-\change{For predictions within our framework, we use a database of 56 instance features\footnote{\url{https://udopia.github.io/gbdc/doc/extractors/CNFBaseFeatures.html}} from the Global Benchmark Database~(GBD)~\cite{IserJ24}.
+For predictions within our framework, we use a database of 56 instance features\footnote{\url{https://udopia.github.io/gbdc/doc/extractors/CNFBaseFeatures.html}} from the Global Benchmark Database~(GBD)~\cite{IserJ24}.
 Table~\ref{tab:features} briefly summarizes all 56 features.
 The placeholder \texttt{<n>} can take values within the range from 1 to 9, and the placeholder \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.
-Accounting for all possible instantiations of \texttt{<n>} and \texttt{<dist>}, there are 56 features in total.}
+Accounting for all possible instantiations of \texttt{<n>} and \texttt{<dist>}, there are 56 features in total.
 
 \begin{table}[h]
     \centering
     \caption{
-      \change{List of all 56 instance features, where \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.}
+      List of all 56 instance features, where \texttt{<dist>} is one of \texttt{mean}, \texttt{variance}, \texttt{min}, \texttt{max}, or \texttt{entropy}.
     }
     \label{tab:features}
     \begin{tabular}{
@@ -1209,7 +1198,7 @@ Accounting for all possible instantiations of \texttt{<n>} and \texttt{<dist>}, 
       & \verb|positive| & Number of positive clauses \\
       & \verb|negative| & Number of negative clauses \\
       \midrule
-      Horn proximity & \verb|hornvars_<dist>| & Distribution of variable occurrence in horn clauses \\
+      Horn proximity & \verb|hornvars_<dist>| & Distribution of variable occurrence in Horn clauses \\
       & \verb|invhornvars_<dist>| & Distribution of variable occurrence in inverted Horn clauses \\
       \midrule
       Polarity balance & \verb|balancecls_<dist>| & Distributions of fractions of number of positive/negative literals in clauses \\
