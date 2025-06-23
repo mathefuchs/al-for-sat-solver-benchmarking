@@ -4,8 +4,8 @@ This repository contains the code and text of the paper
 
 > Fuchs, Bach, Iser. "Active Learning for SAT Solver Benchmarking"
 
-[published](https://doi.org/10.1007/978-3-031-30823-9_21) at the conference [TACAS 2023](https://etaps.org/2023/tacas)
-as well as an extended (currently unpublished) version at the [Journal of Automated Reasoning](https://link.springer.com/journal/10817).
+published [as a conference version](https://doi.org/10.1007/978-3-031-30823-9_21) at [TACAS 2023](https://etaps.org/2023/tacas)
+as well as an [extended and revised journal version](https://doi.org/10.1007/s10817-025-09729-6) at the [Journal of Automated Reasoning](https://link.springer.com/journal/10817).
 You can find the corresponding complete experimental data (inputs as well as results) within [this data repository](https://github.com/mathefuchs/al-for-sat-solver-benchmarking-data).
 
 This document provides:
